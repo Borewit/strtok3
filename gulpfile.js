@@ -31,7 +31,7 @@ gulp.task('test-compile', ['compile'], function () {
     .pipe(gulp.dest('test'))
 });
 
-gulp.task('test', ['test-compile'], function () {
+gulp.task('test', function () {
   // Minify and copy all JavaScript (except vendor scripts)
   // with sourcemaps all the way down
   return gulp.src('test', {read: false})

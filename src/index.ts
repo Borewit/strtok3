@@ -1,3 +1,4 @@
+///<reference path="../node_modules/@types/fs-extra/index.d.ts"/>
 
 const assert = require('assert');
 import * as Promise from "promise";
