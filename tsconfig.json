@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "sourceMap":  true,
+    "inlineSources": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "declaration": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ]
+}
+

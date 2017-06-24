@@ -1,0 +1,4 @@
+*.iml
+typings
+node_modules
+lib
