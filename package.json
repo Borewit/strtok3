@@ -34,7 +34,6 @@
     "@types/node": "^7.0.32",
     "chai": "^4.0.2",
     "debug": "^2.6.8",
-    "del": "^3.0.0",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-mocha": "^4.3.1",
@@ -48,7 +47,6 @@
   "dependencies": {
     "es6-promise": "^4.1.0",
     "fs-extra": "^3.0.1",
-    "then-read-stream": "^0.0.4",
     "then-read-stream": "^0.0.5",
     "token-types": "0.0.2"
   },
