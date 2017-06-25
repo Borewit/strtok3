@@ -30,7 +30,7 @@ gulp.task('test-compile', ['compile'], function () {
   // with sourcemaps all the way down
   return gulp.src(['test/**/*.ts'])
     .pipe(typescript(), {target: 'es5'})
-    .pipe(gulp.dest('test'))
+    .pipe(gulp.dest('./'))
 });
 
 gulp.task('test', ['test-compile'], function () {
