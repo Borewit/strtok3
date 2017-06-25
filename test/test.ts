@@ -9,6 +9,7 @@ import {SourceStream} from "./util";
 import {FileTokenizer, ReadStreamTokenizer} from "../src";
 import * as fs from 'fs-extra';
 import * as Path from 'path';
+import {IgnoreType} from "token-types";
 
 describe("ReadStreamTokenizer", () => {
 
@@ -395,22 +396,20 @@ describe("FileTokenizer", () => {
 
   it("should be able to read from a file", () => {
 
-    return fs.open(Path.join(__dirname, 'resources', 'test1.dat'), "r").then((fd) => {
-      const rst = new FileTokenizer(fd);
-
-      return rst.readToken<number>(Token.UINT32_LE)
+    return FileTokenizer.open(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
+      return tokenizer.readToken<number>(Token.UINT32_LE)
         .then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT24_LE #1");
-          return rst.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken<number>(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-          return rst.readToken<number>(Token.UINT32_LE);
+          return tokenizer.readToken<number>(Token.UINT32_LE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT32_LE #3");
-          return rst.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken<number>(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #4");
@@ -418,7 +417,48 @@ describe("FileTokenizer", () => {
     });
 
   });
+
+  it("should be able to ignore (skip) a given number of bytes", () => {
+    return FileTokenizer.open(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
+      return tokenizer.ignore(4)
+        .then((value) => {
+          return tokenizer.readToken<number>(Token.UINT32_BE);
+        }).then((value) => {
+          assert.ok(typeof value === 'number');
+          assert.equal(value, 0x1a001a00, "UINT32_BE #2");
+          return tokenizer.readToken<number>(Token.UINT32_LE);
+        }).then((value) => {
+          assert.ok(typeof value === 'number');
+          assert.equal(value, 0x001a001a, "UINT32_LE #3");
+          return tokenizer.readToken<number>(Token.UINT32_BE);
+        }).then((value) => {
+          assert.ok(typeof value === 'number');
+          assert.equal(value, 0x1a001a00, "UINT32_BE #4");
+        })
+    });
+  });
+
+  it("should be able to parse the IgnoreType-token", () => {
+    return FileTokenizer.open(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
+      return tokenizer.readToken<void>(new IgnoreType(4))
+        .then((value) => {
+          return tokenizer.readToken<number>(Token.UINT32_BE);
+        }).then((value) => {
+          assert.ok(typeof value === 'number');
+          assert.equal(value, 0x1a001a00, "UINT32_BE #2");
+          return tokenizer.readToken<number>(Token.UINT32_LE);
+        }).then((value) => {
+          assert.ok(typeof value === 'number');
+          assert.equal(value, 0x001a001a, "UINT32_LE #3");
+          return tokenizer.readToken<number>(Token.UINT32_BE);
+        }).then((value) => {
+          assert.ok(typeof value === 'number');
+          assert.equal(value, 0x1a001a00, "UINT32_BE #4");
+        })
+    });
+  });
 });
+
 
 
 

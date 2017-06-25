@@ -1,5 +1,3 @@
-///<reference path="../node_modules/@types/fs-extra/index.d.ts"/>
-
 const assert = require('assert');
 
 import * as stream from "stream";
@@ -21,6 +19,12 @@ export interface ITokenizer {
   readToken<T>(token: IGetToken<T>, position?: number | null): Promise<T>;
 
   readNumber(token: IGetToken<number>): Promise<number>;
+
+  /**
+   * Ignore given number of bytes
+   * @param length Lenght in bytes
+   */
+  ignore(length: number);
 }
 
 // Possibly call flush()
@@ -39,8 +43,6 @@ const maybeFlush = function (b: Buffer, o, len: number, flush: IFlush) {
 
   return o;
 };
-
-
 
 export class IgnoreType implements IGetToken<Buffer> {
 
@@ -75,6 +77,8 @@ export abstract class AbstractTokenizer implements ITokenizer {
   public readNumber(token: IToken<number>): Promise<number> {
     return this._readToken(this.numBuffer, token);
   }
+
+  public abstract ignore(length: number): Promise<void>;
 }
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
@@ -87,26 +91,39 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public readBuffer(buffer: Buffer, offset: number, length: number, position: number = null): Promise<number> {
-    return this.streamReader.read(buffer, offset, length, position);
+    return this.streamReader.read(buffer, offset, length, position); // ToDo: looks like wrong return type is defined in fs.read
   }
 
   public static read(stream: stream.Readable): ReadStreamTokenizer {
     return new ReadStreamTokenizer(stream);
   }
+
+  public ignore(length: number): Promise<void> {
+    const buf = new Buffer(length);
+    return this.streamReader.read(buf, 0, length); // stream cannot skip data
+  }
 }
 
 export class FileTokenizer extends AbstractTokenizer {
+
+  private fileOffset: number = 0;
+  private ignoreLength: number = 0;
 
   constructor(private fd: number, public fileSize?: number) {
     super();
   }
 
   public readBuffer(buffer: Buffer, offset: number, length: number, position: number = null): Promise<number> {
-    return (fs.read(this.fd, buffer, offset, length, position) as any) .then((actualLength: number) => { // ToDo: looks like wrong return type is defined in fs.read
-      if(actualLength<length)
-        throw EndOfFile;
-      return actualLength;
-    }); // ToDo: looks like wrong return type is defined in fs.read
+    if(position) {
+      this.fileOffset = position;
+      this.ignoreLength = 0;
+    } else if(this.ignoreLength>0) {
+      position = this.fileOffset + this.ignoreLength;
+      this.ignoreLength = 0;
+    }
+    return (fs.read(this.fd, buffer, offset, length, position) as any).then((bytesRead) => {
+      this.fileOffset += bytesRead;
+    });// ToDo: looks like wrong return type is defined in fs.read
   }
 
   public static open(filePath: string): Promise<FileTokenizer> {
@@ -120,6 +137,11 @@ export class FileTokenizer extends AbstractTokenizer {
         })
       })
     });
+  }
+
+  public ignore(length: number): Promise<void> {
+    this.ignoreLength += length;
+    return Promise.resolve<void>(null);
   }
 
   public close(): Promise<void> {
