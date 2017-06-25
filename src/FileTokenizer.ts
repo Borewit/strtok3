@@ -8,7 +8,7 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public readBuffer(buffer: Buffer, offset: number, length: number, position: number = null): Promise<number> {
-    return fs.read(this.fd, buffer, offset, length, position); // ToDo: looks like wrong return type is defined in fs.read
+    return fs.read(this.fd, buffer, offset, length, position) as any;// ToDo: looks like wrong return type is defined in fs.read
   }
 
   public static open(filePath: string): Promise<FileTokenizer> {

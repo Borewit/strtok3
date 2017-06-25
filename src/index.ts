@@ -1,7 +1,7 @@
 ///<reference path="../node_modules/@types/fs-extra/index.d.ts"/>
 
 const assert = require('assert');
-import * as Promise from "promise";
+
 import * as stream from "stream";
 import {StreamReader} from "then-read-stream";
 import * as fs from 'fs-extra';
@@ -102,7 +102,7 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public readBuffer(buffer: Buffer, offset: number, length: number, position: number = null): Promise<number> {
-    return fs.read(this.fd, buffer, offset, length, position).then((actualLength: number) => { // ToDo: looks like wrong return type is defined in fs.read
+    return (fs.read(this.fd, buffer, offset, length, position) as any) .then((actualLength: number) => { // ToDo: looks like wrong return type is defined in fs.read
       if(actualLength<length)
         throw EndOfFile;
       return actualLength;
