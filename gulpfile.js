@@ -19,7 +19,9 @@ gulp.task('compile', ['clean'], function () {
   // Minify and copy all JavaScript (except vendor scripts)
   // with sourcemaps all the way down
   return gulp.src(['src/**/*.ts'])
-    .pipe(typescript({declaration: true}))
+    .pipe(typescript({
+      declaration: true, target: 'es5'
+    })) // ({tmpDir:'.tmp'})
     .pipe(gulp.dest(buildPath))
 });
 
@@ -27,15 +29,15 @@ gulp.task('test-compile', ['compile'], function () {
   // Minify and copy all JavaScript (except vendor scripts)
   // with sourcemaps all the way down
   return gulp.src(['test/**/*.ts'])
-    .pipe(typescript())
+    .pipe(typescript(), {target: 'es5'})
     .pipe(gulp.dest('test'))
 });
 
 gulp.task('test', ['test-compile'], function () {
   // Minify and copy all JavaScript (except vendor scripts)
   // with sourcemaps all the way down
-  return gulp.src('test', {read: false})
-    //.pipe(mocha({require: 'ts-node/register'}))
+  return gulp.src('test', { read: false })
+  //.pipe(mocha({require: 'ts-node/register'}))
     .pipe(mocha())
 });
 

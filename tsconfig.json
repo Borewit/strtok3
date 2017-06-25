@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "sourceMap":  true,
+    "sourceMap": true,
     "inlineSources": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "declaration": true
+    "declaration": true,
+    "target": "es5"
   },
   "include": [
     "src/**/*.ts",
