@@ -9,7 +9,7 @@ The `strtok3` contains one class, `ReadStreamTokenizer`, which is constructed wi
 a [stream.Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable).
 
 The `ReadStreamTokenizer` has one method `readToken` which takes a *token* as an argument 
-and returns a `Promise`.
+and returns a `Promise` resolving the decoded token value.
 
 The *token* is basically a description what to read form the stream. 
 A basic set of *token types* can be found here: [token-types](https://github.com/Borewit/token-types).
