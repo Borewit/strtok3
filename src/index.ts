@@ -14,6 +14,11 @@ const EndOfFile = new Error("End-Of-File");
 
 export interface ITokenizer {
 
+  /**
+   * File length in bytes
+   */
+  fileSize?: number;
+
   readBuffer(buffer: Buffer, offset: number, length: number, position?: number): Promise<number>;
 
   readToken<T>(token: IGetToken<T>, position?: number | null): Promise<T>;

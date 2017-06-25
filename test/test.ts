@@ -397,6 +397,9 @@ describe("FileTokenizer", () => {
   it("should be able to read from a file", () => {
 
     return FileTokenizer.open(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
+
+      assert.equal(tokenizer.fileSize, 16, "check file size property");
+
       return tokenizer.readToken<number>(Token.UINT32_LE)
         .then((value) => {
           assert.ok(typeof value === 'number');
