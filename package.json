@@ -1,6 +1,6 @@
 {
   "name": "strtok3",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A promise based streaming tokenizer",
   "author": {
     "name": "Borewit",
@@ -50,5 +50,18 @@
     "fs-extra": "^3.0.1",
     "then-read-stream": "^0.0.4",
     "token-types": "0.0.2"
-  }
+  },
+  "keywords": [
+    "tokenizer",
+    "promise",
+    "parser",
+    "binary",
+    "endian",
+    "integer",
+    "uint",
+    "token",
+    "read",
+    "stream",
+    "streaming"
+  ]
 }
