@@ -7,7 +7,6 @@ import {} from "mocha"
 import {assert} from 'chai';
 import {SourceStream} from "./util";
 import {FileTokenizer, ReadStreamTokenizer} from "../src";
-import * as fs from 'fs-extra';
 import * as Path from 'path';
 import {IgnoreType} from "token-types";
 

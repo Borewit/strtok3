@@ -1,9 +1,6 @@
 // Utilies for testing
 
-import {ReadStreamTokenizer} from "../src";
 const assert = require('assert');
-import * as stream from "stream";
-import * as Promise from "promise";
 import {Readable} from "stream";
 
 /**
