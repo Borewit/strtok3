@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import {AbstractTokenizer} from "./AbstractTokenizer";
+import {Promise} from 'es6-promise';
 
 export class FileTokenizer extends AbstractTokenizer {
 

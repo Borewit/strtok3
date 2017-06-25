@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/chai": "^4.0.1",
+    "@types/es6-promise": "0.0.32",
     "@types/fs-extra": "^3.0.3",
     "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.32",
@@ -46,6 +47,7 @@
   },
   "dependencies": {
     "@types/promise": "^7.1.30",
+    "es6-promise": "^4.1.0",
     "fs-extra": "^3.0.1",
     "promise": "^7.3.1",
     "then-read-stream": "^0.0.4",
