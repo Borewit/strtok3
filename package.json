@@ -46,10 +46,8 @@
     "typings": "2.0.0"
   },
   "dependencies": {
-    "@types/promise": "^7.1.30",
     "es6-promise": "^4.1.0",
     "fs-extra": "^3.0.1",
-    "promise": "^7.3.1",
     "then-read-stream": "^0.0.4",
     "token-types": "0.0.2"
   }
