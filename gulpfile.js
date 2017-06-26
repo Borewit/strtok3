@@ -2,6 +2,7 @@ const gulp = require('gulp');
 const typescript = require('gulp-tsc');
 const clean = require('gulp-clean');
 const mocha = require('gulp-mocha');
+const sourcemaps = require('gulp-sourcemaps');
 
 const buildPath = 'lib';
 
@@ -14,9 +15,11 @@ gulp.task('clean', function () {
 
 gulp.task('compile', ['clean'], function () {
   return gulp.src(['src/**/*.ts'])
+    .pipe(sourcemaps.init()) // generate sourcemaps
     .pipe(typescript({
       declaration: true, target: 'es5'
     }))
+    .pipe(sourcemaps.write()) // add the sourcemaps to the .js file
     .pipe(gulp.dest(buildPath))
 });
 

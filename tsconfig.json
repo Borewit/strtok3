@@ -5,7 +5,8 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
-    "target": "es5"
+    "target": "es5",
+    "outDir": "lib"
   },
   "include": [
     "src/**/*.ts",
