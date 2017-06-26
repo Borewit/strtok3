@@ -126,9 +126,12 @@ export class FileTokenizer extends AbstractTokenizer {
       position = this.fileOffset + this.ignoreLength;
       this.ignoreLength = 0;
     }
-    return (fs.read(this.fd, buffer, offset, length, position) as any).then((bytesRead) => {
+    return (fs.read(this.fd, buffer, offset, length, position) as any).then((bytesRead) => { // ToDo: looks like wrong return type is defined in fs.read
+      if(bytesRead<length)
+        throw EndOfFile;
       this.fileOffset += bytesRead;
-    });// ToDo: looks like wrong return type is defined in fs.read
+      return bytesRead;
+    });
   }
 
   public static open(filePath: string): Promise<FileTokenizer> {
