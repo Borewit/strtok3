@@ -7,6 +7,7 @@ import {} from "mocha"
 import {assert} from 'chai';
 import {SourceStream} from "./util";
 import {FileTokenizer, ReadStreamTokenizer} from "../src";
+import * as strtok3 from "../src";
 import * as Path from 'path';
 import {IgnoreType} from "token-types";
 import * as fs from "fs-extra";
@@ -40,7 +41,7 @@ describe("ReadStreamTokenizer", () => {
       return rst.readToken<number>(Token.UINT8).then((value) => {
         assert.fail("Should rejct due to end-of-stream");
       }).catch((err) => {
-        assert.equal(err, StreamReader.EndOfStream);
+        assert.equal(err, strtok3.EndOfFile);
       })
     });
 

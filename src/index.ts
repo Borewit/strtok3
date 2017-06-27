@@ -7,10 +7,10 @@ import * as fs from 'fs-extra';
 import {IGetToken, IFlush, IToken} from 'token-types';
 
 /**
- * Used to reject read if end-of-stream has been reached
+ * Used to reject read if end-of-stream or end-of-file is reached
  * @type {Error}
  */
-const EndOfFile = new Error("End-Of-File");
+export const EndOfFile = new Error("End-Of-File");
 
 export interface ITokenizer {
 
@@ -102,7 +102,12 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public readBuffer(buffer: Buffer, offset: number, length: number, position: number = null): Promise<number> {
-    return this.streamReader.read(buffer, offset, length, position); // ToDo: looks like wrong return type is defined in fs.read
+    return this.streamReader.read(buffer, offset, length, position) // ToDo: looks like wrong return type is defined in fs.read
+      .catch((err) => {
+        if(err = StreamReader.EndOfStream) // Convert EndOfStream into EndOfFile
+          throw EndOfFile;
+        else throw err;
+      })
   }
 
   /**
