@@ -51,7 +51,10 @@ const maybeFlush = function (b: Buffer, o, len: number, flush: IFlush) {
 
 export class IgnoreType implements IGetToken<Buffer> {
 
-  constructor(public len: number) {
+  /**
+   * @param len Number of bytes to ignore (skip)
+   */
+  public constructor(public len: number) {
   }
 
   // ToDo: don't read,, but skip data
@@ -61,6 +64,8 @@ export class IgnoreType implements IGetToken<Buffer> {
 }
 
 export abstract class AbstractTokenizer implements ITokenizer {
+
+  public fileSize?: number;
 
   private numBuffer = new Buffer(4);
 
@@ -90,17 +95,29 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
   private streamReader: StreamReader;
 
-  public constructor(stream: stream.Readable) {
+  public constructor(stream: stream.Readable, fileSize?: number) {
     super();
     this.streamReader = new StreamReader(stream);
+    this.fileSize =  fileSize;
   }
 
   public readBuffer(buffer: Buffer, offset: number, length: number, position: number = null): Promise<number> {
     return this.streamReader.read(buffer, offset, length, position); // ToDo: looks like wrong return type is defined in fs.read
   }
 
-  public static read(stream: stream.Readable): ReadStreamTokenizer {
-    return new ReadStreamTokenizer(stream);
+  /**
+   * Construct ReadStreamTokenizer from given stream.
+   * Will set fileSize, if provided given stream has set the .path property/
+   * @param stream stream.Readable
+   * @returns {any}
+   */
+  public static read(stream: stream.Readable): Promise<ReadStreamTokenizer> {
+    if((stream as any).path) {
+      return fs.stat((stream as any).path).then((stat) => {
+        return new ReadStreamTokenizer(stream, stat.size);
+      })
+    }
+    return Promise.resolve(new ReadStreamTokenizer(stream));
   }
 
   public ignore(length: number): Promise<void> {
