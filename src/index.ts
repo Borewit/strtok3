@@ -32,23 +32,6 @@ export interface ITokenizer {
   ignore(length: number);
 }
 
-// Possibly call flush()
-const maybeFlush = function (b: Buffer, o, len: number, flush: IFlush) {
-  if (o + len > b.length) {
-    if (typeof(flush) !== 'function') {
-      throw new Error(
-        'Buffer out of space and no valid flush() function found'
-      );
-    }
-
-    flush(b, o);
-
-    return 0;
-  }
-
-  return o;
-};
-
 export class IgnoreType implements IGetToken<Buffer> {
 
   /**
