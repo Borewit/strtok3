@@ -9,8 +9,7 @@
     "outDir": "lib"
   },
   "include": [
-    "src/**/*.ts",
-    "test/**/*.ts"
+    "src/**/*.ts"
   ]
 }
 

@@ -1,6 +1,4 @@
 // Utilies for testing
-
-const assert = require('assert');
 import {Readable} from "stream";
 
 /**
