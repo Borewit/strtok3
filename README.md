@@ -18,6 +18,7 @@ A basic set of *token types* can be found here: [token-types](https://github.com
 
 Below is an example of parsing the the first byte from a readable stream as an unsigned-integer:
 
+###### TypeScript:
 ```TypeScript
 import * as strtok3 from "strtok3";
 import * as stream from "stream";
@@ -33,6 +34,7 @@ strtok3.fromStream(readableStream).then((tokenizer) => {
 })
 ```
 
+###### JavaScript:
 ```JavaScript
 var strtok3 = require('strtok3');
 var Token = require('token-types');
@@ -42,8 +44,8 @@ var readableStream;
 
 
 strtok3.fromStream(readableStream).then( function(streamTokenizer) {
-  return streamTokenizer.readToken(Token.UINT8).then( function(myUint8Number {
-    console.log("My number: %s", myUint8Number);
+  return streamTokenizer.readToken(Token.UINT8).then( function(myUint8Number) {
+    console.log('My number: %s', myUint8Number);
   });
 })
 ```
@@ -52,8 +54,8 @@ strtok3.fromStream(readableStream).then( function(streamTokenizer) {
 
 The same can be done from a file:
 
+###### TypeScript:
 ```TypeScript
-import * as fs from "fs-extra";
 import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
@@ -62,8 +64,18 @@ strtok3.fromFile("somefile.bin").then((tokenizer) => {
     console.log("My number: %s", myUint8Number);
   });
 })
+```
 
-
+###### JavaScript:
+```JavaScript
+var strtok3 = require('strtok3');
+var Token = require('token-types');
+    
+strtok3.fromFile('somefile.bin').then( function(streamTokenizer) {
+  return streamTokenizer.readToken(Token.UINT8).then( function(myUint8Number) {
+    console.log('My number: %s', myUint8Number);
+  });
+})
 ```
       
 [npm-url]: https://npmjs.org/package/strtok3
