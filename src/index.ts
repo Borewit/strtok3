@@ -2,10 +2,10 @@ import {IGetToken} from 'token-types';
 import {ReadStreamTokenizer} from "./ReadStreamTokenizer";
 import {FileTokenizer} from "./FileTokenizer";
 import * as fs from "fs-extra";
-import * as stream from "stream";
+import * as Stream from "stream";
 
 /**
- * Used to reject read if end-of-stream or end-of-file is reached
+ * Used to reject read if end-of-Stream or end-of-file is reached
  * @type {Error}
  */
 export const EndOfFile = new Error("End-Of-File");
@@ -45,12 +45,12 @@ export class IgnoreType implements IGetToken<Buffer> {
 }
 
 /**
- * Construct ReadStreamTokenizer from given stream.
- * Will set fileSize, if provided given stream has set the .path property/
- * @param stream stream.Readable
+ * Construct ReadStreamTokenizer from given Stream.
+ * Will set fileSize, if provided given Stream has set the .path property/
+ * @param stream Stream.Readable
  * @returns {Promise<ReadStreamTokenizer>}
  */
-export function fromStream(stream: stream.Readable): Promise<ReadStreamTokenizer> {
+export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer> {
   if ((stream as any).path) {
     return fs.stat((stream as any).path).then((stat) => {
       return new ReadStreamTokenizer(stream, stat.size);

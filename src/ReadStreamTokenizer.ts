@@ -1,13 +1,13 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
 import {EndOfFile} from "./";
 import {StreamReader} from "then-read-stream";
-import * as stream from "stream";
+import * as Stream from "stream";
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
   private streamReader: StreamReader;
 
-  public constructor(stream: stream.Readable, fileSize?: number) {
+  public constructor(stream: Stream.Readable, fileSize?: number) {
     super();
     this.streamReader = new StreamReader(stream);
     this.fileSize = fileSize;
@@ -24,6 +24,6 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
   public ignore(length: number): Promise<void> {
     const buf = new Buffer(length);
-    return this.streamReader.read(buf, 0, length).then(() => null); // stream cannot skip data
+    return this.streamReader.read(buf, 0, length).then(() => null); // Stream cannot skip data
   }
 }
