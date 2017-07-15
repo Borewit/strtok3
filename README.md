@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/Borewit/strtok3.svg?branch=master)](https://travis-ci.org/Borewit/strtok3)
 [![NPM version](https://badge.fury.io/js/strtok3.svg)](https://npmjs.org/package/strtok3)
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmjs.org/package/strtok3)
-[![Dependencies](https://david-dm.org/Borewit/strtok3.svg)](https://github.com/Borewit/strtok3)
+[![Dependencies](https://david-dm.org/Borewit/strtok3.svg)](https://david-dm.org/Borewit/strtok3)
 
 A promise based streaming tokenizer for [NodeJS](http://nodejs.org).
 This node module is a successor of [strtok2](https://github.com/Borewit/strtok2).
