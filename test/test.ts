@@ -2,7 +2,7 @@ import * as Token from "token-types";
 import {} from "mocha";
 import {assert} from 'chai';
 import {SourceStream} from "./util";
-import * as strtok3 from "../src";
+import * as strtok3 from "../lib";
 import * as Path from 'path';
 import {IgnoreType} from "token-types";
 import * as fs from "fs-extra";
