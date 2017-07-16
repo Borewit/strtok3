@@ -8,8 +8,7 @@
   },
   "scripts": {
     "compile": "tsc",
-    "clean": "rm lib/*.js",
-    "prepare": "npm compile",
+    "prepare": "npm run compile",
     "lint": "tslint 'lib/**/*.ts' --exclude 'lib/**/*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
     "test": "mocha --require ts-node/register test",
     "cover-test": "nyc npm run test",
