@@ -7,7 +7,7 @@
     "url": "https://github.com/Borewit"
   },
   "scripts": {
-    "compile": "gulp compile",
+    "compile": "gulp compile && gulp test-compile",
     "clean": "gulp clean",
     "mocha": "mocha --require ts-node/register test",
     "prepare": "gulp",
