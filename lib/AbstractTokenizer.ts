@@ -7,7 +7,15 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   private numBuffer = new Buffer(4);
 
-  public abstract readBuffer(buffer: Buffer, offset: number, length: number, position: number): Promise<number>;
+  /**
+   * Read buffer from tokenizer
+   * @param buffer
+   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
+   * @param length is an integer specifying the number of bytes to read
+   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
+   * @returns {Promise<TResult|number>}
+   */
+  public abstract readBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number): Promise<number>;
 
   public readToken<T>(token: IGetToken<T>, position: number | null = null): Promise<T> {
     const buffer = new Buffer(token.len);

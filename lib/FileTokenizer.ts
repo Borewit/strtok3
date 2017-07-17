@@ -10,20 +10,32 @@ export class FileTokenizer extends AbstractTokenizer {
     super();
   }
 
-  public readBuffer(buffer: Buffer, offset: number, length: number, position?: number): Promise<number> {
+  /**
+   * Read buffer from file
+   * @param buffer
+   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
+   * @param length is an integer specifying the number of bytes to read, of not provided the buffer length will be used
+   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
+   * @returns Promise number of bytes read
+   */
+  public readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number> {
 
     if (position) {
       this.fileOffset = position;
     }
 
-    return (fs.read(this.fd, buffer, offset, length, this.fileOffset) as any).then((bytesRead) => { // ToDo: looks like wrong return type is defined in fs.read
-      if (bytesRead < length)
+    if (!length) {
+      length = buffer.length;
+    }
+
+    return (fs.read(this.fd, buffer, offset, length, this.fileOffset) as any).then((res) => {
+      if (res.bytesRead < length)
         throw EndOfFile;
-      this.fileOffset += bytesRead;
+      this.fileOffset += res.bytesRead;
 
       // debug("Read:" + buffer.slice(offset, length).toString("hex"));
 
-      return bytesRead;
+      return res.bytesRead;
     });
   }
 

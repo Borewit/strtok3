@@ -6,6 +6,7 @@ import * as strtok3 from "../lib";
 import * as Path from 'path';
 import {IgnoreType} from "token-types";
 import * as fs from "fs-extra";
+import {EndOfFile} from "../lib/index";
 
 describe("ReadStreamTokenizer", () => {
 
@@ -433,13 +434,34 @@ describe("FileTokenizer", () => {
     });
   });
 
+  it("should throw an EndOfFile exception", () => {
+
+    const pathTestFile = Path.join(__dirname, 'resources', 'test1.dat');
+
+    return fs.stat(pathTestFile).then((stat) => {
+      return stat.size;
+    }).then((fileSize) => {
+      return strtok3.fromFile(pathTestFile).then((tokenizer) => {
+        const buf = new Buffer(fileSize);
+        return tokenizer.readBuffer(buf).then((bytesRead) => {
+          assert.ok(typeof bytesRead === "number", "readBuffer promise should provide a number");
+          assert.equal(fileSize, bytesRead);
+        }).then(() => {
+          return tokenizer.readBuffer(buf).catch((err) => {
+            assert.equal(err, EndOfFile);
+          });
+        });
+      });
+    });
+  });
+
   it("should be able to ignore (skip) a given number of bytes", () => {
     return strtok3.fromFile(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
       return tokenizer.ignore(4)
         .then(() => {
           return tokenizer.readToken<number>(Token.UINT32_BE);
         }).then((value) => {
-          assert.ok(typeof value === 'number');
+          assert.ok(typeof value === "number");
           assert.equal(value, 0x1a001a00, "UINT32_BE #2");
           return tokenizer.readToken<number>(Token.UINT32_LE);
         }).then((value) => {
