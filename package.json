@@ -40,8 +40,7 @@
     "mocha": "^3.4.2",
     "nyc": "^11.0.3",
     "ts-node": "^3.2.0",
-    "tslint": "^5.5.0",
-    "typescript": "^2.4.1"
+    "tslint": "^5.5.0"
   },
   "dependencies": {
     "es6-promise": "^4.1.1",
