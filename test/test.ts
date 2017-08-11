@@ -6,7 +6,7 @@ import * as strtok3 from "../lib";
 import * as Path from 'path';
 import {IgnoreType} from "token-types";
 import * as fs from "fs-extra";
-import {EndOfFile} from "../lib/index";
+import {EndOfFile, ITokenizer} from "../lib/index";
 
 describe("ReadStreamTokenizer", () => {
 
@@ -512,4 +512,58 @@ describe("FileTokenizer", () => {
         });
     });
   });
+});
+
+describe("Peek token", () => {
+
+  function peekOnData(tokenizer: ITokenizer): Promise<void> {
+    return tokenizer.peekToken<number>(Token.UINT32_LE)
+      .then((value) => {
+        assert.ok(typeof value === 'number');
+        assert.equal(value, 0x001a001a, "UINT24_LE #1");
+        return tokenizer.readToken<number>(Token.UINT32_LE);
+      })
+      .then((value) => {
+        assert.ok(typeof value === 'number');
+        assert.equal(value, 0x001a001a, "UINT24_LE #1");
+        return tokenizer.readToken<number>(Token.UINT32_BE);
+      }).then((value) => {
+        assert.ok(typeof value === 'number');
+        assert.equal(value, 0x1a001a00, "UINT32_BE #2");
+        return tokenizer.readToken<number>(Token.UINT32_LE);
+      }).then((value) => {
+        assert.ok(typeof value === 'number');
+        assert.equal(value, 0x001a001a, "UINT32_LE #3");
+        return tokenizer.readToken<number>(Token.UINT32_BE);
+      }).then((value) => {
+        assert.ok(typeof value === 'number');
+        assert.equal(value, 0x1a001a00, "UINT32_BE #4");
+      });
+  }
+
+  it("should be able to peek from a atream", () => {
+
+    const fileReadStream = fs.createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
+    return strtok3.fromStream(fileReadStream).then((tokenizer) => {
+
+      return peekOnData(tokenizer);
+
+    });
+  });
+
+  it("should be able to peek from a file", () => {
+
+    return strtok3.fromFile(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
+
+      assert.equal(tokenizer.fileSize, 16, "check file size property");
+
+      return peekOnData(tokenizer);
+    });
+  });
+
+  it("should be able to peek from a stream", () => {
+
+    // ToDo
+  });
+
 });

@@ -5,6 +5,7 @@ import {EndOfFile} from "./";
 export class FileTokenizer extends AbstractTokenizer {
 
   private fileOffset: number = 0;
+  private peekOffset: number = 0;
 
   constructor(private fd: number, public fileSize?: number) {
     super();
@@ -32,6 +33,38 @@ export class FileTokenizer extends AbstractTokenizer {
       if (res.bytesRead < length)
         throw EndOfFile;
       this.fileOffset += res.bytesRead;
+
+      // debug("Read:" + buffer.slice(offset, length).toString("hex"));
+
+      return res.bytesRead;
+    });
+  }
+
+  /**
+   * Peek buffer from file
+   * @param buffer
+   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
+   * @param length is an int
+   * eger specifying the number of bytes to read, of not provided the buffer length will be used
+   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
+   * @returns Promise number of bytes read
+   */
+  public peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number> {
+
+    if (position) {
+      this.peekOffset = position;
+    } else if (this.peekOffset < this.fileOffset) {
+      this.peekOffset = this.fileOffset;
+    }
+
+    if (!length) {
+      length = buffer.length;
+    }
+
+    return (fs.read(this.fd, buffer, offset, length, this.peekOffset) as any).then((res) => {
+      if (res.bytesRead < length)
+        throw EndOfFile;
+      this.peekOffset += res.bytesRead;
 
       // debug("Read:" + buffer.slice(offset, length).toString("hex"));
 
