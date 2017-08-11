@@ -4,7 +4,6 @@ import {assert} from 'chai';
 import {SourceStream} from "./util";
 import * as strtok3 from "../lib";
 import * as Path from 'path';
-import {IgnoreType} from "token-types";
 import * as fs from "fs-extra";
 import {EndOfFile, ITokenizer} from "../lib/index";
 
@@ -495,7 +494,7 @@ describe("FileTokenizer", () => {
 
   it("should be able to parse the IgnoreType-token", () => {
     return strtok3.fromFile(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
-      return tokenizer.readToken<void>(new IgnoreType(4))
+      return tokenizer.readToken<void>(new Token.IgnoreType(4))
         .then(() => {
           return tokenizer.readToken<number>(Token.UINT32_BE);
         }).then((value) => {
