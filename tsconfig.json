@@ -4,7 +4,7 @@
     "inlineSources": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "declaration": true,
+    "declaration": false,
     "target": "es5"
   },
   "include": [
