@@ -6,10 +6,6 @@
     "moduleResolution": "node",
     "declaration": false,
     "target": "es5"
-  },
-  "include": [
-    "lib/**/*.ts",
-    "test/**/*.ts"
-  ]
+  }
 }
 

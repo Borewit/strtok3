@@ -2,10 +2,9 @@ import * as Token from "token-types";
 import {} from "mocha";
 import {assert} from 'chai';
 import {SourceStream} from "./util";
-import * as strtok3 from "../lib";
+import * as strtok3 from "../src";
 import * as Path from 'path';
 import * as fs from "fs-extra";
-import {EndOfFile, ITokenizer} from "../lib/index";
 
 describe("ReadStreamTokenizer", () => {
 
@@ -447,7 +446,7 @@ describe("FileTokenizer", () => {
           assert.equal(fileSize, bytesRead);
         }).then(() => {
           return tokenizer.readBuffer(buf).catch((err) => {
-            assert.equal(err, EndOfFile);
+            assert.equal(err, strtok3.EndOfFile);
           });
         });
       });
@@ -515,7 +514,7 @@ describe("FileTokenizer", () => {
 
 describe("Peek token", () => {
 
-  function peekOnData(tokenizer: ITokenizer): Promise<void> {
+  function peekOnData(tokenizer: strtok3.ITokenizer): Promise<void> {
     return tokenizer.peekToken<number>(Token.UINT32_LE)
       .then((value) => {
         assert.ok(typeof value === 'number');

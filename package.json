@@ -7,9 +7,11 @@
     "url": "https://github.com/Borewit"
   },
   "scripts": {
-    "compile": "tsc",
+    "compile-src": "tsc -p src",
+    "compile-test": "tsc -p test",
+    "compile": "npm run compile-src && npm run compile-test",
     "prepare": "npm run compile",
-    "lint": "tslint 'lib/**/*.ts' --exclude 'lib/**/*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
+    "lint": "tslint 'src/**/*.ts' --exclude 'src/**/*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
     "test": "mocha --require ts-node/register test",
     "cover-test": "nyc npm run test",
     "coveralls": "npm run cover-test && nyc report --reporter=text-lcov | coveralls",
@@ -36,7 +38,6 @@
     "@types/node": "^8.0.20",
     "chai": "^4.1.1",
     "coveralls": "^2.13.1",
-    "debug": "^2.6.8",
     "mocha": "^3.5.0",
     "nyc": "^11.1.0",
     "ts-node": "^3.3.0",
@@ -46,8 +47,8 @@
   "dependencies": {
     "es6-promise": "^4.1.1",
     "fs-extra": "^4.0.1",
-    "then-read-stream": "^0.9.2",
-    "token-types": "^0.1.2"
+    "then-read-stream": "^0.9.3",
+    "token-types": "^0.9.0"
   },
   "keywords": [
     "tokenizer",
