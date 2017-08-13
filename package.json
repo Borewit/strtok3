@@ -33,7 +33,7 @@
   "devDependencies": {
     "@types/chai": "^4.0.3",
     "@types/es6-promise": "0.0.32",
-    "@types/fs-extra": "^3.0.3",
+    "@types/fs-extra": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "@types/node": "^8.0.20",
     "chai": "^4.1.1",
