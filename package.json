@@ -62,5 +62,16 @@
     "read",
     "stream",
     "streaming"
-  ]
+  ],
+  "nyc": {
+    "check-coverage": true,
+    "include": [
+      "src/**/*"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "report-dir": "coverage"
+  }
 }
