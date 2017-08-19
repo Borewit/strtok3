@@ -47,8 +47,8 @@
   "dependencies": {
     "es6-promise": "^4.1.1",
     "fs-extra": "^4.0.1",
-    "then-read-stream": "^0.9.3",
-    "token-types": "^0.9.0"
+    "then-read-stream": "^0.9.5",
+    "token-types": "^0.9.1"
   },
   "keywords": [
     "tokenizer",
