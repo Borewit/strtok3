@@ -32,7 +32,7 @@ describe("ReadStreamTokenizer", () => {
       it("should should reject at the end of the stream", () => {
 
         return rst.readToken<number>(Token.UINT8).then(() => {
-          assert.fail("Should rejct due to end-of-stream");
+          assert.fail("Should reject due to end-of-stream");
         }).catch((err) => {
           assert.equal(err, strtok3.EndOfFile);
         });
