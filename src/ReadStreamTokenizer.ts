@@ -26,7 +26,11 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       length = buffer.length;
     }
 
-    return this.streamReader.read(buffer, offset, length) // ToDo: looks like wrong return type is defined in fs.read
+    return this.streamReader.read(buffer, offset, length)
+      .then((bytesRead) => {
+        this.offset += bytesRead;
+        return bytesRead;
+      })
       .catch((err) => {
         if (err === StreamReader.EndOfStream) // Convert EndOfStream into EndOfFile
           throw EndOfFile;

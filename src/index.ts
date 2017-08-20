@@ -18,6 +18,11 @@ export interface ITokenizer {
   fileSize?: number;
 
   /**
+   * Offset in bytes (= number of bytes read) since beginning of file or stream
+   */
+  offset: number;
+
+  /**
    * Peek (read ahead) buffer from tokenizer
    * @param buffer
    * @param offset is the offset in the buffer to start writing at; if not provided, start at 0

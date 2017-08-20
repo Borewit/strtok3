@@ -15,6 +15,7 @@ describe("ReadStreamTokenizer", () => {
 
       it("should decode UINT8 from chunk", () => {
 
+        assert.strictEqual(rst.offset, 0);
         return rst.readToken<number>(Token.UINT8).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 5, "0x05 == 5");
@@ -23,9 +24,11 @@ describe("ReadStreamTokenizer", () => {
 
       it("should decode string from chunk", () => {
 
+        assert.strictEqual(rst.offset, 1);
         return rst.readToken<string>(new Token.StringType(5, 'utf-8')).then((value) => {
           assert.ok(typeof value === 'string');
           assert.equal(value, 'peter', "0x05 == 5");
+          assert.strictEqual(rst.offset, 6);
         });
       });
 
@@ -515,27 +518,33 @@ describe("FileTokenizer", () => {
 describe("Peek token", () => {
 
   function peekOnData(tokenizer: strtok3.ITokenizer): Promise<void> {
+    assert.strictEqual(tokenizer.offset, 0);
     return tokenizer.peekToken<number>(Token.UINT32_LE)
       .then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
+        assert.strictEqual(tokenizer.offset, 0);
         return tokenizer.readToken<number>(Token.UINT32_LE);
       })
       .then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
+        assert.strictEqual(tokenizer.offset, 4);
         return tokenizer.readToken<number>(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x1a001a00, "UINT32_BE #2");
+        assert.strictEqual(tokenizer.offset, 8);
         return tokenizer.readToken<number>(Token.UINT32_LE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT32_LE #3");
+        assert.strictEqual(tokenizer.offset, 12);
         return tokenizer.readToken<number>(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x1a001a00, "UINT32_BE #4");
+        assert.strictEqual(tokenizer.offset, 16);
       });
   }
 
