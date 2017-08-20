@@ -1,6 +1,6 @@
 {
   "name": "strtok3",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "A promise based streaming tokenizer",
   "author": {
     "name": "Borewit",
@@ -35,14 +35,14 @@
     "@types/es6-promise": "0.0.32",
     "@types/fs-extra": "^4.0.0",
     "@types/mocha": "^2.2.41",
-    "@types/node": "^8.0.20",
+    "@types/node": "^8.0.24",
     "chai": "^4.1.1",
     "coveralls": "^2.13.1",
     "mocha": "^3.5.0",
     "nyc": "^11.1.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.6.0",
-    "typescript": "^2.4.2"
+    "typescript": "^2.5.1"
   },
   "dependencies": {
     "es6-promise": "^4.1.1",
