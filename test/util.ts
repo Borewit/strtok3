@@ -8,32 +8,33 @@ import {Readable} from "stream";
  */
 export class SourceStream extends Readable {
 
-  private buf: Buffer;
+  public static FromString(str: string = ''): SourceStream {
+    return new SourceStream(new Buffer(str, 'binary'));
+  }
 
-  constructor(private str: string = '', private min: number = 1, private max: number = str.length) {
+  public constructor(private buf: Buffer) {
     super();
-
-    this.buf = new Buffer(str, 'binary');
   }
 
   public _read() {
 
     /* ToDo: segment data
-    const len = Math.min(
-      this.min + Math.floor(Math.random() * (this.max - this.min)),
-      this.buf.length
-    );
+     const len = Math.min(
+     this.min + Math.floor(Math.random() * (this.max - this.min)),
+     this.buf.length
+     );
 
-    const b = this.buf.slice(0, len);
+     const b = this.buf.slice(0, len);
 
-    if (len < this.buf.length) {
-      this.buf = this.buf.slice(len, this.buf.length);
-      this.push(b);
-    } else {
-      this.push(null); // push the EOF-signaling `null` chunk
-    }*/
+     if (len < this.buf.length) {
+     this.buf = this.buf.slice(len, this.buf.length);
+     this.push(b);
+     } else {
+     this.push(null); // push the EOF-signaling `null` chunk
+     }*/
 
     this.push(this.buf);
     this.push(null); // push the EOF-signaling `null` chunk
   }
+
 }

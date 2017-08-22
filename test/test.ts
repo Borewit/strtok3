@@ -10,13 +10,13 @@ describe("ReadStreamTokenizer", () => {
 
   describe("buffer", () => {
 
-    const ss = new SourceStream('\x05peter');
+    const ss = SourceStream.FromString('\x05peter');
     return strtok3.fromStream(ss).then((rst) => {
 
       it("should decode UINT8 from chunk", () => {
 
         assert.strictEqual(rst.offset, 0);
-        return rst.readToken<number>(Token.UINT8).then((value) => {
+        return rst.readToken(Token.UINT8).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 5, "0x05 == 5");
         });
@@ -25,7 +25,7 @@ describe("ReadStreamTokenizer", () => {
       it("should decode string from chunk", () => {
 
         assert.strictEqual(rst.offset, 1);
-        return rst.readToken<string>(new Token.StringType(5, 'utf-8')).then((value) => {
+        return rst.readToken(new Token.StringType(5, 'utf-8')).then((value) => {
           assert.ok(typeof value === 'string');
           assert.equal(value, 'peter', "0x05 == 5");
           assert.strictEqual(rst.offset, 6);
@@ -34,7 +34,7 @@ describe("ReadStreamTokenizer", () => {
 
       it("should should reject at the end of the stream", () => {
 
-        return rst.readToken<number>(Token.UINT8).then(() => {
+        return rst.readToken(Token.UINT8).then(() => {
           assert.fail("Should reject due to end-of-stream");
         }).catch((err) => {
           assert.equal(err, strtok3.EndOfFile);
@@ -72,26 +72,26 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode signed 8-bit integer (INT8)", () => {
 
-      const ss = new SourceStream('\x00\x7f\x80\xff\x81');
+      const ss = SourceStream.FromString('\x00\x7f\x80\xff\x81');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.INT8)
+        return rst.readToken(Token.INT8)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0, "INT8 #1 == 0");
-            return rst.readToken<number>(Token.INT8);
+            return rst.readToken(Token.INT8);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 127, "INT8 #2 == 127");
-            return rst.readToken<number>(Token.INT8);
+            return rst.readToken(Token.INT8);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -128, "INT8 #3 == -128");
-            return rst.readToken<number>(Token.INT8);
+            return rst.readToken(Token.INT8);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -1, "INT8 #4 == -1");
-            return rst.readToken<number>(Token.INT8);
+            return rst.readToken(Token.INT8);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -127, "INT8 #5 == -127");
@@ -115,22 +115,22 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode signed 16-bit big-endian integer (INT16_BE)", () => {
 
-      const ss = new SourceStream('\x0a\x1a\x00\x00\xff\xff\x80\x00');
+      const ss = SourceStream.FromString('\x0a\x1a\x00\x00\xff\xff\x80\x00');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.INT16_BE)
+        return rst.readToken(Token.INT16_BE)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 2586, "INT16_BE#1");
-            return rst.readToken<number>(Token.INT16_BE);
+            return rst.readToken(Token.INT16_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0, "INT16_BE#2");
-            return rst.readToken<number>(Token.INT16_BE);
+            return rst.readToken(Token.INT16_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -1, "INT16_BE#3");
-            return rst.readToken<number>(Token.INT16_BE);
+            return rst.readToken(Token.INT16_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -32768, "INT16_BE#4");
@@ -154,22 +154,22 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode signed 24-bit big-endian integer (INT24_BE)", () => {
 
-      const ss = new SourceStream('\x00\x00\x00\xff\xff\xff\x10\x00\xff\x80\x00\x00');
+      const ss = SourceStream.FromString('\x00\x00\x00\xff\xff\xff\x10\x00\xff\x80\x00\x00');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.INT24_BE)
+        return rst.readToken(Token.INT24_BE)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0, "INT24_BE#1");
-            return rst.readToken<number>(Token.INT24_BE);
+            return rst.readToken(Token.INT24_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -1, "INT24_BE#2");
-            return rst.readToken<number>(Token.INT24_BE);
+            return rst.readToken(Token.INT24_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 1048831, "INT24_BE#3");
-            return rst.readToken<number>(Token.INT24_BE);
+            return rst.readToken(Token.INT24_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -8388608, "INT24_BE#4");
@@ -195,22 +195,22 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode signed 32-bit big-endian integer (INT32_BE)", () => {
 
-      const ss = new SourceStream('\x00\x00\x00\x00\xff\xff\xff\xff\x00\x10\x00\xff\x80\x00\x00\x00');
+      const ss = SourceStream.FromString('\x00\x00\x00\x00\xff\xff\xff\xff\x00\x10\x00\xff\x80\x00\x00\x00');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.INT32_BE)
+        return rst.readToken(Token.INT32_BE)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0, "INT24_BE #1");
-            return rst.readToken<number>(Token.INT32_BE);
+            return rst.readToken(Token.INT32_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -1, "INT32_BE #2");
-            return rst.readToken<number>(Token.INT32_BE);
+            return rst.readToken(Token.INT32_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 1048831, "INT32_BE #3");
-            return rst.readToken<number>(Token.INT32_BE);
+            return rst.readToken(Token.INT32_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, -2147483648, "INT32_BE #4");
@@ -231,18 +231,18 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode unsigned 8-bit big-endian integer (UINT8)", () => {
 
-      const ss = new SourceStream('\x00\x1a\xff');
+      const ss = SourceStream.FromString('\x00\x1a\xff');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.UINT8)
+        return rst.readToken(Token.UINT8)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0, "UINT8 #1");
-            return rst.readToken<number>(Token.UINT8);
+            return rst.readToken(Token.UINT8);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 26, "UINT8 #2");
-            return rst.readToken<number>(Token.UINT8);
+            return rst.readToken(Token.UINT8);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 255, "UINT8 #3");
@@ -275,22 +275,22 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode unsigned mixed 16-bit big/little-endian integer", () => {
 
-      const ss = new SourceStream('\x1a\x00\x1a\x00\x1a\x00\x1a\x00');
+      const ss = SourceStream.FromString('\x1a\x00\x1a\x00\x1a\x00\x1a\x00');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.UINT16_LE)
+        return rst.readToken(Token.UINT16_LE)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x001a, "UINT16_LE #1");
-            return rst.readToken<number>(Token.UINT16_BE);
+            return rst.readToken(Token.UINT16_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x1a00, "UINT16_BE #2");
-            return rst.readToken<number>(Token.UINT16_LE);
+            return rst.readToken(Token.UINT16_LE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x001a, "UINT16_BE #3");
-            return rst.readToken<number>(Token.UINT16_BE);
+            return rst.readToken(Token.UINT16_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x1a00, "UINT16_LE #4");
@@ -328,22 +328,22 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode signed 24-bit big/little-endian integer (UINT24_LE/INT24_BE)", () => {
 
-      const ss = new SourceStream('\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00');
+      const ss = SourceStream.FromString('\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.UINT24_LE)
+        return rst.readToken(Token.UINT24_LE)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x001a1a, "INT24_LE#1");
-            return rst.readToken<number>(Token.UINT24_BE);
+            return rst.readToken(Token.UINT24_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x1a1a00, "INT24_BE#2");
-            return rst.readToken<number>(Token.UINT24_LE);
+            return rst.readToken(Token.UINT24_LE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x001a1a, "INT24_LE#3");
-            return rst.readToken<number>(Token.UINT24_BE);
+            return rst.readToken(Token.UINT24_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x1a1a00, "INT24_BE#4");
@@ -381,22 +381,22 @@ describe("ReadStreamTokenizer", () => {
 
     it("should decode unsigned 32-bit little/big-endian integer (UINT32_LE/UINT32_BE)", () => {
 
-      const ss = new SourceStream('\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00');
+      const ss = SourceStream.FromString('\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00');
       return strtok3.fromStream(ss).then((rst) => {
 
-        return rst.readToken<number>(Token.UINT32_LE)
+        return rst.readToken(Token.UINT32_LE)
           .then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x001a001a, "UINT24_LE #1");
-            return rst.readToken<number>(Token.UINT32_BE);
+            return rst.readToken(Token.UINT32_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-            return rst.readToken<number>(Token.UINT32_LE);
+            return rst.readToken(Token.UINT32_LE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x001a001a, "UINT32_LE #3");
-            return rst.readToken<number>(Token.UINT32_BE);
+            return rst.readToken(Token.UINT32_BE);
           }).then((value) => {
             assert.ok(typeof value === 'number');
             assert.equal(value, 0x1a001a00, "UINT32_BE #4");
@@ -415,19 +415,19 @@ describe("FileTokenizer", () => {
 
       assert.equal(tokenizer.fileSize, 16, "check file size property");
 
-      return tokenizer.readToken<number>(Token.UINT32_LE)
+      return tokenizer.readToken(Token.UINT32_LE)
         .then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT24_LE #1");
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-          return tokenizer.readToken<number>(Token.UINT32_LE);
+          return tokenizer.readToken(Token.UINT32_LE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT32_LE #3");
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #4");
@@ -460,15 +460,15 @@ describe("FileTokenizer", () => {
     return strtok3.fromFile(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
       return tokenizer.ignore(4)
         .then(() => {
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === "number");
           assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-          return tokenizer.readToken<number>(Token.UINT32_LE);
+          return tokenizer.readToken(Token.UINT32_LE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT32_LE #3");
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #4");
@@ -478,7 +478,7 @@ describe("FileTokenizer", () => {
 
   it("should be able to handle multiple ignores", () => {
     return strtok3.fromFile(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
-      return tokenizer.readToken<number>(Token.UINT32_LE)
+      return tokenizer.readToken(Token.UINT32_LE)
         .then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT24_LE #1");
@@ -486,7 +486,7 @@ describe("FileTokenizer", () => {
         }).then(() => {
           return tokenizer.ignore(Token.UINT32_LE.len);
         }).then(() => {
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #4");
@@ -496,17 +496,17 @@ describe("FileTokenizer", () => {
 
   it("should be able to parse the IgnoreType-token", () => {
     return strtok3.fromFile(Path.join(__dirname, 'resources', 'test1.dat')).then((tokenizer) => {
-      return tokenizer.readToken<void>(new Token.IgnoreType(4))
+      return tokenizer.readToken(new Token.IgnoreType(4))
         .then(() => {
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-          return tokenizer.readToken<number>(Token.UINT32_LE);
+          return tokenizer.readToken(Token.UINT32_LE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x001a001a, "UINT32_LE #3");
-          return tokenizer.readToken<number>(Token.UINT32_BE);
+          return tokenizer.readToken(Token.UINT32_BE);
         }).then((value) => {
           assert.ok(typeof value === 'number');
           assert.equal(value, 0x1a001a00, "UINT32_BE #4");
@@ -524,23 +524,23 @@ describe("Peek token", () => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
         assert.strictEqual(tokenizer.offset, 0);
-        return tokenizer.readToken<number>(Token.UINT32_LE);
+        return tokenizer.readToken(Token.UINT32_LE);
       })
       .then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
         assert.strictEqual(tokenizer.offset, 4);
-        return tokenizer.readToken<number>(Token.UINT32_BE);
+        return tokenizer.readToken(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x1a001a00, "UINT32_BE #2");
         assert.strictEqual(tokenizer.offset, 8);
-        return tokenizer.readToken<number>(Token.UINT32_LE);
+        return tokenizer.readToken(Token.UINT32_LE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT32_LE #3");
         assert.strictEqual(tokenizer.offset, 12);
-        return tokenizer.readToken<number>(Token.UINT32_BE);
+        return tokenizer.readToken(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x1a001a00, "UINT32_BE #4");
