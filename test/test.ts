@@ -8,32 +8,24 @@ import * as fs from "fs-extra";
 
 describe("ReadStreamTokenizer", () => {
 
-  describe("buffer", () => {
+  it("should decode buffer", () => {
 
     const ss = SourceStream.FromString('\x05peter');
     return strtok3.fromStream(ss).then((rst) => {
-
-      it("should decode UINT8 from chunk", () => {
-
-        assert.strictEqual(rst.offset, 0);
-        return rst.readToken(Token.UINT8).then((value) => {
-          assert.ok(typeof value === 'number');
-          assert.equal(value, 5, "0x05 == 5");
-        });
-      });
-
-      it("should decode string from chunk", () => {
-
+      // should decode UINT8 from chunk
+      assert.strictEqual(rst.offset, 0);
+      return rst.readToken(Token.UINT8).then((value) => {
+        assert.ok(typeof value === 'number');
+        assert.equal(value, 5, "0x05 == 5");
+      }).then(() => {
+        // should decode string from chunk
         assert.strictEqual(rst.offset, 1);
         return rst.readToken(new Token.StringType(5, 'utf-8')).then((value) => {
           assert.ok(typeof value === 'string');
           assert.equal(value, 'peter', "0x05 == 5");
           assert.strictEqual(rst.offset, 6);
         });
-      });
-
-      it("should should reject at the end of the stream", () => {
-
+      }).then(() => { // should should reject at the end of the stream
         return rst.readToken(Token.UINT8).then(() => {
           assert.fail("Should reject due to end-of-stream");
         }).catch((err) => {
@@ -405,7 +397,8 @@ describe("ReadStreamTokenizer", () => {
     });
 
   });
-});
+})
+;
 
 describe("FileTokenizer", () => {
 
@@ -548,7 +541,7 @@ describe("Peek token", () => {
       });
   }
 
-  it("should be able to peek from a atream", () => {
+  it("should be able to peek from a stream", () => {
 
     const fileReadStream = fs.createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
     return strtok3.fromStream(fileReadStream).then((tokenizer) => {
