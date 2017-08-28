@@ -5,7 +5,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   public fileSize?: number;
 
-  public offset: number = 0;
+  public position: number = 0;
 
   private numBuffer = new Buffer(4);
 

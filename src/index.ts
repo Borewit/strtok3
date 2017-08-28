@@ -20,7 +20,7 @@ export interface ITokenizer {
   /**
    * Offset in bytes (= number of bytes read) since beginning of file or stream
    */
-  offset: number;
+  position: number;
 
   /**
    * Peek (read ahead) buffer from tokenizer

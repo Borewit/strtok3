@@ -13,17 +13,17 @@ describe("ReadStreamTokenizer", () => {
     const ss = SourceStream.FromString('\x05peter');
     return strtok3.fromStream(ss).then((rst) => {
       // should decode UINT8 from chunk
-      assert.strictEqual(rst.offset, 0);
+      assert.strictEqual(rst.position, 0);
       return rst.readToken(Token.UINT8).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 5, "0x05 == 5");
       }).then(() => {
         // should decode string from chunk
-        assert.strictEqual(rst.offset, 1);
+        assert.strictEqual(rst.position, 1);
         return rst.readToken(new Token.StringType(5, 'utf-8')).then((value) => {
           assert.ok(typeof value === 'string');
           assert.equal(value, 'peter', "0x05 == 5");
-          assert.strictEqual(rst.offset, 6);
+          assert.strictEqual(rst.position, 6);
         });
       }).then(() => { // should should reject at the end of the stream
         return rst.readToken(Token.UINT8).then(() => {
@@ -511,33 +511,33 @@ describe("FileTokenizer", () => {
 describe("Peek token", () => {
 
   function peekOnData(tokenizer: strtok3.ITokenizer): Promise<void> {
-    assert.strictEqual(tokenizer.offset, 0);
+    assert.strictEqual(tokenizer.position, 0);
     return tokenizer.peekToken<number>(Token.UINT32_LE)
       .then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
-        assert.strictEqual(tokenizer.offset, 0);
+        assert.strictEqual(tokenizer.position, 0);
         return tokenizer.readToken(Token.UINT32_LE);
       })
       .then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
-        assert.strictEqual(tokenizer.offset, 4);
+        assert.strictEqual(tokenizer.position, 4);
         return tokenizer.readToken(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-        assert.strictEqual(tokenizer.offset, 8);
+        assert.strictEqual(tokenizer.position, 8);
         return tokenizer.readToken(Token.UINT32_LE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x001a001a, "UINT32_LE #3");
-        assert.strictEqual(tokenizer.offset, 12);
+        assert.strictEqual(tokenizer.position, 12);
         return tokenizer.readToken(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === 'number');
         assert.equal(value, 0x1a001a00, "UINT32_BE #4");
-        assert.strictEqual(tokenizer.offset, 16);
+        assert.strictEqual(tokenizer.position, 16);
       });
   }
 

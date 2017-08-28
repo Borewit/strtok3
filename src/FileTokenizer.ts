@@ -21,17 +21,17 @@ export class FileTokenizer extends AbstractTokenizer {
   public readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number> {
 
     if (position) {
-      this.offset = position;
+      this.position = position;
     }
 
     if (!length) {
       length = buffer.length;
     }
 
-    return (fs.read(this.fd, buffer, offset, length, this.offset) as any).then((res) => {
+    return (fs.read(this.fd, buffer, offset, length, this.position) as any).then((res) => {
       if (res.bytesRead < length)
         throw EndOfFile;
-      this.offset += res.bytesRead;
+      this.position += res.bytesRead;
 
       // debug("Read:" + buffer.slice(offset, length).toString("hex"));
 
@@ -52,8 +52,8 @@ export class FileTokenizer extends AbstractTokenizer {
 
     if (position) {
       this.peekOffset = position;
-    } else if (this.peekOffset < this.offset) {
-      this.peekOffset = this.offset;
+    } else if (this.peekOffset < this.position) {
+      this.peekOffset = this.position;
     }
 
     if (!length) {
@@ -75,7 +75,7 @@ export class FileTokenizer extends AbstractTokenizer {
    * @param length Number of bytes to ignore
    */
   public ignore(length: number): Promise<void> {
-    this.offset += length;
+    this.position += length;
     return Promise.resolve<void>(null);
   }
 

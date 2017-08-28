@@ -28,7 +28,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
     return this.streamReader.read(buffer, offset, length)
       .then((bytesRead) => {
-        this.offset += bytesRead;
+        this.position += bytesRead;
         return bytesRead;
       })
       .catch((err) => {
