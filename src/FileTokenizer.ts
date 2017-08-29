@@ -23,6 +23,7 @@ export class FileTokenizer extends AbstractTokenizer {
     if (position) {
       this.position = position;
     }
+    this.peekOffset = position; // clear peek pointer
 
     if (!length) {
       length = buffer.length;
@@ -61,12 +62,7 @@ export class FileTokenizer extends AbstractTokenizer {
     }
 
     return (fs.read(this.fd, buffer, offset, length, this.peekOffset) as any).then((res) => {
-      if (res.bytesRead < length)
-        throw EndOfFile;
       this.peekOffset += res.bytesRead;
-
-      // debug("Read:" + buffer.slice(offset, length).toString("hex"));
-
       return res.bytesRead;
     });
   }

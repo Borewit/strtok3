@@ -5,6 +5,7 @@ import {SourceStream} from "./util";
 import * as strtok3 from "../src";
 import * as Path from 'path';
 import * as fs from "fs-extra";
+import {ITokenizer} from "../src/index";
 
 describe("ReadStreamTokenizer", () => {
 
@@ -565,7 +566,130 @@ describe("Peek token", () => {
     this.skip();
   });
 
-    // ToDo
+  describe("Overlapping peeks", () => {
+
+    const testData = '\x01\x02\x03\x04\x05';
+
+    function verifyPeekBehaviour(rst: ITokenizer) {
+
+      const peekBuffer = new Buffer(3);
+      const readBuffer = new Buffer(1);
+
+      assert.equal(0, rst.position);
+      return rst.peekBuffer(peekBuffer, 0, 3) // Peek #1
+        .then((len) => {
+          assert.equal(3, len);
+          assert.deepEqual(peekBuffer, new Buffer('\x01\x02\x03', 'binary'), "Peek #1");
+          assert.equal(rst.position, 0);
+          return rst.readBuffer(readBuffer, 0, 1); // Read #1
+        }).then((len) => {
+          assert.equal(len, 1);
+          assert.equal(rst.position, 1);
+          assert.deepEqual(readBuffer, new Buffer('\x01', 'binary'), "Read #1");
+          return rst.peekBuffer(peekBuffer, 0, 3); // Peek #2
+        }).then((len) => {
+          assert.equal(len, 3);
+          assert.equal(rst.position, 1);
+          assert.deepEqual(peekBuffer, new Buffer('\x02\x03\x04', 'binary'), "Peek #2");
+          return rst.readBuffer(readBuffer, 0, 1); // Read #2
+        }).then((len) => {
+          assert.equal(len, 1);
+          assert.equal(rst.position, 2);
+          assert.deepEqual(readBuffer, new Buffer('\x02', 'binary'), "Read #2");
+          return rst.peekBuffer(peekBuffer, 0, 3); // Peek #3
+        }).then((len) => {
+          assert.equal(len, 3);
+          assert.equal(rst.position, 2);
+          assert.deepEqual(peekBuffer, new Buffer('\x03\x04\x05', 'binary'), "Peek #3");
+          return rst.readBuffer(readBuffer, 0, 1); // Read #3
+        }).then((len) => {
+          assert.equal(len, 1);
+          assert.equal(rst.position, 3);
+          assert.deepEqual(readBuffer, new Buffer('\x03', 'binary'), "Read #3");
+          return rst.peekBuffer(peekBuffer, 0, 3); // Peek #4
+        }).then((len) => {
+          assert.equal(len, 2, "3 bytes requested to peek, only 2 bytes left");
+          assert.equal(rst.position, 3);
+          assert.deepEqual(peekBuffer, new Buffer('\x04\x05\x05', 'binary'), "Peek #4");
+          return rst.readBuffer(readBuffer, 0, 1); // Read #4
+        }).then((len) => {
+          assert.equal(len, 1);
+          assert.equal(rst.position, 4);
+          assert.deepEqual(readBuffer, new Buffer('\x04', 'binary'), "Read #4");
+        });
+    }
+
+    it("stream", () => {
+      const ss = SourceStream.FromString(testData);
+
+      return strtok3.fromStream(ss).then((rst) => {
+        return verifyPeekBehaviour(rst);
+      });
+    });
+
+    it("file", () => {
+
+      const pathTestFile = Path.join(__dirname, 'resources', 'test3.dat');
+
+      return fs.writeFile(pathTestFile, new Buffer(testData, 'binary')).then(() => {
+
+        return strtok3.fromFile(pathTestFile).then((tokenizer) => {
+          return verifyPeekBehaviour(tokenizer);
+        });
+      });
+
+    });
+
+  });
+
+});
+
+describe("transparency", () => {
+
+  const size = 10 * 1024;
+  const buf = new Buffer(size);
+
+  for (let i = 0; i < size; ++i) {
+    buf[i] = i % 255;
+  }
+
+  function checkStream(tokenizer: strtok3.ITokenizer) {
+    let expected = 0;
+
+    function readByte() {
+      return tokenizer.readNumber(Token.UINT8)
+        .then((v) => {
+          assert.equal(v, expected % 255, "offset=" + expected);
+          ++expected;
+          return readByte();
+        });
+    }
+
+    return readByte().catch((err) => {
+      assert.equal(err.message, "End-Of-File");
+      assert.equal(expected, size, "total number of parsed bytes");
+    });
+  }
+
+  it("transparency on file", () => {
+
+    const pathTestFile = Path.join(__dirname, 'resources', 'test2.dat');
+
+    return fs.writeFile(pathTestFile, buf).then(() => {
+
+      return strtok3.fromFile(pathTestFile).then((tokenizer) => {
+        return checkStream(tokenizer);
+      });
+    });
+  });
+
+  it("transparency on stream", () => {
+
+    const ss = new SourceStream(buf);
+
+    return strtok3.fromStream(ss).then((tokenizer) => {
+      return checkStream(tokenizer);
+    });
   });
 
 });
