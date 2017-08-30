@@ -619,7 +619,7 @@ describe("Peek token", () => {
         });
     }
 
-    it("stream", () => {
+    it("should work with a stream", () => {
       const ss = SourceStream.FromString(testData);
 
       return strtok3.fromStream(ss).then((rst) => {
@@ -627,7 +627,7 @@ describe("Peek token", () => {
       });
     });
 
-    it("file", () => {
+    it("should work with a file", () => {
 
       const pathTestFile = Path.join(__dirname, 'resources', 'test3.dat');
 
@@ -644,7 +644,7 @@ describe("Peek token", () => {
 
 });
 
-describe("transparency", () => {
+describe("Transparency", () => {
 
   const size = 10 * 1024;
   const buf = new Buffer(size);

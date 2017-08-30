@@ -1,6 +1,6 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
 import {EndOfFile} from "./";
-import {StreamReader} from "then-read-stream";
+import {EndOfStream, StreamReader} from "then-read-stream";
 import * as Stream from "stream";
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
@@ -32,7 +32,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
         return bytesRead;
       })
       .catch((err) => {
-        if (err === StreamReader.EndOfStream) // Convert EndOfStream into EndOfFile
+        if (err === EndOfStream) // Convert EndOfStream into EndOfFile
           throw EndOfFile;
         else throw err;
       });
@@ -54,7 +54,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
     return this.streamReader.peek(buffer, offset, length)
       .catch((err) => {
-        if (err === StreamReader.EndOfStream) // Convert EndOfStream into EndOfFile
+        if (err === EndOfStream) // Convert EndOfStream into EndOfFile
           throw EndOfFile;
         else throw err;
       });
