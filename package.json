@@ -1,6 +1,6 @@
 {
   "name": "strtok3",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A promise based streaming tokenizer",
   "author": {
     "name": "Borewit",
@@ -34,7 +34,7 @@
     "@types/chai": "^4.0.4",
     "@types/fs-extra": "^4.0.0",
     "@types/mocha": "^2.2.42",
-    "@types/node": "^8.0.25",
+    "@types/node": "^8.0.26",
     "chai": "^4.1.1",
     "coveralls": "^2.13.1",
     "mocha": "^3.5.0",
