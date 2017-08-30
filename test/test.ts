@@ -562,10 +562,6 @@ describe("Peek token", () => {
     });
   });
 
-  it("should be able to peek from a stream", function() {
-    this.skip();
-  });
-
   describe("Overlapping peeks", () => {
 
     const testData = '\x01\x02\x03\x04\x05';
