@@ -561,9 +561,4 @@ describe("Peek token", () => {
     });
   });
 
-  it("should be able to peek from a stream", () => {
-
-    // ToDo
-  });
-
 });
