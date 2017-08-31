@@ -23,7 +23,7 @@ export class FileTokenizer extends AbstractTokenizer {
     if (position) {
       this.position = position;
     }
-    this.peekOffset = position; // clear peek pointer
+    this.peekOffset = this.position; // clear peek pointer
 
     if (!length) {
       length = buffer.length;
