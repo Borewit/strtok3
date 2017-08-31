@@ -36,6 +36,22 @@ describe("ReadStreamTokenizer", () => {
     });
   });
 
+  it("should pick length from buffer, if length is not explicit defined", () => {
+
+    const ss = SourceStream.FromString("\x05peter");
+    return strtok3.fromStream(ss).then((rst) => {
+
+      const buf = new Buffer(4);
+
+        // should decode UINT8 from chunk
+      assert.strictEqual(rst.position, 0);
+      return rst.readBuffer(buf).then((bufferLength) => {
+        assert.strictEqual(bufferLength, buf.length);
+        assert.strictEqual(rst.position, buf.length);
+      });
+    });
+  });
+
   it("should contain fileSize if constructed from file-read-stream", () => {
 
     // ToDo
