@@ -1,5 +1,5 @@
-import {IGetToken, IToken} from 'token-types';
-import {ITokenizer} from "./";
+import {IGetToken, IToken} from "token-types";
+import {EndOfFile, ITokenizer} from "./";
 
 export abstract class AbstractTokenizer implements ITokenizer {
 
@@ -31,7 +31,9 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   public readToken<T>(token: IGetToken<T>, position: number | null = null): Promise<T> {
     const buffer = new Buffer(token.len);
-    return this.readBuffer(buffer, 0, token.len, position).then((res) => {
+    return this.readBuffer(buffer, 0, token.len, position).then((len) => {
+      if (len < token.len)
+        throw EndOfFile;
       return token.get(buffer, 0);
     });
   }
