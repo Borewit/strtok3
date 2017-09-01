@@ -43,7 +43,7 @@ describe("ReadStreamTokenizer", () => {
 
       const buf = new Buffer(4);
 
-        // should decode UINT8 from chunk
+      // should decode UINT8 from chunk
       assert.strictEqual(rst.position, 0);
       return rst.readBuffer(buf).then((bufferLength) => {
         assert.strictEqual(bufferLength, buf.length);
@@ -466,26 +466,6 @@ describe("FileTokenizer", () => {
     });
   });
 
-  it("should be able to ignore (skip) a given number of bytes", () => {
-    return strtok3.fromFile(Path.join(__dirname, "resources", "test1.dat")).then((tokenizer) => {
-      return tokenizer.ignore(4)
-        .then(() => {
-          return tokenizer.readToken(Token.UINT32_BE);
-        }).then((value) => {
-          assert.ok(typeof value === "number");
-          assert.equal(value, 0x1a001a00, "UINT32_BE #2");
-          return tokenizer.readToken(Token.UINT32_LE);
-        }).then((value) => {
-          assert.ok(typeof value === "number");
-          assert.equal(value, 0x001a001a, "UINT32_LE #3");
-          return tokenizer.readToken(Token.UINT32_BE);
-        }).then((value) => {
-          assert.ok(typeof value === "number");
-          assert.equal(value, 0x1a001a00, "UINT32_BE #4");
-        });
-    });
-  });
-
   it("should be able to handle multiple ignores", () => {
     return strtok3.fromFile(Path.join(__dirname, "resources", "test1.dat")).then((tokenizer) => {
       return tokenizer.readToken(Token.UINT32_LE)
@@ -739,6 +719,43 @@ describe("EndOfFile Error", () => {
       return rst.readBuffer(buffer).then((len) => {
         assert.strictEqual(len, 3, "should return 3 because no more bytes are available");
       });
+    });
+  });
+
+});
+
+describe("Ignore", () => {
+
+  function testIgnore(tokenizer: ITokenizer) {
+    assert.strictEqual(tokenizer.position, 0);
+    return tokenizer.ignore(4)
+      .then(() => {
+        assert.strictEqual(tokenizer.position, 4);
+        return tokenizer.readToken(Token.UINT32_BE);
+      }).then((value) => {
+        assert.ok(typeof value === "number");
+        assert.equal(value, 0x1a001a00, "UINT32_BE #2");
+        return tokenizer.readToken(Token.UINT32_LE);
+      }).then((value) => {
+        assert.ok(typeof value === "number");
+        assert.equal(value, 0x001a001a, "UINT32_LE #3");
+        return tokenizer.readToken(Token.UINT32_BE);
+      }).then((value) => {
+        assert.ok(typeof value === "number");
+        assert.equal(value, 0x1a001a00, "UINT32_BE #4");
+      });
+  }
+
+  it("should be able to ignore (skip) on a file", () => {
+    return strtok3.fromFile(Path.join(__dirname, "resources", "test1.dat")).then((tokenizer) => {
+      return testIgnore(tokenizer);
+    });
+  });
+
+  it("should be able to ignore (skip) on a stream", () => {
+    const fileReadStream = fs.createReadStream(Path.join(__dirname, "resources", "test1.dat"));
+    return strtok3.fromStream(fileReadStream).then((tokenizer) => {
+      return testIgnore(tokenizer);
     });
   });
 
