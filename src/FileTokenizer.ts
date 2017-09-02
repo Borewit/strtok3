@@ -70,9 +70,15 @@ export class FileTokenizer extends AbstractTokenizer {
   /**
    * @param length Number of bytes to ignore
    */
-  public ignore(length: number): Promise<void> {
-    this.position += length;
-    return Promise.resolve<void>(null);
+  public ignore(length: number): Promise<number> {
+    const bytesLeft = this.fileSize - this.position;
+    if (length <= bytesLeft) {
+      this.position += length;
+      return Promise.resolve(length);
+    } else {
+      this.position += bytesLeft;
+      return Promise.resolve(bytesLeft);
+    }
   }
 
   public close(): Promise<void> {

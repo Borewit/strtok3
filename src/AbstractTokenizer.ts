@@ -57,6 +57,9 @@ export abstract class AbstractTokenizer implements ITokenizer {
     });
   }
 
-  public abstract ignore(length: number): Promise<void>;
+  /**
+   * @return actual number of bytes ignored
+   */
+  public abstract ignore(length: number): Promise<number>;
 
 }
