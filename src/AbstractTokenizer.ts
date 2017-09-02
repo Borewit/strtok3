@@ -56,7 +56,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   public peekNumber(token: IToken<number>): Promise<number> {
-    return this.peekBuffer(this.numBuffer, 0, token.len, null).then((len) => {
+    return this.peekBuffer(this.numBuffer, 0, token.len).then((len) => {
       if (len < token.len)
         throw new Error(endOfFile);
       return token.get(this.numBuffer, 0);
