@@ -38,21 +38,27 @@ export abstract class AbstractTokenizer implements ITokenizer {
     });
   }
 
-  public peekToken<T>(token: IGetToken<T>, position: number | null = null): Promise<T> {
+  public peekToken<T>(token: IGetToken<T>, position: number = this.position): Promise<T> {
     const buffer = new Buffer(token.len);
-    return this.peekBuffer(buffer, 0, token.len, position).then((res) => {
+    return this.peekBuffer(buffer, 0, token.len, position).then((len) => {
+      if (len < token.len)
+        throw new Error(endOfFile);
       return token.get(buffer, 0);
     });
   }
 
   public readNumber(token: IToken<number>): Promise<number> {
-    return this.readBuffer(this.numBuffer, 0, token.len, null).then((res) => {
+    return this.readBuffer(this.numBuffer, 0, token.len, null).then((len) => {
+      if (len < token.len)
+        throw new Error(endOfFile);
       return token.get(this.numBuffer, 0);
     });
   }
 
   public peekNumber(token: IToken<number>): Promise<number> {
-    return this.peekBuffer(this.numBuffer, 0, token.len, null).then((res) => {
+    return this.peekBuffer(this.numBuffer, 0, token.len, null).then((len) => {
+      if (len < token.len)
+        throw new Error(endOfFile);
       return token.get(this.numBuffer, 0);
     });
   }
