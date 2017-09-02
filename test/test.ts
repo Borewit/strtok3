@@ -30,7 +30,7 @@ describe("ReadStreamTokenizer", () => {
         return rst.readToken(Token.UINT8).then(() => {
           assert.fail("Should reject due to end-of-stream");
         }).catch((err) => {
-          assert.equal(err, strtok3.EndOfFile);
+          assert.equal(err.message, strtok3.endOfFile);
         });
       });
     });
@@ -459,7 +459,7 @@ describe("FileTokenizer", () => {
           assert.equal(fileSize, bytesRead);
         }).then(() => {
           return tokenizer.readBuffer(buf).catch((err) => {
-            assert.equal(err, strtok3.EndOfFile);
+            assert.equal(err.message, strtok3.endOfFile);
           });
         });
       });
@@ -711,7 +711,7 @@ describe("EndOfFile Error", () => {
       return rst.readToken(Token.INT32_BE).then(() => {
         assert.fail("It should throw EndOfFile Error");
       }).catch((err) => {
-        assert.strictEqual(err, strtok3.EndOfFile);
+        assert.strictEqual(err.message, strtok3.endOfFile);
       });
     });
   });

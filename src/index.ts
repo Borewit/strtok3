@@ -8,7 +8,7 @@ import * as Stream from "stream";
  * Used to reject read if end-of-Stream or end-of-file is reached
  * @type {Error}
  */
-export const EndOfFile = new Error("End-Of-File");
+export const endOfFile = "End-Of-File";
 
 export interface ITokenizer {
 

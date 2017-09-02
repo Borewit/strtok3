@@ -1,6 +1,6 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
 import * as fs from "fs-extra";
-import {EndOfFile} from "./";
+import {endOfFile} from "./";
 
 export class FileTokenizer extends AbstractTokenizer {
 
@@ -28,7 +28,7 @@ export class FileTokenizer extends AbstractTokenizer {
 
     return (fs.read(this.fd, buffer, offset, length, this.position) as any).then((res) => {
       if (res.bytesRead < length)
-        throw EndOfFile;
+        throw new Error(endOfFile);
       this.position += res.bytesRead;
 
       // debug("Read:" + buffer.slice(offset, length).toString("hex"));
