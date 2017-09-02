@@ -514,26 +514,32 @@ describe("Peek token", () => {
         assert.ok(typeof value === "number");
         assert.equal(value, 0x001a001a, "UINT24_LE #1");
         assert.strictEqual(tokenizer.position, 0);
+        return tokenizer.peekToken(Token.UINT32_LE);
+      })
+      .then((value) => {
+        assert.ok(typeof value === "number");
+        assert.equal(value, 0x001a001a, "UINT24_LE sequential peek #2");
+        assert.strictEqual(tokenizer.position, 0);
         return tokenizer.readToken(Token.UINT32_LE);
       })
       .then((value) => {
         assert.ok(typeof value === "number");
-        assert.equal(value, 0x001a001a, "UINT24_LE #1");
+        assert.equal(value, 0x001a001a, "UINT24_LE #3");
         assert.strictEqual(tokenizer.position, 4);
         return tokenizer.readToken(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === "number");
-        assert.equal(value, 0x1a001a00, "UINT32_BE #2");
+        assert.equal(value, 0x1a001a00, "UINT32_BE #4");
         assert.strictEqual(tokenizer.position, 8);
         return tokenizer.readToken(Token.UINT32_LE);
       }).then((value) => {
         assert.ok(typeof value === "number");
-        assert.equal(value, 0x001a001a, "UINT32_LE #3");
+        assert.equal(value, 0x001a001a, "UINT32_LE #5");
         assert.strictEqual(tokenizer.position, 12);
         return tokenizer.readToken(Token.UINT32_BE);
       }).then((value) => {
         assert.ok(typeof value === "number");
-        assert.equal(value, 0x1a001a00, "UINT32_BE #4");
+        assert.equal(value, 0x1a001a00, "UINT32_BE #6");
         assert.strictEqual(tokenizer.position, 16);
       });
   }

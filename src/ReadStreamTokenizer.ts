@@ -20,11 +20,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param length is an integer specifying the number of bytes to read
    * @returns Promise number of bytes read
    */
-  public readBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number): Promise<number> {
-
-    if (!length) {
-      length = buffer.length;
-    }
+  public readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length): Promise<number> {
 
     return this.streamReader.read(buffer, offset, length)
       .then((bytesRead) => {
@@ -46,11 +42,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns {Promise<TResult|number>}
    */
-  public peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number): Promise<number> {
-
-    if (!length) {
-      length = buffer.length;
-    }
+  public peekBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length): Promise<number> {
 
     return this.streamReader.peek(buffer, offset, length)
       .catch((err) => {
@@ -60,8 +52,8 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       });
   }
 
-  public ignore(length: number): Promise<void> {
+  public ignore(length: number): Promise<number> {
     const buf = new Buffer(length);
-    return this.readBuffer(buf).then(() => null); // Stream cannot skip data
+    return this.readBuffer(buf); // Stream cannot skip data
   }
 }

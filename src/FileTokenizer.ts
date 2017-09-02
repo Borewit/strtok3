@@ -1,10 +1,8 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
-import * as fs from 'fs-extra';
+import * as fs from "fs-extra";
 import {EndOfFile} from "./";
 
 export class FileTokenizer extends AbstractTokenizer {
-
-  private peekOffset: number = 0;
 
   constructor(private fd: number, public fileSize?: number) {
     super();
@@ -18,12 +16,11 @@ export class FileTokenizer extends AbstractTokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns Promise number of bytes read
    */
-  public readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number> {
+  public readBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position?: number): Promise<number> {
 
     if (position) {
       this.position = position;
     }
-    this.peekOffset = this.position; // clear peek pointer
 
     if (!length) {
       length = buffer.length;
@@ -49,20 +46,9 @@ export class FileTokenizer extends AbstractTokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns Promise number of bytes read
    */
-  public peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number> {
+  public peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position): Promise<number> {
 
-    if (position) {
-      this.peekOffset = position;
-    } else if (this.peekOffset < this.position) {
-      this.peekOffset = this.position;
-    }
-
-    if (!length) {
-      length = buffer.length;
-    }
-
-    return (fs.read(this.fd, buffer, offset, length, this.peekOffset) as any).then((res) => {
-      this.peekOffset += res.bytesRead;
+    return (fs.read(this.fd, buffer, offset, length, position) as any).then((res) => {
       return res.bytesRead;
     });
   }
