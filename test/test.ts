@@ -721,7 +721,9 @@ describe("Transparency", () => {
     });
   }
 
-  it("transparency on file", () => {
+  it("transparency on file", function() {
+
+    this.timeout(10000);
 
     const pathTestFile = Path.join(__dirname, "resources", "test2.dat");
 
