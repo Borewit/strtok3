@@ -640,6 +640,58 @@ describe("Peek token", () => {
 
   });
 
+  describe("number", () => {
+
+    const path_test3 = Path.join(__dirname, "resources", "test3.dat");
+
+    it("should be able to peek a number from a file", () => {
+      return strtok3.fromFile(path_test3).then((tokenizer) => {
+        return tokenizer.ignore(tokenizer.fileSize - 4).then(() => {
+          return tokenizer.peekNumber(Token.INT32_BE).then((x) => {
+            assert.strictEqual(x, 33752069);
+          });
+        });
+      });
+    });
+
+    it("should be able to peek a number a stream", () => {
+      const fileReadStream = fs.createReadStream(path_test3);
+      return strtok3.fromStream(fileReadStream).then((tokenizer) => {
+        return tokenizer.ignore(tokenizer.fileSize - 4).then(() => {
+          return tokenizer.peekNumber(Token.INT32_BE).then((x) => {
+            assert.strictEqual(x, 33752069);
+          });
+        });
+      });
+    });
+
+    it("should throw an Error if we reach EOF while peeking a number from a file", () => {
+      return strtok3.fromFile(path_test3).then((tokenizer) => {
+        return tokenizer.ignore(tokenizer.fileSize - 3).then(() => {
+          return tokenizer.peekNumber(Token.INT32_BE).then((x) => {
+            assert.fail("Should throw Error: End-Of-File");
+          }).catch((err) => {
+            assert.strictEqual(err.message, "End-Of-File");
+          });
+        });
+      });
+    });
+
+    it("should throw an Error if we reach EOF while peeking a number from a stream", () => {
+      const fileReadStream = fs.createReadStream(path_test3);
+      return strtok3.fromStream(fileReadStream).then((tokenizer) => {
+        return tokenizer.ignore(tokenizer.fileSize - 3).then(() => {
+          return tokenizer.peekNumber(Token.INT32_BE).then((x) => {
+            assert.fail("Should throw Error: End-Of-File");
+          }).catch((err) => {
+            assert.strictEqual(err.message, "End-Of-File");
+          });
+        });
+      });
+    });
+
+  }); // number
+
 });
 
 describe("Transparency", () => {
