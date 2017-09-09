@@ -23,11 +23,11 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   public readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length): Promise<number> {
 
     return this.streamReader.read(buffer, offset, length)
-      .then((bytesRead) => {
+      .then(bytesRead => {
         this.position += bytesRead;
         return bytesRead;
       })
-      .catch((err) => {
+      .catch(err => {
         if (err.message === endOfStream) // Convert EndOfStream into EndOfFile
           throw new Error(endOfFile);
         else throw err;
@@ -45,7 +45,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   public peekBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length): Promise<number> {
 
     return this.streamReader.peek(buffer, offset, length)
-      .catch((err) => {
+      .catch(err => {
         if (err.message === endOfStream) // Convert EndOfStream into EndOfFile
           throw new Error(endOfFile);
         else throw err;

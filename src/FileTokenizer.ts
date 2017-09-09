@@ -26,7 +26,7 @@ export class FileTokenizer extends AbstractTokenizer {
       length = buffer.length;
     }
 
-    return (fs.read(this.fd, buffer, offset, length, this.position) as any).then((res) => {
+    return (fs.read(this.fd, buffer, offset, length, this.position) as any).then(res => {
       if (res.bytesRead < length)
         throw new Error(endOfFile);
       this.position += res.bytesRead;
@@ -48,7 +48,7 @@ export class FileTokenizer extends AbstractTokenizer {
    */
   public peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position): Promise<number> {
 
-    return (fs.read(this.fd, buffer, offset, length, position) as any).then((res) => {
+    return (fs.read(this.fd, buffer, offset, length, position) as any).then(res => {
       return res.bytesRead;
     });
   }

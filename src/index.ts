@@ -79,7 +79,7 @@ export class IgnoreType implements IGetToken<Buffer> {
  */
 export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer> {
   if ((stream as any).path) {
-    return fs.stat((stream as any).path).then((stat) => {
+    return fs.stat((stream as any).path).then(stat => {
       return new ReadStreamTokenizer(stream, stat.size);
     });
   }
@@ -92,12 +92,12 @@ export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer
  * @returns {Promise<FileTokenizer>}
  */
 export function fromFile(filePath: string): Promise<FileTokenizer> {
-  return fs.pathExists(filePath).then((exist) => {
+  return fs.pathExists(filePath).then(exist => {
     if (!exist) {
       throw new Error("File not found: " + filePath);
     }
-    return fs.stat(filePath).then((stat) => {
-      return fs.open(filePath, "r").then((fd) => {
+    return fs.stat(filePath).then(stat => {
+      return fs.open(filePath, "r").then(fd => {
         return new FileTokenizer(fd, stat.size);
       });
     });
