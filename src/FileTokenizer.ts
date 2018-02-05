@@ -1,6 +1,7 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
 import * as fs from "fs-extra";
 import {endOfFile} from "./";
+import {Promise} from "es6-promise";
 
 export class FileTokenizer extends AbstractTokenizer {
 
@@ -68,6 +69,6 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public close(): Promise<void> {
-    return fs.close(this.fd);
+    return fs.close(this.fd) as any;
   }
 }
