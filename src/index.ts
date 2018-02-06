@@ -3,6 +3,7 @@ import {ReadStreamTokenizer} from "./ReadStreamTokenizer";
 import {FileTokenizer} from "./FileTokenizer";
 import * as fs from "fs-extra";
 import * as Stream from "stream";
+import {Promise} from "es6-promise";
 
 /**
  * Used to reject read if end-of-Stream or end-of-file is reached
@@ -81,7 +82,7 @@ export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer
   if ((stream as any).path) {
     return fs.stat((stream as any).path).then(stat => {
       return new ReadStreamTokenizer(stream, stat.size);
-    });
+    }) as any;
   }
   return Promise.resolve(new ReadStreamTokenizer(stream));
 }
@@ -101,5 +102,5 @@ export function fromFile(filePath: string): Promise<FileTokenizer> {
         return new FileTokenizer(fd, stat.size);
       });
     });
-  });
+  }) as any;
 }
