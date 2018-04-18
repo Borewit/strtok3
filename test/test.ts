@@ -820,3 +820,22 @@ describe("Ignore", () => {
   });
 
 });
+
+describe("0 bytes read", () => {
+
+  const bufZero = new Buffer(0);
+
+  it("should be able to read 0 bytes from a file", () => {
+    return strtok3.fromFile(Path.join(__dirname, "resources", "test1.dat")).then(tokenizer => {
+      return tokenizer.readBuffer(bufZero);
+    });
+  });
+
+  it("should be able to read 0 bytes from a stream", () => {
+    const fileReadStream = fs.createReadStream(Path.join(__dirname, "resources", "test1.dat"));
+    return strtok3.fromStream(fileReadStream).then(tokenizer => {
+      return tokenizer.readBuffer(bufZero);
+    });
+  });
+
+});
