@@ -23,6 +23,10 @@ export class FileTokenizer extends AbstractTokenizer {
       this.position = position;
     }
 
+    if (length === 0) {
+      return Promise.resolve(0);
+    }
+
     if (!length) {
       length = buffer.length;
     }
@@ -31,8 +35,6 @@ export class FileTokenizer extends AbstractTokenizer {
       if (res.bytesRead < length)
         throw new Error(endOfFile);
       this.position += res.bytesRead;
-
-      // debug("Read:" + buffer.slice(offset, length).toString("hex"));
 
       return res.bytesRead;
     });

@@ -23,6 +23,10 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    */
   public readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length): Promise<number> {
 
+    if (length === 0) {
+      return Promise.resolve(0);
+    }
+
     return this.streamReader.read(buffer, offset, length)
       .then(bytesRead => {
         this.position += bytesRead;
