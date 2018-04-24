@@ -3,7 +3,7 @@ import {ReadStreamTokenizer} from "./ReadStreamTokenizer";
 import {FileTokenizer} from "./FileTokenizer";
 import * as fs from "fs-extra";
 import * as Stream from "stream";
-import {Promise} from "es6-promise";
+import {Promise} from "bluebird";
 
 /**
  * Used to reject read if end-of-Stream or end-of-file is reached

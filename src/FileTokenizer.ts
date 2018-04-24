@@ -1,7 +1,7 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
 import * as fs from "fs-extra";
 import {endOfFile} from "./";
-import {Promise} from "es6-promise";
+import {Promise} from "bluebird";
 
 export class FileTokenizer extends AbstractTokenizer {
 
