@@ -46,7 +46,7 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "fs-extra": "^5.0.0",
-    "then-read-stream": "^1.0.6",
+    "then-read-stream": "^1.1.0",
     "token-types": "^0.9.2"
   },
   "keywords": [
