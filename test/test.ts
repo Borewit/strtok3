@@ -41,7 +41,7 @@ describe("ReadStreamTokenizer", () => {
     const ss = SourceStream.FromString("\x05peter");
     return strtok3.fromStream(ss).then(rst => {
 
-      const buf = new Buffer(4);
+      const buf = Buffer.alloc(4);
 
       // should decode UINT8 from chunk
       assert.strictEqual(rst.position, 0);
@@ -67,7 +67,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode signed 8-bit integer (INT8)", () => {
 
-      const b = new Buffer(1);
+      const b = Buffer.alloc(1);
 
       Token.INT8.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00");
@@ -110,7 +110,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode signed 16-bit big-endian integer (INT16_BE)", () => {
 
-      const b = new Buffer(2);
+      const b = Buffer.alloc(2);
 
       Token.INT16_BE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00");
@@ -149,7 +149,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode signed 24-bit big-endian integer (INT24_BE)", () => {
 
-      const b = new Buffer(3);
+      const b = Buffer.alloc(3);
 
       Token.INT24_BE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00\x00");
@@ -190,7 +190,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode signed 32-bit big-endian integer (INT32_BE)", () => {
 
-      const b = new Buffer(4);
+      const b = Buffer.alloc(4);
 
       Token.INT32_BE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00\x00\x00");
@@ -229,7 +229,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode signed 8-bit big-endian integer (INT8)", () => {
 
-      const b = new Buffer(1);
+      const b = Buffer.alloc(1);
 
       Token.UINT8.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00");
@@ -261,7 +261,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode unsigned 16-bit big-endian integer (UINT16_LE)", () => {
 
-      const b = new Buffer(4);
+      const b = Buffer.alloc(4);
 
       Token.UINT16_LE.put(b, 0, 0x00);
       Token.UINT16_LE.put(b, 2, 0xffaa);
@@ -269,14 +269,14 @@ describe("ReadStreamTokenizer", () => {
     });
 
     it("should encode unsigned 16-bit little-endian integer (UINT16_BE)", () => {
-      const b = new Buffer(4);
+      const b = Buffer.alloc(4);
       Token.UINT16_BE.put(b, 0, 0xf);
       Token.UINT16_BE.put(b, 2, 0xffaa);
       assert.strictEqual(b.toString("binary"), "\x00\x0f\xff\xaa");
     });
 
     it("should encode unsigned 16-bit mixed little/big-endian integers", () => {
-      const b = new Buffer(4);
+      const b = Buffer.alloc(4);
       Token.UINT16_BE.put(b, 0, 0xffaa);
       Token.UINT16_LE.put(b, 2, 0xffaa);
       assert.strictEqual(b.toString("binary"), "\xff\xaa\xaa\xff");
@@ -309,7 +309,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode unsigned 24-bit little-endian integer (UINT24_LE)", () => {
 
-      const b = new Buffer(3);
+      const b = Buffer.alloc(3);
 
       Token.UINT24_LE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00\x00");
@@ -323,7 +323,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode unsigned 24-bit big-endian integer (UINT24_BE)", () => {
 
-      const b = new Buffer(3);
+      const b = Buffer.alloc(3);
 
       Token.UINT24_BE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00\x00");
@@ -362,7 +362,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode unsigned 32-bit little-endian integer (UINT32_LE)", () => {
 
-      const b = new Buffer(4);
+      const b = Buffer.alloc(4);
 
       Token.UINT32_LE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00\x00\x00");
@@ -376,7 +376,7 @@ describe("ReadStreamTokenizer", () => {
 
     it("should encode unsigned 32-bit big-endian integer (INT32_BE)", () => {
 
-      const b = new Buffer(4);
+      const b = Buffer.alloc(4);
 
       Token.UINT32_BE.put(b, 0, 0x00);
       assert.strictEqual(b.toString("binary"), "\x00\x00\x00\x00");
@@ -453,7 +453,7 @@ describe("FileTokenizer", () => {
       return stat.size;
     }).then(fileSize => {
       return strtok3.fromFile(pathTestFile).then(tokenizer => {
-        const buf = new Buffer(fileSize);
+        const buf = Buffer.alloc(fileSize);
         return tokenizer.readBuffer(buf).then(bytesRead => {
           assert.ok(typeof bytesRead === "number", "readBuffer promise should provide a number");
           assert.equal(fileSize, bytesRead);
@@ -570,50 +570,50 @@ describe("Peek token", () => {
 
     function verifyPeekBehaviour(rst: ITokenizer) {
 
-      const peekBuffer = new Buffer(3);
-      const readBuffer = new Buffer(1);
+      const peekBuffer = Buffer.alloc(3);
+      const readBuffer = Buffer.alloc(1);
 
       assert.equal(0, rst.position);
       return rst.peekBuffer(peekBuffer, 0, 3) // Peek #1
         .then(len => {
           assert.equal(3, len);
-          assert.deepEqual(peekBuffer, new Buffer("\x01\x02\x03", "binary"), "Peek #1");
+          assert.deepEqual(peekBuffer, Buffer.from("\x01\x02\x03", "binary"), "Peek #1");
           assert.equal(rst.position, 0);
           return rst.readBuffer(readBuffer, 0, 1); // Read #1
         }).then(len => {
           assert.equal(len, 1);
           assert.equal(rst.position, 1);
-          assert.deepEqual(readBuffer, new Buffer("\x01", "binary"), "Read #1");
+          assert.deepEqual(readBuffer, Buffer.from("\x01", "binary"), "Read #1");
           return rst.peekBuffer(peekBuffer, 0, 3); // Peek #2
         }).then(len => {
           assert.equal(len, 3);
           assert.equal(rst.position, 1);
-          assert.deepEqual(peekBuffer, new Buffer("\x02\x03\x04", "binary"), "Peek #2");
+          assert.deepEqual(peekBuffer, Buffer.from("\x02\x03\x04", "binary"), "Peek #2");
           return rst.readBuffer(readBuffer, 0, 1); // Read #2
         }).then(len => {
           assert.equal(len, 1);
           assert.equal(rst.position, 2);
-          assert.deepEqual(readBuffer, new Buffer("\x02", "binary"), "Read #2");
+          assert.deepEqual(readBuffer, Buffer.from("\x02", "binary"), "Read #2");
           return rst.peekBuffer(peekBuffer, 0, 3); // Peek #3
         }).then(len => {
           assert.equal(len, 3);
           assert.equal(rst.position, 2);
-          assert.deepEqual(peekBuffer, new Buffer("\x03\x04\x05", "binary"), "Peek #3");
+          assert.deepEqual(peekBuffer, Buffer.from("\x03\x04\x05", "binary"), "Peek #3");
           return rst.readBuffer(readBuffer, 0, 1); // Read #3
         }).then(len => {
           assert.equal(len, 1);
           assert.equal(rst.position, 3);
-          assert.deepEqual(readBuffer, new Buffer("\x03", "binary"), "Read #3");
+          assert.deepEqual(readBuffer, Buffer.from("\x03", "binary"), "Read #3");
           return rst.peekBuffer(peekBuffer, 0, 3); // Peek #4
         }).then(len => {
           assert.equal(len, 2, "3 bytes requested to peek, only 2 bytes left");
           assert.equal(rst.position, 3);
-          assert.deepEqual(peekBuffer, new Buffer("\x04\x05\x05", "binary"), "Peek #4");
+          assert.deepEqual(peekBuffer, Buffer.from("\x04\x05\x05", "binary"), "Peek #4");
           return rst.readBuffer(readBuffer, 0, 1); // Read #4
         }).then(len => {
           assert.equal(len, 1);
           assert.equal(rst.position, 4);
-          assert.deepEqual(readBuffer, new Buffer("\x04", "binary"), "Read #4");
+          assert.deepEqual(readBuffer, Buffer.from("\x04", "binary"), "Read #4");
         });
     }
 
@@ -629,7 +629,7 @@ describe("Peek token", () => {
 
       const pathTestFile = Path.join(__dirname, "resources", "test3.dat");
 
-      return fs.writeFile(pathTestFile, new Buffer(testData, "binary")).then(() => {
+      return fs.writeFile(pathTestFile, Buffer.from(testData, "binary")).then(() => {
 
         return strtok3.fromFile(pathTestFile).then(tokenizer => {
           return verifyPeekBehaviour(tokenizer);
@@ -697,7 +697,7 @@ describe("Peek token", () => {
 describe("Transparency", () => {
 
   const size = 10 * 1024;
-  const buf = new Buffer(size);
+  const buf = Buffer.alloc(size);
 
   for (let i = 0; i < size; ++i) {
     buf[i] = i % 255;
@@ -772,7 +772,7 @@ describe("EndOfFile Error", () => {
 
   it("should not throw an EOF if we read to buffer", () => {
 
-    const buffer = new Buffer(4);
+    const buffer = Buffer.alloc(4);
 
     const ss = SourceStream.FromString("\x89\x54\x40");
     return strtok3.fromStream(ss).then(rst => {
@@ -823,7 +823,7 @@ describe("Ignore", () => {
 
 describe("0 bytes read", () => {
 
-  const bufZero = new Buffer(0);
+  const bufZero = Buffer.alloc(0);
 
   it("should be able to read 0 bytes from a file", () => {
     return strtok3.fromFile(Path.join(__dirname, "resources", "test1.dat")).then(tokenizer => {

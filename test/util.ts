@@ -9,7 +9,7 @@ import {Readable} from "stream";
 export class SourceStream extends Readable {
 
   public static FromString(str: string = ''): SourceStream {
-    return new SourceStream(new Buffer(str, 'binary'));
+    return new SourceStream(Buffer.from(str, 'binary'));
   }
 
   public constructor(private buf: Buffer) {
