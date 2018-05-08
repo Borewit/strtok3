@@ -19,3 +19,4 @@ jobs:
     - stage: after_success
       script: npm run coveralls
       node_js: 9
+
