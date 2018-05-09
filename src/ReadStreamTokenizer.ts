@@ -58,7 +58,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public ignore(length: number): Promise<number> {
-    const buf = new Buffer(length);
+    const buf = Buffer.alloc(length);
     return this.readBuffer(buf); // Stream cannot skip data
   }
 }

@@ -8,7 +8,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   public position: number = 0;
 
-  private numBuffer = new Buffer(4);
+  private numBuffer = Buffer.alloc(4);
 
   /**
    * Read buffer from tokenizer
@@ -31,7 +31,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   public abstract peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number): Promise<number>;
 
   public readToken<T>(token: IGetToken<T>, position: number | null = null): Promise<T> {
-    const buffer = new Buffer(token.len);
+    const buffer = Buffer.alloc(token.len);
     return this.readBuffer(buffer, 0, token.len, position).then(len => {
       if (len < token.len)
         throw new Error(endOfFile);
@@ -40,7 +40,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   public peekToken<T>(token: IGetToken<T>, position: number = this.position): Promise<T> {
-    const buffer = new Buffer(token.len);
+    const buffer = Buffer.alloc(token.len);
     return this.peekBuffer(buffer, 0, token.len, position).then(len => {
       if (len < token.len)
         throw new Error(endOfFile);
