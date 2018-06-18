@@ -1,12 +1,9 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import {endOfFile} from "./";
 import {Promise} from "bluebird";
 
 export class FileTokenizer extends AbstractTokenizer {
-
-  private _read = Promise.promisify(fs.read);
-  private _close = Promise.promisify(fs.readFile);
 
   constructor(private fd: number, public fileSize?: number) {
     super();
@@ -34,7 +31,7 @@ export class FileTokenizer extends AbstractTokenizer {
       length = buffer.length;
     }
 
-    return (this._read(this.fd, buffer, offset, length, this.position) as any).then(res => {
+    return (fs.read(this.fd, buffer, offset, length, this.position) as any).then(res => {
       if (res.bytesRead < length)
         throw new Error(endOfFile);
       this.position += res.bytesRead;
@@ -54,7 +51,7 @@ export class FileTokenizer extends AbstractTokenizer {
    */
   public peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position): Promise<number> {
 
-    return (this.read(this.fd, buffer, offset, length, position) as any).then(res => {
+    return (fs.read(this.fd, buffer, offset, length, position) as any).then(res => {
       return res.bytesRead;
     });
   }
@@ -74,6 +71,6 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public close(): Promise<void> {
-    return this._close(this.fd) as any;
+    return fs.close(this.fd) as any;
   }
 }
