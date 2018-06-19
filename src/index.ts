@@ -1,9 +1,9 @@
 import {IGetToken} from 'token-types';
 import {ReadStreamTokenizer} from "./ReadStreamTokenizer";
 import {FileTokenizer} from "./FileTokenizer";
-import * as fs from "fs-extra";
 import * as Stream from "stream";
 import {Promise} from "bluebird";
+import {FsPromise} from "./FsPromise";
 
 /**
  * Used to reject read if end-of-Stream or end-of-file is reached
@@ -80,7 +80,7 @@ export class IgnoreType implements IGetToken<Buffer> {
  */
 export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer> {
   if ((stream as any).path) {
-    return fs.stat((stream as any).path).then(stat => {
+    return new FsPromise().stat((stream as any).path).then(stat => {
       return new ReadStreamTokenizer(stream, stat.size);
     }) as any;
   }
@@ -93,14 +93,14 @@ export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer
  * @returns {Promise<FileTokenizer>}
  */
 export function fromFile(filePath: string): Promise<FileTokenizer> {
-  return fs.pathExists(filePath).then(exist => {
-    if (!exist) {
-      throw new Error("File not found: " + filePath);
-    }
+  const fs = new FsPromise();
+  if (fs.pathExists(filePath)) {
     return fs.stat(filePath).then(stat => {
       return fs.open(filePath, "r").then(fd => {
         return new FileTokenizer(fd, stat.size);
       });
     });
-  }) as any;
+  } else {
+    return Promise.reject(new Error("File not found: " + filePath));
+  }
 }
