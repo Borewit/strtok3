@@ -2,7 +2,7 @@ import {IGetToken} from 'token-types';
 import {ReadStreamTokenizer} from "./ReadStreamTokenizer";
 import {FileTokenizer} from "./FileTokenizer";
 import * as Stream from "stream";
-import {Promise} from "bluebird";
+import {Promise} from "es6-promise";
 import {FsPromise} from "./FsPromise";
 
 /**

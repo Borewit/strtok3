@@ -1,6 +1,6 @@
 import {IGetToken, IToken} from "token-types";
 import {endOfFile, ITokenizer} from "./";
-import {Promise} from "bluebird";
+import {Promise} from "es6-promise";
 
 export abstract class AbstractTokenizer implements ITokenizer {
 

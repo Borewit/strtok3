@@ -4,8 +4,10 @@ import {assert} from "chai";
 import {SourceStream} from "./util";
 import * as strtok3 from "../src";
 import * as Path from "path";
-import * as fs from "fs-extra";
 import {ITokenizer} from "../src/index";
+import {FsPromise} from "../src/FsPromise";
+
+const fs = new FsPromise();
 
 describe("ReadStreamTokenizer", () => {
 
