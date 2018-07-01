@@ -32,7 +32,6 @@
   },
   "devDependencies": {
     "@types/chai": "^4.1.4",
-    "@types/es6-promise": "^3.3.0",
     "@types/mocha": "^5.2.2",
     "@types/node": "^10.3.4",
     "chai": "^4.1.2",
