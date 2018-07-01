@@ -45,7 +45,7 @@
   "dependencies": {
     "coveralls": "^3.0.1",
     "es6-promise": "^4.2.4",
-    "then-read-stream": "^1.2.0",
+    "then-read-stream": "^1.2.1",
     "token-types": "^0.9.4"
   },
   "keywords": [
