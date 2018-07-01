@@ -31,7 +31,7 @@ export interface ITokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns {Promise<TResult|number>}
    */
-  peekBuffer(buffer: Buffer, offset: number, length: number, position?: number): Promise<number>;
+  peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number>;
 
   /**
    * Read buffer from tokenizer
@@ -41,7 +41,7 @@ export interface ITokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns {Promise<TResult|number>}
    */
-  readBuffer(buffer: Buffer, offset: number, length: number, position?: number): Promise<number>;
+  readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number>;
 
   peekToken<T>(token: IGetToken<T>, position?: number | null): Promise<T>;
 
