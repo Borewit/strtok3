@@ -58,20 +58,6 @@ export interface ITokenizer {
   ignore(length: number);
 }
 
-export class IgnoreType implements IGetToken<Buffer> {
-
-  /**
-   * @param len Number of bytes to ignore (skip)
-   */
-  public constructor(public len: number) {
-  }
-
-  // ToDo: don't read,, but skip data
-  public get(buf: Buffer, off: number): Buffer {
-    return buf.slice(off, off + this.len);
-  }
-}
-
 /**
  * Construct ReadStreamTokenizer from given Stream.
  * Will set fileSize, if provided given Stream has set the .path property/
