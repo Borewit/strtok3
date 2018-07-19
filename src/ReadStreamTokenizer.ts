@@ -41,7 +41,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     }
 
     if (position) {
-      if(position >  this.position) {
+      if (position >  this.position) {
         return this.ignore(position - this.position).then(() => {
           return this.readBuffer(buffer, offset, length);
         });
