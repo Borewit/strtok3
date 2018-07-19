@@ -4,6 +4,9 @@ import {endOfStream, StreamReader} from "then-read-stream";
 import * as Stream from "stream";
 import {Promise} from "es6-promise";
 
+import * as _debug from "debug";
+const debug = _debug("strtok3:ReadStreamTokenizer");
+
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
   private streamReader: StreamReader;
@@ -21,10 +24,30 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param length is an integer specifying the number of bytes to read
    * @returns Promise number of bytes read
    */
-  public readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length): Promise<number> {
+  public readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number): Promise<number> {
 
     if (length === 0) {
       return Promise.resolve(0);
+    }
+
+    if (position) {
+      if (position > this.position) {
+        return this.ignore(position - this.position).then(() => {
+          return this.readBuffer(buffer, offset, length);
+        });
+      } else {
+        throw new Error('Cannot read from a negative offset in a stream');
+      }
+    }
+
+    if (position) {
+      if(position >  this.position) {
+        return this.ignore(position - this.position).then(() => {
+          return this.readBuffer(buffer, offset, length);
+        });
+      } else {
+        throw new Error('Cannot read from a negative offset in a stream');
+      }
     }
 
     return this.streamReader.read(buffer, offset, length)
@@ -58,6 +81,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public ignore(length: number): Promise<number> {
+    debug(`Ignore ${length} bytes in a stream`);
     const buf = Buffer.alloc(length);
     return this.readBuffer(buf); // Stream cannot skip data
   }
