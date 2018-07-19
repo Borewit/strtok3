@@ -9,7 +9,7 @@ node_js:
 before_install:
 - yarn run lint
 install:
- - yarn install
+- yarn install
 script:
 - yarn run compile
 - yarn run test
