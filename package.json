@@ -12,7 +12,6 @@
     "compile-test": "tsc -p test",
     "compile": "npm run compile-src && npm run compile-test",
     "build": "npm run clean && npm run compile",
-    "prepare": "npm run compile",
     "lint": "tslint 'src/**/*.ts' --exclude 'src/**/*.d.ts' 'test/**/*.ts' --exclude 'test/**/*.d.ts'",
     "test": "mocha --require ts-node/register test",
     "cover-test": "nyc npm run test",
