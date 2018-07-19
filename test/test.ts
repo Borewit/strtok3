@@ -38,6 +38,27 @@ describe("ReadStreamTokenizer", () => {
     });
   });
 
+  it("should be able to read from an absolute offset", () => {
+
+    const ss = SourceStream.FromString("\x05peter");
+    return strtok3.fromStream(ss).then(rst => {
+      // should decode UINT8 from chunk
+      assert.strictEqual(rst.position, 0);
+      return rst.readToken(new Token.StringType(5, "utf-8"), 1).then(value => {
+        assert.ok(typeof value === "string");
+        assert.equal(value, "peter", "0x05 == 5");
+        assert.strictEqual(rst.position, 6);
+      }).then(() => { // should should reject at the end of the stream
+        return rst.readToken(Token.UINT8).then(() => {
+          assert.fail("Should reject due to end-of-stream");
+        }).catch(err => {
+          assert.equal(err.message, strtok3.endOfFile);
+        });
+      });
+    });
+
+  });
+
   it("should pick length from buffer, if length is not explicit defined", () => {
 
     const ss = SourceStream.FromString("\x05peter");
