@@ -19,48 +19,27 @@ and returns a `Promise` resolving the decoded token value.
 The *token* is basically a description what to read form the stream. 
 A basic set of *token types* can be found here: [token-types](https://github.com/Borewit/token-types).
 
-### Reading from a stream
+### Examples
 
 Below is an example of parsing the the first byte from a readable stream as an unsigned-integer:
 
-###### TypeScript:
-```TypeScript
+```JavaScript
 import * as strtok3 from "strtok3";
-import * as stream from "stream";
 import * as Token from "token-types";
     
-let readableStream: stream.Readable;
+let readableStream // stream.Readable;
 // Assign readable
 
-strtok3.fromStream(readableStream).then((tokenizer) => {
+strtok3.fromStream(readableStream).then(tokenizer => {
   return tokenizer.readToken<number>(Token.UINT8).then((myUint8Number) => {
     console.log("My number: %s", myUint8Number);
   });
 })
 ```
 
-###### JavaScript:
-```JavaScript
-var strtok3 = require('strtok3');
-var Token = require('token-types');
-    
-var readableStream;
-// Assign readable
-
-
-strtok3.fromStream(readableStream).then( function(streamTokenizer) {
-  return streamTokenizer.readToken(Token.UINT8).then( function(myUint8Number) {
-    console.log('My number: %s', myUint8Number);
-  });
-})
-```
-
-### Reading from a file
-
 The same can be done from a file:
 
-###### TypeScript:
-```TypeScript
+```JavaScript
 import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
@@ -71,14 +50,12 @@ strtok3.fromFile("somefile.bin").then((tokenizer) => {
 })
 ```
 
-###### JavaScript:
+Read from a Buffer:
 ```JavaScript
-var strtok3 = require('strtok3');
-var Token = require('token-types');
     
-strtok3.fromFile('somefile.bin').then( function(streamTokenizer) {
-  return streamTokenizer.readToken(Token.UINT8).then( function(myUint8Number) {
-    console.log('My number: %s', myUint8Number);
+strtok3.fromBuffer(buffer).then((tokenizer) => {
+  return tokenizer.readToken<number>(Token.UINT8).then((myUint8Number) => {
+    console.log("My number: %s", myUint8Number);
   });
 })
 ```

@@ -28,7 +28,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns {Promise<TResult|number>}
    */
-  public abstract peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number): Promise<number>;
+  public abstract peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeLess?: boolean): Promise<number>;
 
   public readToken<T>(token: IGetToken<T>, position: number | null = null): Promise<T> {
     const buffer = Buffer.alloc(token.len);
