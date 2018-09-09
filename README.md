@@ -31,7 +31,7 @@ let readableStream // stream.Readable;
 // Assign readable
 
 strtok3.fromStream(readableStream).then(tokenizer => {
-  return tokenizer.readToken<number>(Token.UINT8).then((myUint8Number) => {
+  return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
     console.log("My number: %s", myUint8Number);
   });
 })
@@ -44,7 +44,7 @@ import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
 strtok3.fromFile("somefile.bin").then((tokenizer) => {
-  return tokenizer.readToken<number>(Token.UINT8).then((myUint8Number) => {
+  return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
     console.log("My number: %s", myUint8Number);
   });
 })
@@ -54,7 +54,7 @@ Read from a Buffer:
 ```JavaScript
     
 strtok3.fromBuffer(buffer).then((tokenizer) => {
-  return tokenizer.readToken<number>(Token.UINT8).then((myUint8Number) => {
+  return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
     console.log("My number: %s", myUint8Number);
   });
 })
