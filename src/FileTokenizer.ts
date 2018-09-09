@@ -37,7 +37,9 @@ export class FileTokenizer extends AbstractTokenizer {
       if (res.bytesRead < length)
         throw new Error(endOfFile);
       this.position += res.bytesRead;
-
+      if (res.bytesRead < length) {
+        throw new Error(endOfFile);
+      }
       return res.bytesRead;
     });
   }
@@ -51,15 +53,19 @@ export class FileTokenizer extends AbstractTokenizer {
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
    * @returns Promise number of bytes read
    */
-  public peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position): Promise<number> {
+  public peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position, maybeLess: boolean = false): Promise<number> {
 
     return this.fs.read(this.fd, buffer, offset, length, position).then(res => {
+      if (!maybeLess && res.bytesRead < length) {
+        throw new Error(endOfFile);
+      }
       return res.bytesRead;
     });
   }
 
   /**
    * @param length Number of bytes to ignore
+   * @return resolves the number of bytes ignored, equals length if this available, otherwise the number of bytes available
    */
   public ignore(length: number): Promise<number> {
     const bytesLeft = this.fileSize - this.position;
@@ -73,6 +79,6 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public close(): Promise<void> {
-    return this.fs.close(this.fd) as any;
+    return this.fs.close(this.fd);
   }
 }

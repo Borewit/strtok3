@@ -4,6 +4,7 @@ import {FileTokenizer} from "./FileTokenizer";
 import * as Stream from "stream";
 import {Promise} from "es6-promise";
 import {FsPromise} from "./FsPromise";
+import {BufferTokenizer} from "./BufferTokenizer";
 
 /**
  * Used to reject read if end-of-Stream or end-of-file is reached
@@ -29,9 +30,10 @@ export interface ITokenizer {
    * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
    * @param length is an integer specifying the number of bytes to read
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
+   * @param maybeLess If true, will return the bytes available if available bytes is less then length.
    * @returns {Promise<TResult|number>}
    */
-  peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number>;
+  peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number, maybeLess?: boolean): Promise<number>;
 
   /**
    * Read buffer from tokenizer
@@ -53,7 +55,7 @@ export interface ITokenizer {
 
   /**
    * Ignore given number of bytes
-   * @param length Lenght in bytes
+   * @param actual number of bytes ignored
    */
   ignore(length: number);
 }
@@ -80,6 +82,7 @@ export function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer
  */
 export function fromFile(filePath: string): Promise<FileTokenizer> {
   const fs = new FsPromise();
+
   if (fs.pathExists(filePath)) {
     return fs.stat(filePath).then(stat => {
       return fs.open(filePath, "r").then(fd => {
@@ -89,4 +92,13 @@ export function fromFile(filePath: string): Promise<FileTokenizer> {
   } else {
     return Promise.reject(new Error("File not found: " + filePath));
   }
+}
+
+/**
+ * Construct ReadStreamTokenizer from given Buffer.
+ * @param buffer Buffer to tokenize
+ * @returns BufferTokenizer
+ */
+export function fromBuffer(buffer: Buffer): BufferTokenizer {
+  return new BufferTokenizer(buffer);
 }

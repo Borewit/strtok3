@@ -69,4 +69,19 @@ export class FsPromise {
       });
     });
   }
+
+  public writeFileSync(path: fs.PathLike, data: Buffer | string): void {
+    fs.writeFileSync(path, data);
+  }
+
+  public readFile(path: fs.PathLike): Promise<Buffer> {
+    return new Promise<Buffer>((resolve, reject) => {
+      fs.readFile(path, (err, buffer) => {
+        if (err)
+          reject(err);
+        else
+          resolve(buffer);
+      });
+    });
+  }
 }
