@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import {Promise} from "es6-promise";
 
 export interface IReadResult {
   bytesRead: number,
