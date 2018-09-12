@@ -1,5 +1,4 @@
 import {endOfFile} from "./";
-import {Promise} from "es6-promise";
 import {ITokenizer} from "./index";
 import {IGetToken, IToken} from "token-types";
 

@@ -2,7 +2,6 @@ import {AbstractTokenizer} from "./AbstractTokenizer";
 import {endOfFile} from "./";
 import {endOfStream, StreamReader} from "then-read-stream";
 import * as Stream from "stream";
-import {Promise} from "es6-promise";
 
 import * as _debug from "debug";
 const debug = _debug("strtok3:ReadStreamTokenizer");

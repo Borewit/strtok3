@@ -535,10 +535,6 @@ error-ex@^1.2.0, error-ex@^1.3.1:
   dependencies:
     is-arrayish "^0.2.1"
 
-es6-promise@^4.2.4:
-  version "4.2.4"
-  resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.4.tgz#dc4221c2b16518760bd8c39a52d8f356fc00ed29"
-
 escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
@@ -1725,11 +1721,9 @@ test-exclude@^4.2.2:
     read-pkg-up "^3.0.0"
     require-main-filename "^1.0.1"
 
-then-read-stream@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/then-read-stream/-/then-read-stream-1.2.1.tgz#9baddcb8a4ebc8a6fb36436985d24c36f7908829"
-  dependencies:
-    es6-promise "^4.2.4"
+then-read-stream@^1.3.0:
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/then-read-stream/-/then-read-stream-1.3.0.tgz#fb99314d1c5845fea29e5d271f261a1259039c09"
 
 timed-out@^4.0.0:
   version "4.0.1"
