@@ -1,5 +1,5 @@
 import {AbstractTokenizer} from "./AbstractTokenizer";
-import {endOfFile} from "./";
+import {endOfFile} from "./type";
 import {endOfStream, StreamReader} from "then-read-stream";
 import * as Stream from "stream";
 

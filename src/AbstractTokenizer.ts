@@ -1,5 +1,5 @@
 import {IGetToken, IToken} from "token-types";
-import {endOfFile, ITokenizer} from "./";
+import {endOfFile, ITokenizer} from "./type";
 
 export abstract class AbstractTokenizer implements ITokenizer {
 
