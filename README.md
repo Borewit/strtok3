@@ -59,3 +59,20 @@ strtok3.fromBuffer(buffer).then((tokenizer) => {
   });
 })
 ```
+
+### Browser
+To exclude fs based dependencies, you can use:
+```JavaScript
+import * as strtok3 from 'strtok3/lib/core';
+```
+
+| function              | 'strtok3'           | 'strtok3/lib/core'  |
+| ----------------------| --------------------|---------------------|
+| `parseBuffer`         | ✓                   | ✓                   |
+| `parseStream`         | ✓                   | ✓                   |
+| `parseFromTokenizer`  | ✓                   | ✓                   |
+| `fromFile`            | ✓                   |                     |
+
+If you plan to use `fromStream` you need to polyfill: 
+1. buffer: [buffer](https://www.npmjs.com/package/buffer)
+2. stream: [web-streams-polyfill](https://www.npmjs.com/package/web-streams-polyfill)
