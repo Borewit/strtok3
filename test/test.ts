@@ -1,9 +1,8 @@
 import * as Token from "token-types";
-import {} from "mocha";
 import {assert} from "chai";
-import * as strtok3 from "../src";
+import * as strtok3 from "../src/index";
 import * as Path from "path";
-import {ITokenizer} from "../src/index";
+import {endOfFile, ITokenizer} from "../src/type";
 import {FsPromise} from "../src/FsPromise";
 import {FileTokenizer} from "../src/FileTokenizer";
 
@@ -13,6 +12,10 @@ interface ITokenizerTest {
   name: string;
   loadTokenizer: (testFile: string) => Promise<ITokenizer>;
 }
+
+it("Promise", () => {
+  return Promise.resolve();
+});
 
 describe("Tokenizer-types", () => {
 
@@ -76,7 +79,7 @@ describe("Tokenizer-types", () => {
             return rst.readToken(Token.UINT8).then(() => {
               assert.fail("Should reject due to end-of-stream");
             }).catch(err => {
-              assert.equal(err.message, strtok3.endOfFile);
+              assert.equal(err.message, endOfFile);
             });
           });
         });
@@ -95,7 +98,7 @@ describe("Tokenizer-types", () => {
             return rst.readToken(Token.UINT8).then(() => {
               assert.fail("Should reject due to end-of-stream");
             }).catch(err => {
-              assert.equal(err.message, strtok3.endOfFile);
+              assert.equal(err.message, endOfFile);
             });
           });
 
@@ -507,7 +510,7 @@ describe("Tokenizer-types", () => {
 
       it("Handle peek token", () => {
 
-        function peekOnData(tokenizer: strtok3.ITokenizer): Promise<void> {
+        function peekOnData(tokenizer: ITokenizer): Promise<void> {
           assert.strictEqual(tokenizer.position, 0);
           return tokenizer.peekToken<number>(Token.UINT32_LE)
             .then(value => {
@@ -697,7 +700,7 @@ describe("Tokenizer-types", () => {
                 assert.equal(fileSize, bytesRead);
               }).then(() => {
                 return tokenizer.readBuffer(buf).catch(err => {
-                  assert.equal(err.message, strtok3.endOfFile);
+                  assert.equal(err.message, endOfFile);
                 });
               });
             });
@@ -719,7 +722,7 @@ describe("Tokenizer-types", () => {
             return rst.readToken(Token.INT32_BE).then(() => {
               assert.fail("It should throw EndOfFile Error");
             }).catch(err => {
-              assert.strictEqual(err.message, strtok3.endOfFile);
+              assert.strictEqual(err.message, endOfFile);
             });
           });
         });
@@ -732,7 +735,7 @@ describe("Tokenizer-types", () => {
             return rst.readBuffer(buffer).then(len => {
               assert.fail("It should throw EndOfFile Error");
             }).catch(err => {
-              assert.strictEqual(err.message, strtok3.endOfFile);
+              assert.strictEqual(err.message, endOfFile);
             });
           });
         });
@@ -745,7 +748,7 @@ describe("Tokenizer-types", () => {
             return rst.peekBuffer(buffer).then(len => {
               assert.fail("It should throw EndOfFile Error");
             }).catch(err => {
-              assert.strictEqual(err.message, strtok3.endOfFile);
+              assert.strictEqual(err.message, endOfFile);
             });
           });
         });

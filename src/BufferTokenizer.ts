@@ -1,5 +1,4 @@
-import {endOfFile} from "./";
-import {ITokenizer} from "./index";
+import {endOfFile, ITokenizer} from "./type";
 import {IGetToken, IToken} from "token-types";
 
 export class BufferTokenizer implements ITokenizer {
