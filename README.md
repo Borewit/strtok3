@@ -5,6 +5,7 @@
 [![Coverage status](https://coveralls.io/repos/github/Borewit/strtok3/badge.svg?branch=master)](https://coveralls.io/github/Borewit/strtok3?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/59dd6795e61949fb97066ca52e6097ef)](https://www.codacy.com/app/Borewit/strtok3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Borewit/strtok3&amp;utm_campaign=Badge_Grade)
 
+# strtok3
 
 A promise based streaming tokenizer for [NodeJS](http://nodejs.org).
 This node module is a successor of [strtok2](https://github.com/Borewit/strtok2).
