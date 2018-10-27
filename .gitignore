@@ -9,5 +9,6 @@ lib/**/*.d.ts
 test/**/*.js
 test/**/*.js.map
 test/**/*.d.ts
+test/resources/tmp.dat
 lib
 coverage
