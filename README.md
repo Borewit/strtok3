@@ -3,6 +3,7 @@
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmjs.org/package/strtok3)
 [![Dependencies status](https://david-dm.org/Borewit/strtok3/status.svg)](https://david-dm.org/Borewit/strtok3)
 [![Coverage status](https://coveralls.io/repos/github/Borewit/strtok3/badge.svg?branch=master)](https://coveralls.io/github/Borewit/strtok3?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/Borewit/strtok3/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Borewit/strtok3?targetFile=package.json)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/59dd6795e61949fb97066ca52e6097ef)](https://www.codacy.com/app/Borewit/strtok3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Borewit/strtok3&amp;utm_campaign=Badge_Grade)
 
 # strtok3
