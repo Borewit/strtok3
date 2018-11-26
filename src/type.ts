@@ -52,4 +52,10 @@ export interface ITokenizer {
    * @param actual number of bytes ignored
    */
   ignore(length: number);
+
+  /**
+   * Clean up resources.
+   * It does not close the stream for StreamReader, but is does close the file-descriptor.
+   */
+  close(): Promise<void>;
 }
