@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "debug": "^4.1.0",
-    "then-read-stream": "^1.4.0",
+    "then-read-stream": "^1.5.0",
     "token-types": "^1.0.1"
   },
   "keywords": [
