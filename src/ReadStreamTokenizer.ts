@@ -38,7 +38,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       if (skipBytes > 0) {
         await this.ignore(position - this.position);
         return this.readBuffer(buffer, offset, length);
-      } else if (skipBytes < 0){
+      } else if (skipBytes < 0) {
         throw new Error('Cannot read from a negative offset in a stream');
       }
     }
@@ -75,12 +75,12 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     let bytesRead;
     if (position) {
       const skipBytes = position - this.position;
-      if ( skipBytes > 0) {
+      if (skipBytes > 0) {
         const skipBuffer = Buffer.alloc(length + skipBytes);
         bytesRead = await this.peekBuffer(skipBuffer, 0, skipBytes + length, undefined, maybeless);
         skipBuffer.copy(buffer, offset, skipBytes);
         return bytesRead - skipBytes;
-      } else if ( skipBytes < 0){
+      } else if (skipBytes < 0) {
         throw new Error('Cannot peek from a negative offset in a stream');
       }
     }

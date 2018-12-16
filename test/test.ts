@@ -556,7 +556,7 @@ describe('Tokenizer-types', () => {
         const rst = await getTokenizerWithData('\x05peter', tokenizerType);
         // should decode string from chunk
         assert.strictEqual(rst.position, 0);
-        let value = await rst.readToken(new Token.StringType(5, 'utf-8'), 1);
+        const value = await rst.readToken(new Token.StringType(5, 'utf-8'), 1);
         assert.ok(typeof value === 'string');
         assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 6);
@@ -574,7 +574,7 @@ describe('Tokenizer-types', () => {
         const rst = await getTokenizerWithData('\x05peter', tokenizerType);
         // should decode string from chunk
         assert.strictEqual(rst.position, 0);
-        let value = await rst.peekToken(new Token.StringType(5, 'utf-8'), 1);
+        const value = await rst.peekToken(new Token.StringType(5, 'utf-8'), 1);
         assert.ok(typeof value === 'string');
         assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 0);
