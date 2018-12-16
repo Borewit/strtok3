@@ -44,15 +44,15 @@ export class FileTokenizer extends AbstractTokenizer {
    * Peek buffer from file
    * @param buffer
    * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an int
-   * eger specifying the number of bytes to read, of not provided the buffer length will be used
+   * @param length is an integer specifying the number of bytes to read, of not provided the buffer length will be used
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
+   * @param maybeless If set, will not throw an EOF error if the less then the requested length could be read
    * @returns Promise number of bytes read
    */
-  public async peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position, maybeLess: boolean = false): Promise<number> {
+  public async peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position, maybeless: boolean = false): Promise<number> {
 
     const res = await fs.read(this.fd, buffer, offset, length, position);
-    if (!maybeLess && res.bytesRead < length) {
+    if (!maybeless && res.bytesRead < length) {
       throw new Error(endOfFile);
     }
     return res.bytesRead;

@@ -60,9 +60,13 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
    * @param length is an integer specifying the number of bytes to read
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @returns {Promise<TResult|number>}
+   * @param maybeless If set, will not throw an EOF error if the less then the requested length could be read
+   * @returns {Promise<number>}
    */
-  public async peekBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number, maybeLess?: boolean): Promise<number> {
+  public async peekBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number, maybeless?: boolean): Promise<number> {
+
+    // const _offset = position ? position : this.position;
+    // debug(`peek ${_offset}...${_offset + length - 1}`);
 
     let bytesRead;
     try {
@@ -72,7 +76,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
         throw new Error(endOfFile);
       else throw err;
     }
-    if (!maybeLess && bytesRead < length) {
+    if (!maybeless && bytesRead < length) {
       throw new Error(endOfFile);
     }
     return bytesRead;
