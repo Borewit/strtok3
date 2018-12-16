@@ -64,7 +64,7 @@ describe('Tokenizer-types', () => {
         assert.strictEqual(rst.position, 1);
         value = await rst.readToken(new Token.StringType(5, 'utf-8'));
         assert.ok(typeof value === 'string');
-        assert.equal(value, 'peter', '0x05 == 5');
+        assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 6);
         // should should reject at the end of the stream
         try {
@@ -82,7 +82,7 @@ describe('Tokenizer-types', () => {
         assert.strictEqual(rst.position, 0);
         const value: string | number = await rst.readToken(new Token.StringType(5, 'utf-8'), 1);
         assert.ok(typeof value === 'string');
-        assert.equal(value, 'peter', '0x05 == 5');
+        assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 6);
 
         try {
@@ -426,7 +426,7 @@ describe('Tokenizer-types', () => {
 
       });
 
-      it('Transparency', async function() {
+      it.skip('Transparency', async function() {
 
         this.timeout(5000);
 
@@ -549,6 +549,35 @@ describe('Tokenizer-types', () => {
         assert.deepEqual(readBuffer, Buffer.from('\x04', 'binary'), 'Read #4');
 
         await rst.close();
+      });
+
+      it('should be able to read at position ahead', async () => {
+
+        const rst = await getTokenizerWithData('\x05peter', tokenizerType);
+        // should decode string from chunk
+        assert.strictEqual(rst.position, 0);
+        let value = await rst.readToken(new Token.StringType(5, 'utf-8'), 1);
+        assert.ok(typeof value === 'string');
+        assert.equal(value, 'peter');
+        assert.strictEqual(rst.position, 6);
+        // should should reject at the end of the stream
+        try {
+          await rst.readToken(Token.UINT8);
+          assert.fail('Should reject due to end-of-stream');
+        } catch (err) {
+          assert.equal(err.message, endOfFile);
+        }
+      });
+
+      it('should be able to peek at position ahead', async () => {
+
+        const rst = await getTokenizerWithData('\x05peter', tokenizerType);
+        // should decode string from chunk
+        assert.strictEqual(rst.position, 0);
+        let value = await rst.peekToken(new Token.StringType(5, 'utf-8'), 1);
+        assert.ok(typeof value === 'string');
+        assert.equal(value, 'peter');
+        assert.strictEqual(rst.position, 0);
       });
 
       it('number', async () => {

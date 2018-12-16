@@ -26,15 +26,19 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    */
   public async readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number): Promise<number> {
 
+    // const _offset = position ? position : this.position;
+    // debug(`readBuffer ${_offset}...${_offset + length - 1}`);
+
     if (length === 0) {
-      return Promise.resolve(0);
+      return 0;
     }
 
     if (position) {
-      if (position > this.position) {
+      const skipBytes = position - this.position;
+      if (skipBytes > 0) {
         await this.ignore(position - this.position);
         return this.readBuffer(buffer, offset, length);
-      } else {
+      } else if (skipBytes < 0){
         throw new Error('Cannot read from a negative offset in a stream');
       }
     }
@@ -69,6 +73,18 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     // debug(`peek ${_offset}...${_offset + length - 1}`);
 
     let bytesRead;
+    if (position) {
+      const skipBytes = position - this.position;
+      if ( skipBytes > 0) {
+        const skipBuffer = Buffer.alloc(length + skipBytes);
+        bytesRead = await this.peekBuffer(skipBuffer, 0, skipBytes + length, undefined, maybeless);
+        skipBuffer.copy(buffer, offset, skipBytes);
+        return bytesRead - skipBytes;
+      } else if ( skipBytes < 0){
+        throw new Error('Cannot peek from a negative offset in a stream');
+      }
+    }
+
     try {
       bytesRead = await this.streamReader.peek(buffer, offset, length);
     } catch (err) {
@@ -83,7 +99,8 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public async ignore(length: number): Promise<number> {
-    debug(`Ignore ${length} bytes in a stream`);
+    debug(`ignore ${this.position}...${this.position + length - 1}`);
+    // debug(`Ignore ${length} bytes in a stream`);
     const buf = Buffer.alloc(length);
     return this.readBuffer(buf); // Stream cannot skip data
   }
