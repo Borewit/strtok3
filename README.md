@@ -31,7 +31,6 @@ import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
 let readableStream // stream.Readable;
-// Assign readable
 
 strtok3.fromStream(readableStream).then(tokenizer => {
   return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
