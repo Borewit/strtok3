@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/Borewit/strtok3.svg?branch=master)](https://travis-ci.org/Borewit/strtok3)
 [![NPM version](https://badge.fury.io/js/strtok3.svg)](https://npmjs.org/package/strtok3)
-[![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmjs.org/package/strtok3)
+[![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmcharts.com/compare/strtok3,strtok2?start=600&interval=30)
 [![Dependencies status](https://david-dm.org/Borewit/strtok3/status.svg)](https://david-dm.org/Borewit/strtok3)
 [![Coverage status](https://coveralls.io/repos/github/Borewit/strtok3/badge.svg?branch=master)](https://coveralls.io/github/Borewit/strtok3?branch=master)
 [![Known Vulnerabilities](https://snyk.io/test/github/Borewit/strtok3/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Borewit/strtok3?targetFile=package.json)
