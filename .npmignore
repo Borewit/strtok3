@@ -5,3 +5,4 @@ src/
 .travis.yml
 *.iml
 tslint.json
+tsconfig.js
