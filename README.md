@@ -30,7 +30,7 @@ Below is an example of parsing the the first byte from a readable stream as an u
 import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
-let readableStream // stream.Readable;
+let readableStream; // stream.Readable;
 
 strtok3.fromStream(readableStream).then(tokenizer => {
   return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
