@@ -2,3 +2,6 @@ node_modules/
 test/
 coverage/
 src/
+.travis.yml
+*.iml
+tslint.json
