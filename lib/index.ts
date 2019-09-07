@@ -3,7 +3,6 @@ import * as Stream from "stream";
 import {FileTokenizer} from './FileTokenizer';
 import * as fs from './FsPromise';
 import {ReadStreamTokenizer} from './ReadStreamTokenizer';
-import {BufferTokenizer} from './BufferTokenizer';
 import * as core from './core';
 
 /**
