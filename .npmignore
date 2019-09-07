@@ -1,8 +1,12 @@
 node_modules/
 test/
 coverage/
+lib/**/*.ts
+!lib/**/*.d.ts
+lib/**/*.js.map
 src/
 .travis.yml
 *.iml
 tslint.json
-tsconfig.js
+**/tsconfig.js
+**/*.log
