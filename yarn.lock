@@ -2346,9 +2346,9 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
 
-then-read-stream@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/then-read-stream/-/then-read-stream-2.0.0.tgz#94bb75f01cac12198ecfc277f914d3ce5a1eb787"
+then-read-stream@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/then-read-stream/-/then-read-stream-2.0.6.tgz#8d8e2b165b54a1c5f866cb43e2164c1f5f9b85ac"
 
 to-fast-properties@^2.0.0:
   version "2.0.0"
