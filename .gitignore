@@ -1,14 +1,9 @@
 *.iml
 node_modules
-src/**/*.js
-src/**/*.js.map
-src/**/*.d.ts
 lib/**/*.js
 lib/**/*.js.map
-lib/**/*.d.ts
 test/**/*.js
 test/**/*.js.map
 test/**/*.d.ts
 test/resources/tmp.dat
-lib
 coverage

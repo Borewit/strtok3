@@ -1,10 +1,10 @@
 import * as Token from 'token-types';
 import { assert } from 'chai';
-import * as strtok3 from '../src/index';
+import * as strtok3 from '../lib';
 import * as Path from 'path';
-import { endOfFile, ITokenizer } from '../src/type';
-import * as fs from '../src/FsPromise';
-import { FileTokenizer } from '../src/FileTokenizer';
+import { endOfFile, ITokenizer } from '../lib/type';
+import * as fs from '../lib/FsPromise';
+import { FileTokenizer } from '../lib/FileTokenizer';
 
 interface ITokenizerTest {
   name: string;
