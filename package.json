@@ -53,7 +53,7 @@
   "dependencies": {
     "debug": "^4.1.1",
     "then-read-stream": "^2.0.6",
-    "token-types": "^1.0.1"
+    "token-types": "^1.0.3"
   },
   "keywords": [
     "tokenizer",
