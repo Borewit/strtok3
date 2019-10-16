@@ -26,7 +26,7 @@ A basic set of *token types* can be found here: [token-types](https://github.com
 
 Below is an example of parsing the the first byte from a readable stream as an unsigned-integer:
 
-```JavaScript
+```js
 import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
@@ -41,7 +41,7 @@ strtok3.fromStream(readableStream).then(tokenizer => {
 
 The same can be done from a file:
 
-```JavaScript
+```js
 import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
@@ -53,7 +53,7 @@ strtok3.fromFile("somefile.bin").then((tokenizer) => {
 ```
 
 Read from a Buffer:
-```JavaScript
+```js
     
 strtok3.fromBuffer(buffer).then((tokenizer) => {
   return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
@@ -64,7 +64,7 @@ strtok3.fromBuffer(buffer).then((tokenizer) => {
 
 ### Browser
 To exclude fs based dependencies, you can use:
-```JavaScript
+```js
 import * as strtok3 from 'strtok3/lib/core';
 ```
 
