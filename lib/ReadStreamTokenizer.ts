@@ -100,19 +100,26 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     return bytesRead;
   }
 
+  public async _ignore(length: number): Promise<number> {
+    debug(`ignore ${this.position}...${this.position + length - 1}`);
+    // debug(`Ignore ${length} bytes in a stream`);
+    const buf = Buffer.alloc(length);
+    return this.readBuffer(buf); // Stream cannot skip data
+  }
+
   public async ignore(length: number): Promise<number> {
     debug(`ignore ${this.position}...${this.position + length - 1}`);
     const bufSize = Math.min(maxBufferSize, length);
     const buf = Buffer.alloc(bufSize);
     let totBytesRead = 0;
-    do {
-      const bytesRead = await this.readBuffer(buf);
+    while (totBytesRead < length) {
+      const remaining = length - totBytesRead;
+      const bytesRead = await this.readBuffer(buf, 0, Math.min(bufSize, remaining));
       if (bytesRead < 0) {
         return bytesRead;
       }
       totBytesRead += bytesRead;
-      length -= bytesRead;
-    } while (length > 0);
+    }
     return totBytesRead;
   }
 }
