@@ -7,6 +7,8 @@ import * as _debug from 'debug';
 
 const debug = _debug('strtok3:ReadStreamTokenizer');
 
+const maxBufferSize = 1 * 1000 * 1000;
+
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
   private streamReader: StreamReader;
@@ -100,8 +102,17 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
   public async ignore(length: number): Promise<number> {
     debug(`ignore ${this.position}...${this.position + length - 1}`);
-    // debug(`Ignore ${length} bytes in a stream`);
-    const buf = Buffer.alloc(length);
-    return this.readBuffer(buf); // Stream cannot skip data
+    const bufSize = Math.min(maxBufferSize, length);
+    const buf = Buffer.alloc(bufSize);
+    let totBytesRead = 0;
+    do {
+      const bytesRead = await this.readBuffer(buf);
+      if (bytesRead < 0) {
+        return bytesRead;
+      }
+      totBytesRead += bytesRead;
+      length -= bytesRead;
+    } while (length > 0);
+    return totBytesRead;
   }
 }
