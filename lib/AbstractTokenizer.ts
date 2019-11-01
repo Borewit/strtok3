@@ -15,7 +15,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
    * @param length is an integer specifying the number of bytes to read
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @param maybeless If set, will not throw an EOF error if the less then the requested length could be read
+   * @param maybeless If set, will not throw an EOF error if not all of the requested data could be read
    * @returns {Promise<number>}
    */
   public async abstract readBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
@@ -26,7 +26,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
    * @param length is an integer specifying the number of bytes to read
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @param maybeless If set, will not throw an EOF error if the less then the requested length could be read
+   * @param maybeless If set, will not throw an EOF error if not all of the requested data could be read
    * @returns {Promise<number>}
    */
   public async abstract peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;

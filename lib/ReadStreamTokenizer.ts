@@ -45,7 +45,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       }
     }
 
-    let bytesRead;
+    let bytesRead: number;
     try {
       bytesRead = await this.streamReader.read(buffer, offset, length);
       this.position += bytesRead;
