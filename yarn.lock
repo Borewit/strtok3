@@ -2183,10 +2183,10 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
 
-then-read-stream@^2.0.7:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/then-read-stream/-/then-read-stream-2.0.7.tgz#23ee72659ae27ab8d986a68cc6059e3a688b79e3"
-  integrity sha512-UhIYV6kjtqlnmb/3Pzk4U5c27Bx45XQgLhgKRkMRO/uFR2V9YN25zvXFh5Qzu5lGJul4fSHQI74Sw96wFB6ZpA==
+then-read-stream@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/then-read-stream/-/then-read-stream-2.0.8.tgz#1d2c29e46af1327101875abef183e43313876c1b"
+  integrity sha512-OIQn3/zF2J/gp6mAQTbBb1AR+3yoSRqjaij0gGnEUcTl93T840mWIZ9sJWwubjwP7VUDwJpT+Tdl7T9RrQmMlw==
 
 to-fast-properties@^2.0.0:
   version "2.0.0"
