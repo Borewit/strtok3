@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "then-read-stream": "^2.0.7",
+    "then-read-stream": "^2.0.8",
     "token-types": "^1.1.0"
   },
   "keywords": [
