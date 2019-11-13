@@ -10,16 +10,7 @@ import * as core from './core';
  * @param filePath
  * @returns {Promise<FileTokenizer>}
  */
-export async function fromFile(filePath: string): Promise<FileTokenizer> {
-  if (fs.pathExists(filePath)) {
-    const stat = await fs.stat(filePath);
-    const fd = await fs.open(filePath, "r");
-    return new FileTokenizer(fd, stat.size);
-  } else {
-    throw new Error(`File not found: ${filePath}`);
-  }
-}
-
+export const fromFile = FileTokenizer.fromPath;
 /**
  * Construct ReadStreamTokenizer from given Stream.
  * Will set fileSize, if provided given Stream has set the .path property.

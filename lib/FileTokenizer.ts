@@ -4,7 +4,16 @@ import * as fs from "./FsPromise";
 
 export class FileTokenizer extends AbstractTokenizer {
 
-  constructor(private fd: number, public fileSize?: number) {
+  public static async fromPath(sourceFilePath: string): Promise<FileTokenizer> {
+    const stat = await fs.stat(sourceFilePath);
+    if (!stat.isFile) {
+      throw new Error(`File not a file: ${sourceFilePath}`);
+    }
+    const fd = await fs.open(sourceFilePath, "r");
+    return new FileTokenizer(fd, sourceFilePath, stat.size);
+  }
+
+  private constructor(private fd: number, public sourceFilePath: string, public fileSize?: number) {
     super();
   }
 
