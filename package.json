@@ -35,7 +35,7 @@
     "url": "https://github.com/Borewit/strtok3/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.4",
+    "@types/chai": "^4.2.5",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.12.3",
     "chai": "^4.2.0",
