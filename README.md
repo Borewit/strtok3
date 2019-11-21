@@ -41,26 +41,87 @@ strtok3.fromStream(readableStream).then(tokenizer => {
 
 The same can be done from a file:
 
+### strtok3 methods
+
+All of the strtok3 methods return a _tokenizer_, either directly or via a promise.
+
+#### Method `strtok3.fromFile()`
+Returns, via a promise, a tokenizer which can be used to parse a file.
+
 ```js
 import * as strtok3 from "strtok3";
 import * as Token from "token-types";
     
-strtok3.fromFile("somefile.bin").then((tokenizer) => {
+strtok3.fromFile("somefile.bin").then(tokenizer => {
   return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
     console.log("My number: %s", myUint8Number);
   });
 })
 ```
 
-Read from a Buffer:
+#### Method `strtok3.fromStream()`
+
+Create _tokenizer_ from a node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
+
+| Parameter  | Type                                                                        | Description                     |
+|------------|-----------------------------------------------------------------------------|---------------------------------|
+| stream     | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from             |
+
 ```js
-    
-strtok3.fromBuffer(buffer).then((tokenizer) => {
+strtok3.fromStream(stream).then(tokenizer => {
   return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
     console.log("My number: %s", myUint8Number);
   });
 })
 ```
+Returns a tokenizer, via a Promise, which can be used to parse a buffer.
+
+#### Method `strtok3.fromBuffer()`
+
+Returns a tokenizer which can be used to parse a buffer.
+```js
+import * as strtok3 from "strtok3";
+    
+const tokenizer = strtok3.fromBuffer(buffer);
+
+tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
+  console.log("My number: %s", myUint8Number);
+});
+```
+
+### Tokenizer methods 
+
+#### Method `tokenizer.readBuffer()`
+
+Read buffer from stream.
+```js
+  readBuffer(buffer, offset, length, position)
+```
+| Parameter  | Type                     | Description                                                                                                                           |
+|------------|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| buffer     | Buffer &#124; Uint8Array | Target buffer to write the data read to                                                                                               |
+| offset     | number                   | The offset in the buffer to start writing at; if not provided, start at 0                                                             |
+| length     | number                   | An integer specifying the number of bytes to read                                                                                     |
+| position?  | number                   | An integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position. |
+
+Return value `Promise<number>` Promise number of bytes read
+
+#### Method `tokenizer.peekBuffer()`
+
+Peek (read ahead) buffer from tokenizer
+```js
+  peekBuffer(buffer, offset, length, position, maybeless)
+```
+
+| Parameter  | Type                     | Description                                                                                                                              |
+|------------|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| buffer     | Buffer &#124; Uint8Array | Target buffer to write the data read `(peeked) to                                                                                        |
+| offset     | number                   | Is the offset in the buffer to start writing at; if not provided, start at 0                                                             |
+| length     | number                   | Is an integer specifying the number of bytes to read                                                                                     |
+| position?  | number                   | Is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position. |
+| maybeless? | boolean                  | If set, will not throw an EOF error if the less then the requested length could be read                                                  |
+
+Return value `Promise<number>`
 
 ### Browser
 To exclude fs based dependencies, you can use:
