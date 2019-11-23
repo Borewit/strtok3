@@ -57,14 +57,15 @@
   },
   "keywords": [
     "tokenizer",
+    "reader",
+    "token",
+    "async",
     "promise",
     "parser",
+    "decoder",
     "binary",
     "endian",
-    "integer",
     "uint",
-    "token",
-    "read",
     "stream",
     "streaming"
   ],

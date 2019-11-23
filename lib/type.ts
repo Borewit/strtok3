@@ -20,31 +20,54 @@ export interface ITokenizer {
 
   /**
    * Peek (read ahead) buffer from tokenizer
-   * @param buffer
-   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an integer specifying the number of bytes to read
+   * @param buffer - Target buffer to fill with data peek from the tokenizer-stream
+   * @param offset - The offset in the buffer to start writing at; if not provided, start at 0
+   * @param length - is an integer specifying the number of bytes to read
    * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @param maybeLess If true, will return the bytes available if available bytes is less then length.
-   * @returns {Promise<TResult|number>}
+   * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
+   * @returns Promise with number of bytes read
    */
-  peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number, maybeLess?: boolean): Promise<number>;
+  peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
 
   /**
-   * Read buffer from tokenizer
-   * @param buffer
-   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an integer specifying the number of bytes to read
-   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @returns {Promise<TResult|number>}
+   * Peek (read ahead) buffer from tokenizer
+   * @param buffer - Target buffer to fill with data peeked from the tokenizer-stream
+   * @param offset - Offset in the buffer to start writing at; if not provided, start at 0
+   * @param length - The number of bytes to read
+   * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
+   * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
+   * @returns Promise with number of bytes read
    */
-  readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number): Promise<number>;
+  readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
 
-  peekToken<T>(token: IGetToken<T>, position?: number | null): Promise<T>;
+  /**
+   * Peek a token from the tokenizer-stream.
+   * @param token - Token to peek from the tokenizer-stream.
+   * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
+   * @param maybeless - If set, will not throw an EOF error if the less then the requested length could be read.
+   */
+  peekToken<T>(token: IGetToken<T>, position?: number | null, maybeless?: boolean): Promise<T>;
 
-  readToken<T>(token: IGetToken<T>, position?: number | null): Promise<T>;
+  /**
+   * Read a token from the tokenizer-stream.
+   * @param token - Token to peek from the tokenizer-stream.
+   * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
+   * @param maybeless - If set, will not throw an EOF error if the less then the requested length could be read.
+   */
+  readToken<T>(token: IGetToken<T>, position?: number | null, maybeless?: boolean): Promise<T>;
 
+  /**
+   * Peek a numeric token from the stream
+   * @param token - Numeric token
+   * @returns Promise with number
+   */
   peekNumber(token: IGetToken<number>): Promise<number>;
 
+  /**
+   * Read a numeric token from the stream
+   * @param token - Numeric token
+   * @returns Promise with number
+   */
   readNumber(token: IGetToken<number>): Promise<number>;
 
   /**
