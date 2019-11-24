@@ -41,11 +41,17 @@ Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a
 import strtok3 from 'strtok3';
 import Token from 'token-types';
     
-strtok3.fromFile("somefile.bin").then(tokenizer => {
-  return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
-    console.log("My number: %s", myUint8Number);
-  });
-})
+(async () => {
+
+  const tokenizer = await strtok3.fromFile("somefile.bin");
+  try {
+    const myNumber = await tokenizer.readToken(Token.UINT8);
+    console.log(`My number: ${myNumber}`);
+  } finally {
+    tokenizer.close(); // Close the file
+  } 
+})();
+
 ```
 
 #### Method `strtok3.fromStream()`
@@ -61,8 +67,8 @@ import strtok3 from 'strtok3';
 import Token from 'token-types';
 
 strtok3.fromStream(stream).then(tokenizer => {
-  return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
-    console.log("My number: %s", myUint8Number);
+  return tokenizer.readToken(Token.UINT8).then(myUint8Number => {
+    console.log(`My number: ${myUint8Number}`);
   });
 });
 ```
@@ -76,8 +82,8 @@ import strtok3 from 'strtok3';
     
 const tokenizer = strtok3.fromBuffer(buffer);
 
-tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
-  console.log("My number: %s", myUint8Number);
+tokenizer.readToken(Token.UINT8).then(myUint8Number => {
+  console.log(`My number: ${myUint8Number}`);
 });
 ```
 ## Tokenizer
@@ -192,22 +198,27 @@ Clean up resources, such as closing a file pointer if applicable.
 The *token* is basically a description what to read form the [*tokenizer-stream*](#tokenizer). 
 A basic set of *token types* can be found here: [*token-types*](https://github.com/Borewit/token-types).
 
-Below is an example of parsing the the first byte from a readable stream as an unsigned-integer:
+A token is something which implements the following interface:
+```ts
+export interface IGetToken<T> {
 
-```js
-import strtok3 from 'strtok3';
-import Token from 'token-types';
-    
-let readableStream; // stream.Readable;
+  /**
+   * Length in bytes of encoded value
+   */
+  len: number;
 
-strtok3.fromStream(readableStream).then(tokenizer => {
-  return tokenizer.readToken<number>(Token.UINT8).then(myUint8Number => {
-    console.log("My number: %s", myUint8Number);
-  });
-})
+  /**
+   * Decode value from buffer at offset
+   * @param buf Buffer to read the decoded value from
+   * @param off Decode offset
+   */
+  get(buf: Buffer, off: number): T;
+}
 ```
+The *tokenizer* reads `token.len` bytes from the *tokenizer-stream* into a Buffer.
+The `token.get` will be called with the Buffer. `token.get` is responsible for conversion from the buffer to the desired output type.
 
-## Browser
+# Browser compatibility
 To exclude fs based dependencies, you can use a submodule-import from 'strtok3/lib/core'.
 
 | function              | 'strtok3'           | 'strtok3/lib/core'  |
@@ -216,13 +227,22 @@ To exclude fs based dependencies, you can use a submodule-import from 'strtok3/l
 | `parseStream`         | ✓                   | ✓                   |
 | `fromFile`            | ✓                   |                     |
 
+
+## Working with Web-API readable stream
+To convert a [Web-API readable stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamDefaultReader) into a [Node.js readable stream]((https://nodejs.org/api/stream.html#stream_readable_streams)), you can use [readable-web-to-node-stream](https://github.com/Borewit/readable-web-to-node-stream) to convert one in another.
+
 Example submodule-import:
 ```js
-import strtok3core from 'strtok3/lib/core';
+import strtok3core from 'strtok3/lib/core'; // Submodule-import to prevent Node.js specific dependencies
+import {ReadableWebToNodeStream} from 'readable-web-to-node-stream';
 
-const tokenizer = strtok3core.fromStream(stream);
+(async () => {
+
+  const response = await fetch(url);
+  const readableWebStream = response.body; // Web-API readable stream
+  const nodeStream = new ReadableWebToNodeStream(readableWebStream); // convert to Node.js readable stream
+  
+  const tokenizer = strtok3core.fromStream(nodeStream); // And we now have tokenizer in a web environment
+})();
 ```
 
-If you plan to use `fromStream` you need to polyfill: 
-1.   buffer: [buffer](https://www.npmjs.com/package/buffer)
-2.   stream: [web-streams-polyfill](https://www.npmjs.com/package/web-streams-polyfill)
