@@ -21,7 +21,7 @@ It can read from:
 *   A file (taking a file path as an input)
 *   A Node.js [stream](https://nodejs.org/api/stream.html).
 *   A [Buffer](https://nodejs.org/api/buffer.html)
-*   HTTP chunked transfer provided by [streaming-http-token-reader](https://github.com/Borewit/streaming-http-token-reader).
+*   HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
 
 ## Usage
 
