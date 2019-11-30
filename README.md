@@ -38,13 +38,13 @@ All of the strtok3 methods return a [*tokenizer*](#tokenizer), either directly o
 Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a file.
 
 ```js
-import strtok3 from 'strtok3';
-import Token from 'token-types';
+const strtok3 = require('strtok3');
+const Token = require('token-types');
     
 (async () => {
 
   const tokenizer = await strtok3.fromFile("somefile.bin");
-  try {
+         try {
     const myNumber = await tokenizer.readToken(Token.UINT8);
     console.log(`My number: ${myNumber}`);
   } finally {
@@ -63,8 +63,8 @@ Create [*tokenizer*](#tokenizer) from a node.js [readable stream](https://nodejs
 | stream     | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from             |
 
 ```js
-import strtok3 from 'strtok3';
-import Token from 'token-types';
+const strtok3 = require('strtok3');
+const Token = require('token-types');
 
 strtok3.fromStream(stream).then(tokenizer => {
   return tokenizer.readToken(Token.UINT8).then(myUint8Number => {
@@ -78,7 +78,7 @@ Returns a [*tokenizer*](#tokenizer), via a Promise, which can be used to parse a
 
 Returns a [*tokenizer*](#tokenizer) which can be used to parse a buffer.
 ```js
-import strtok3 from 'strtok3';
+const strtok3 = require('strtok3');
     
 const tokenizer = strtok3.fromBuffer(buffer);
 
@@ -233,8 +233,8 @@ To convert a [Web-API readable stream](https://developer.mozilla.org/en-US/docs/
 
 Example submodule-import:
 ```js
-import strtok3core from 'strtok3/lib/core'; // Submodule-import to prevent Node.js specific dependencies
-import {ReadableWebToNodeStream} from 'readable-web-to-node-stream';
+const strtok3core = require('strtok3/lib/core'); // Submodule-import to prevent Node.js specific dependencies
+const {ReadableWebToNodeStream} = require('readable-web-to-node-stream');
 
 (async () => {
 
