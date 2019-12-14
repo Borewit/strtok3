@@ -14,7 +14,7 @@ This node module is a successor of [strtok2](https://github.com/Borewit/strtok2)
 The `strtok3` contains a few methods to turn different input into a [*tokenizer*](#tokenizer). Designed to
 *   Support a streaming environment
 *   Decoding of binary data, strings and numbers in mind
-*   Read custom tokens.
+*   Read [predefined](https://github.com/Borewit/token-types) or custom tokens.
 *   Optimized [*tokenizers*](#tokenizer) for reading from [file](#method-strtok3fromfile), [stream](#method-strtok3fromstream) or [buffer](#method-strtok3frombuffer).
 
 It can read from:
