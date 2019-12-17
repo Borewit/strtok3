@@ -16,7 +16,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    */
   public position: number = 0;
 
-  private numBuffer = Buffer.alloc(8);
+  private numBuffer = Buffer.alloc(10);
 
   /**
    * Read buffer from tokenizer
