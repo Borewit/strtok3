@@ -1,6 +1,7 @@
 version: 1
 update_configs:
   - package_manager: "javascript"
+    version_requirement_updates: "increase_versions"
     directory: "/"
     update_schedule: "daily"
     automerged_updates:
@@ -24,4 +25,5 @@ update_configs:
           dependency_name: "coveralls"
       - match:
           dependency_name: "nyc"
-
+      - match:
+          dependency_name: "token-types"
