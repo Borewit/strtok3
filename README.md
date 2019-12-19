@@ -23,6 +23,12 @@ It can read from:
 *   A [Buffer](https://nodejs.org/api/buffer.html)
 *   HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
 
+## Installation
+
+```sh
+npm install --save strtok3
+```
+
 ## Usage
 
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
