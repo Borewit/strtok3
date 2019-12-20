@@ -1,21 +1,17 @@
 import * as Stream from "stream";
 
-import {FileTokenizer} from './FileTokenizer';
 import * as fs from './FsPromise';
 import {ReadStreamTokenizer} from './ReadStreamTokenizer';
 import * as core from './core';
 
-/**
- * Construct ReadStreamTokenizer from given file path.
- * @param filePath
- * @returns {Promise<FileTokenizer>}
- */
-export const fromFile = FileTokenizer.fromPath;
+export { fromFile } from './FileTokenizer';
+export { fromBuffer } from './core';
+
 /**
  * Construct ReadStreamTokenizer from given Stream.
  * Will set fileSize, if provided given Stream has set the .path property.
- * @param stream Stream.Readable
- * @returns {Promise<ReadStreamTokenizer>}
+ * @param stream - Node.js Stream.Readable
+ * @returns Tokenizer
  */
 export async function fromStream(stream: Stream.Readable): Promise<ReadStreamTokenizer> {
   if ((stream as any).path) {
@@ -24,10 +20,3 @@ export async function fromStream(stream: Stream.Readable): Promise<ReadStreamTok
   }
   return new ReadStreamTokenizer(stream);
 }
-
-/**
- * Construct ReadStreamTokenizer from given Buffer.
- * @param buffer Buffer to tokenize
- * @returns BufferTokenizer
- */
-export const fromBuffer = core.fromBuffer;
