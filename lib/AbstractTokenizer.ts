@@ -27,7 +27,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
    * @returns Promise with number of bytes read
    */
-  public async abstract readBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
+  public abstract async readBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
 
   /**
    * Peek (read ahead) buffer from tokenizer
@@ -38,7 +38,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
    * @returns Promise with number of bytes read
    */
-  public async abstract peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
+  public abstract async peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
 
   /**
    * Read a token from the tokenizer-stream
@@ -99,7 +99,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param length - Number of bytes to skip (ignore)
    * @return actual number of bytes ignored
    */
-  public async abstract ignore(length: number): Promise<number>;
+  public abstract async ignore(length: number): Promise<number>;
 
   public async close(): Promise<void> {
     // empty
