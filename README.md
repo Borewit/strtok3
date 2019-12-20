@@ -42,6 +42,11 @@ Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
 All of the strtok3 methods return a [*tokenizer*](#tokenizer), either directly or via a promise.
 
 #### Method `strtok3.fromFile()`
+
+| Parameter | Type                  | Description                |
+|-----------|-----------------------|----------------------------|
+| path      | Path to file (string) | Path to file to read from  |
+
 Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a file.
 
 ```js
@@ -65,9 +70,11 @@ const Token = require('token-types');
 
 Create [*tokenizer*](#tokenizer) from a node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
 
-| Parameter  | Type                                                                        | Description                     |
-|------------|-----------------------------------------------------------------------------|---------------------------------|
-| stream     | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from             |
+| Parameter | Type                                                                        | Description                     |
+|-----------|-----------------------------------------------------------------------------|---------------------------------|
+| stream    | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from             |
+
+Returns a [*tokenizer*](#tokenizer), via a Promise, which can be used to parse a buffer.
 
 ```js
 const strtok3 = require('strtok3');
@@ -79,11 +86,15 @@ strtok3.fromStream(stream).then(tokenizer => {
   });
 });
 ```
-Returns a [*tokenizer*](#tokenizer), via a Promise, which can be used to parse a buffer.
 
 #### Method `strtok3.fromBuffer()`
 
-Returns a [*tokenizer*](#tokenizer) which can be used to parse a buffer.
+| Parameter | Type                                         | Description         |
+|-----------|----------------------------------------------|---------------------|
+| buffer    | [Buffer](https://nodejs.org/api/buffer.html) | Buffer to read from |
+
+Returns a [*tokenizer*](#tokenizer) which can be used to parse the provided buffer.
+
 ```js
 const strtok3 = require('strtok3');
     
@@ -93,6 +104,7 @@ tokenizer.readToken(Token.UINT8).then(myUint8Number => {
   console.log(`My number: ${myUint8Number}`);
 });
 ```
+
 ## Tokenizer
 The tokenizer allows us to *read* or *peek* from the *tokenizer-stream*. The *tokenizer-stream* is an abstraction of a [stream](https://nodejs.org/api/stream.html), file or [Buffer](https://nodejs.org/api/buffer.html).
 It can also be translated in chunked reads, as done in [streaming-http-token-reader](https://github.com/Borewit/streaming-http-token-reader);
