@@ -30,15 +30,12 @@ describe('Tokenizer-types', () => {
         const stream = fs.createReadStream(getResourcePath(testFile));
         return strtok3.fromStream(stream);
       }
-    },
-    {
+    }, {
       name: 'fromFile()',
       loadTokenizer: testFile => {
         return strtok3.fromFile(Path.join(__dirname, 'resources', testFile));
       }
-    }
-    ,
-    {
+    }, {
       name: 'fromBuffer()',
       loadTokenizer: testFile => {
         return fs.readFile(Path.join(__dirname, 'resources', testFile)).then(data => {
@@ -58,12 +55,12 @@ describe('Tokenizer-types', () => {
         // should decode UINT8 from chunk
         assert.strictEqual(rst.position, 0);
         let value: string | number = await rst.readToken(Token.UINT8);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 5, '0x05 == 5');
         // should decode string from chunk
         assert.strictEqual(rst.position, 1);
         value = await rst.readToken(new Token.StringType(5, 'utf-8'));
-        assert.ok(typeof value === 'string');
+        assert.equal(typeof value, 'string');
         assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 6);
         // should should reject at the end of the stream
@@ -81,7 +78,7 @@ describe('Tokenizer-types', () => {
         // should decode UINT8 from chunk
         assert.strictEqual(rst.position, 0);
         const value: string | number = await rst.readToken(new Token.StringType(5, 'utf-8'), 1);
-        assert.ok(typeof value === 'string');
+        assert.equal(typeof value, 'string');
         assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 6);
 
@@ -137,19 +134,19 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x00\x7f\x80\xff\x81', tokenizerType);
 
           let value: number = await rst.readToken(Token.INT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0, 'INT8 #1 == 0');
           value = await rst.readToken(Token.INT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 127, 'INT8 #2 == 127');
           value = await rst.readToken(Token.INT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -128, 'INT8 #3 == -128');
           value = await rst.readToken(Token.INT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -1, 'INT8 #4 == -1');
           value = await rst.readToken(Token.INT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -127, 'INT8 #5 == -127');
 
           await rst.close();
@@ -175,16 +172,16 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x0a\x1a\x00\x00\xff\xff\x80\x00', tokenizerType);
 
           let value: number = await rst.readToken(Token.INT16_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 2586, 'INT16_BE#1');
           value = await rst.readToken(Token.INT16_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0, 'INT16_BE#2');
           value = await rst.readToken(Token.INT16_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -1, 'INT16_BE#3');
           value = await rst.readToken(Token.INT16_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -32768, 'INT16_BE#4');
 
           await rst.close();
@@ -209,16 +206,16 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x00\x00\x00\xff\xff\xff\x10\x00\xff\x80\x00\x00', tokenizerType);
 
           let value: number = await rst.readToken(Token.INT24_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0, 'INT24_BE#1');
           value = await rst.readToken(Token.INT24_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -1, 'INT24_BE#2');
           value = await rst.readToken(Token.INT24_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 1048831, 'INT24_BE#3');
           value = await rst.readToken(Token.INT24_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -8388608, 'INT24_BE#4');
           await rst.close();
         });
@@ -244,16 +241,16 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x00\x00\x00\x00\xff\xff\xff\xff\x00\x10\x00\xff\x80\x00\x00\x00', tokenizerType);
 
           let value: number = await rst.readToken(Token.INT32_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0, 'INT32_BE #1');
           value = await rst.readToken(Token.INT32_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -1, 'INT32_BE #2');
           value = await rst.readToken(Token.INT32_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 1048831, 'INT32_BE #3');
           value = await rst.readToken(Token.INT32_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, -2147483648, 'INT32_BE #4');
           await rst.close();
         });
@@ -274,13 +271,13 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x00\x1a\xff', tokenizerType);
 
           let value: number = await rst.readToken(Token.UINT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0, 'UINT8 #1');
           value = await rst.readToken(Token.UINT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 26, 'UINT8 #2');
           value = await rst.readToken(Token.UINT8);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 255, 'UINT8 #3');
           await rst.close();
         });
@@ -313,16 +310,16 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x1a\x00\x1a\x00\x1a\x00\x1a\x00', tokenizerType);
 
           let value: number = await rst.readToken(Token.UINT16_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a, 'UINT16_LE #1');
           value = await rst.readToken(Token.UINT16_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a00, 'UINT16_BE #2');
           value = await rst.readToken(Token.UINT16_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a, 'UINT16_BE #3');
           value = await rst.readToken(Token.UINT16_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a00, 'UINT16_LE #4');
 
           await rst.close();
@@ -361,16 +358,16 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00\x1a\x1a\x00', tokenizerType);
 
           let value: number = await rst.readToken(Token.UINT24_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a1a, 'INT24_LE#1');
           value = await rst.readToken(Token.UINT24_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a1a00, 'INT24_BE#2');
           value = await rst.readToken(Token.UINT24_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a1a, 'INT24_LE#3');
           value = await rst.readToken(Token.UINT24_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a1a00, 'INT24_BE#4');
 
           await rst.close();
@@ -409,16 +406,16 @@ describe('Tokenizer-types', () => {
           const rst = await getTokenizerWithData('\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00\x1a\x00', tokenizerType);
 
           let value: number = await rst.readToken(Token.UINT32_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a001a, 'UINT24_LE #1');
-          return rst.readToken(Token.UINT32_BE);
-          assert.ok(typeof value === 'number');
+          value = await rst.readToken(Token.UINT32_BE);
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a001a00, 'UINT32_BE #2');
           value = await rst.readToken(Token.UINT32_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value,  'number');
           assert.equal(value, 0x001a001a, 'UINT32_LE #3');
           value = await rst.readToken(Token.UINT32_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a001a00, 'UINT32_BE #4');
 
           await rst.close();
@@ -469,31 +466,31 @@ describe('Tokenizer-types', () => {
           assert.strictEqual(tokenizer.position, 0);
 
           let value = await tokenizer.peekToken<number>(Token.UINT32_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a001a, 'UINT24_LE #1');
           assert.strictEqual(tokenizer.position, 0);
 
           value = await tokenizer.peekToken(Token.UINT32_LE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a001a, 'UINT24_LE sequential peek #2');
           assert.strictEqual(tokenizer.position, 0);
           value = await tokenizer.readToken(Token.UINT32_LE);
 
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a001a, 'UINT24_LE #3');
           assert.strictEqual(tokenizer.position, 4);
           value = await tokenizer.readToken(Token.UINT32_BE);
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a001a00, 'UINT32_BE #4');
           assert.strictEqual(tokenizer.position, 8);
           value = await tokenizer.readToken(Token.UINT32_LE);
 
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a001a, 'UINT32_LE #5');
           assert.strictEqual(tokenizer.position, 12);
           value = await tokenizer.readToken(Token.UINT32_BE);
 
-          assert.ok(typeof value === 'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a001a00, 'UINT32_BE #6');
           assert.strictEqual(tokenizer.position, 16);
 
@@ -557,7 +554,7 @@ describe('Tokenizer-types', () => {
         // should decode string from chunk
         assert.strictEqual(rst.position, 0);
         const value = await rst.readToken(new Token.StringType(5, 'utf-8'), 1);
-        assert.ok(typeof value === 'string');
+        assert.equal(typeof value, 'string');
         assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 6);
         // should should reject at the end of the stream
@@ -575,7 +572,7 @@ describe('Tokenizer-types', () => {
         // should decode string from chunk
         assert.strictEqual(rst.position, 0);
         const value = await rst.peekToken(new Token.StringType(5, 'utf-8'), 1);
-        assert.ok(typeof value === 'string');
+        assert.equal(typeof value, 'string');
         assert.equal(value, 'peter');
         assert.strictEqual(rst.position, 0);
       });
@@ -602,12 +599,12 @@ describe('Tokenizer-types', () => {
       it('should be able to handle multiple ignores', async () => {
         const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
         let value = await tokenizer.readToken(Token.UINT32_LE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x001a001a, 'UINT24_LE #1');
         await tokenizer.ignore(Token.UINT32_BE.len);
         await tokenizer.ignore(Token.UINT32_LE.len);
         value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #4');
         await tokenizer.close();
       });
@@ -619,13 +616,13 @@ describe('Tokenizer-types', () => {
         await tokenizer.ignore(4);
         assert.strictEqual(tokenizer.position, 4);
         let value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #2');
         value = await tokenizer.readToken(Token.UINT32_LE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x001a001a, 'UINT32_LE #3');
         value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #4');
         await tokenizer.close();
       });
@@ -716,16 +713,16 @@ describe('Tokenizer-types', () => {
         const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
         assert.equal(tokenizer.fileSize, 16, 'check file size property');
         let value = await tokenizer.readToken(Token.UINT32_LE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x001a001a, 'UINT24_LE #1');
         value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #2');
         value = await tokenizer.readToken(Token.UINT32_LE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x001a001a, 'UINT32_LE #3');
         value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #4');
       });
 
@@ -733,13 +730,13 @@ describe('Tokenizer-types', () => {
         const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
         await tokenizer.readToken(new Token.IgnoreType(4));
         let value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #2');
         value = await tokenizer.readToken(Token.UINT32_LE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x001a001a, 'UINT32_LE #3');
         value = await tokenizer.readToken(Token.UINT32_BE);
-        assert.ok(typeof value === 'number');
+        assert.equal(typeof value, 'number');
         assert.equal(value, 0x1a001a00, 'UINT32_BE #4');
       });
 
