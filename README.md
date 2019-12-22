@@ -107,7 +107,7 @@ tokenizer.readToken(Token.UINT8).then(myUint8Number => {
 
 ## Tokenizer
 The tokenizer allows us to *read* or *peek* from the *tokenizer-stream*. The *tokenizer-stream* is an abstraction of a [stream](https://nodejs.org/api/stream.html), file or [Buffer](https://nodejs.org/api/buffer.html).
-It can also be translated in chunked reads, as done in [streaming-http-token-reader](https://github.com/Borewit/streaming-http-token-reader);
+It can also be translated in chunked reads, as done in [@tokenizer/http](https://github.com/Borewit/tokenizer-http);
 
 What is the difference with Nodejs.js stream?
 *   The *tokenizer-stream* supports jumping / seeking in a the *tokenizer-stream* using [`tokenizer.ignore()`](#method-tokenizerignore)
