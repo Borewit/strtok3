@@ -27,7 +27,7 @@ export interface IToken<T> extends IGetToken<T> {
    * @param buffer - Buffer to write the encoded value to
    * @param offset - Buffer write offset
    * @param value - Value to decode of type T
-   * @param flush ToDo
+   * @param flush - ToDo
    */
   put(buffer: Buffer, offset: number, value: T, flush?: IFlush): number
 }

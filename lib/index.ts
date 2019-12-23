@@ -6,7 +6,7 @@ import * as core from './core';
 
 export { fromFile } from './FileTokenizer';
 export { fromBuffer } from './core';
-export { IToken, IFlush, IGetToken, ITokenizer } from './types';
+export { IToken, IFlush, IGetToken, ITokenizer, endOfFile } from './types';
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
