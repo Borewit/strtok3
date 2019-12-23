@@ -65,7 +65,7 @@ describe('Tokenizer-types', () => {
         assert.strictEqual(rst.position, 6);
         // should should reject at the end of the stream
         try {
-          value = await rst.readToken(Token.UINT8);
+          await rst.readToken(Token.UINT8);
           assert.fail('Should reject due to end-of-stream');
         } catch (err) {
           assert.equal(err.message, endOfFile);
