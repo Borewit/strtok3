@@ -1,5 +1,4 @@
-import { endOfFile, ITokenizer } from './type';
-import { IGetToken, IToken } from 'token-types';
+import { endOfFile, ITokenizer, IGetToken, IToken } from './types';
 
 export class BufferTokenizer implements ITokenizer {
 

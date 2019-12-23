@@ -1,10 +1,36 @@
-import {IGetToken} from 'token-types';
-
 /**
  * Used to reject read if end-of-Stream or end-of-file is reached
  * @type {Error}
  */
 export const endOfFile = "End-Of-File";
+
+export type IFlush = (b: Buffer, o: number) => void;
+
+export interface IGetToken<T> {
+
+  /**
+   * Length in bytes of encoded value
+   */
+  len: number;
+
+  /**
+   * Decode value from buffer at offset
+   * @param buf - Buffer to read the decoded value from
+   * @param off - Decode offset
+   */
+  get(buf: Buffer, off: number): T;
+}
+
+export interface IToken<T> extends IGetToken<T> {
+  /**
+   * Encode value to buffer
+   * @param buffer - Buffer to write the encoded value to
+   * @param offset - Buffer write offset
+   * @param value - Value to decode of type T
+   * @param flush ToDo
+   */
+  put(buffer: Buffer, offset: number, value: T, flush?: IFlush): number
+}
 
 export interface ITokenizer {
 

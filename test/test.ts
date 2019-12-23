@@ -2,7 +2,7 @@ import * as Token from 'token-types';
 import { assert } from 'chai';
 import * as strtok3 from '../lib';
 import * as Path from 'path';
-import { endOfFile, ITokenizer } from '../lib/type';
+import { endOfFile, ITokenizer } from '../lib/types';
 import * as fs from '../lib/FsPromise';
 import { FileTokenizer } from '../lib/FileTokenizer';
 

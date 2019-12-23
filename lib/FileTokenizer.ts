@@ -1,5 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
-import { endOfFile } from './type';
+import { endOfFile } from './types';
 import * as fs from './FsPromise';
 
 export class FileTokenizer extends AbstractTokenizer {
