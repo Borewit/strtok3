@@ -1,5 +1,4 @@
-import { IGetToken, IToken } from 'token-types';
-import { endOfFile, ITokenizer } from './type';
+import { IGetToken, IToken, endOfFile, ITokenizer } from './types';
 
 /**
  * Core tokenizer
