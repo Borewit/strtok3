@@ -68,11 +68,12 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     // const _offset = position ? position : this.position;
     // debug(`peek ${_offset}...${_offset + length - 1}`);
 
+    let bytesRead: number;
     if (position) {
       const skipBytes = position - this.position;
       if (skipBytes > 0) {
         const skipBuffer = Buffer.alloc(length + skipBytes);
-        const bytesRead = await this.peekBuffer(skipBuffer, 0, skipBytes + length, undefined, maybeless);
+        bytesRead = await this.peekBuffer(skipBuffer, 0, skipBytes + length, undefined, maybeless);
         skipBuffer.copy(buffer, offset, skipBytes);
         return bytesRead - skipBytes;
       } else if (skipBytes < 0) {
@@ -80,7 +81,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       }
     }
 
-    const bytesRead = await this.streamReader.peek(buffer, offset, length);
+    bytesRead = await this.streamReader.peek(buffer, offset, length);
     if (!maybeless && bytesRead < length) {
       throw new EndOfStreamError();
     }
