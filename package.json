@@ -29,7 +29,7 @@
     "url": "git+https://github.com/Borewit/strtok3.git"
   },
   "license": "MIT",
-  "main": "./lib/index.js",
+  "main": "lib/index.js",
   "typings": "lib/index",
   "bugs": {
     "url": "https://github.com/Borewit/strtok3/issues"
