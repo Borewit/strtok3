@@ -27,7 +27,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
    * @returns Promise with number of bytes read
    */
-  public async readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number): Promise<number> {
+  public async readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number, maybeless?: boolean): Promise<number> {
 
     // const _offset = position ? position : this.position;
     // debug(`readBuffer ${_offset}...${_offset + length - 1}`);
@@ -48,7 +48,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
     const bytesRead = await this.streamReader.read(buffer, offset, length);
     this.position += bytesRead;
-    if (bytesRead < length) {
+    if (!maybeless && bytesRead < length) {
       throw new EndOfStreamError();
     }
     return bytesRead;
