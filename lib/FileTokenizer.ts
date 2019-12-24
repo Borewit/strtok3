@@ -1,5 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
-import { endOfFile } from './types';
+import { EndOfStreamError } from 'then-read-stream';
 import * as fs from './FsPromise';
 
 export class FileTokenizer extends AbstractTokenizer {
@@ -32,10 +32,10 @@ export class FileTokenizer extends AbstractTokenizer {
 
     const res = await fs.read(this.fd, buffer, offset, length, this.position);
     if (res.bytesRead < length)
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     this.position += res.bytesRead;
     if (res.bytesRead < length) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     }
     return res.bytesRead;
   }
@@ -53,7 +53,7 @@ export class FileTokenizer extends AbstractTokenizer {
 
     const res = await fs.read(this.fd, buffer, offset, length, position);
     if (!maybeless && res.bytesRead < length) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     }
     return res.bytesRead;
   }

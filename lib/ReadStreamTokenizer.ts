@@ -1,6 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
-import { endOfFile } from './types';
-import { endOfStream, StreamReader } from 'then-read-stream';
+import { EndOfStreamError, StreamReader } from 'then-read-stream';
 import * as Stream from 'stream';
 
 import * as _debug from 'debug';
@@ -28,7 +27,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
    * @returns Promise with number of bytes read
    */
-  public async readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number): Promise<number> {
+  public async readBuffer(buffer: Buffer | Uint8Array, offset: number = 0, length: number = buffer.length, position?: number, maybeless?: boolean): Promise<number> {
 
     // const _offset = position ? position : this.position;
     // debug(`readBuffer ${_offset}...${_offset + length - 1}`);
@@ -47,17 +46,10 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       }
     }
 
-    let bytesRead: number;
-    try {
-      bytesRead = await this.streamReader.read(buffer, offset, length);
-      this.position += bytesRead;
-    } catch (err) {
-      if (err.message === endOfStream) // Convert EndOfStream into EndOfFile
-        throw new Error(endOfFile);
-      else throw err;
-    }
-    if (bytesRead < length) {
-      throw new Error(endOfFile);
+    const bytesRead = await this.streamReader.read(buffer, offset, length);
+    this.position += bytesRead;
+    if (!maybeless && bytesRead < length) {
+      throw new EndOfStreamError();
     }
     return bytesRead;
   }
@@ -76,7 +68,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     // const _offset = position ? position : this.position;
     // debug(`peek ${_offset}...${_offset + length - 1}`);
 
-    let bytesRead;
+    let bytesRead: number;
     if (position) {
       const skipBytes = position - this.position;
       if (skipBytes > 0) {
@@ -89,15 +81,9 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       }
     }
 
-    try {
-      bytesRead = await this.streamReader.peek(buffer, offset, length);
-    } catch (err) {
-      if (err.message === endOfStream) // Convert EndOfStream into EndOfFile
-        throw new Error(endOfFile);
-      else throw err;
-    }
+    bytesRead = await this.streamReader.peek(buffer, offset, length);
     if (!maybeless && bytesRead < length) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     }
     return bytesRead;
   }

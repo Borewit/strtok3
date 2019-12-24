@@ -2,9 +2,10 @@ import * as Token from 'token-types';
 import { assert } from 'chai';
 import * as strtok3 from '../lib';
 import * as Path from 'path';
-import { endOfFile, ITokenizer } from '../lib/types';
+import { ITokenizer } from '..';
 import * as fs from '../lib/FsPromise';
 import { FileTokenizer } from '../lib/FileTokenizer';
+import { EndOfStreamError } from 'then-read-stream';
 
 interface ITokenizerTest {
   name: string;
@@ -68,7 +69,7 @@ describe('Tokenizer-types', () => {
           await rst.readToken(Token.UINT8);
           assert.fail('Should reject due to end-of-stream');
         } catch (err) {
-          assert.equal(err.message, endOfFile);
+          assert.instanceOf(err, EndOfStreamError);
         }
       });
 
@@ -86,7 +87,7 @@ describe('Tokenizer-types', () => {
           await rst.readToken(Token.UINT8);
           assert.fail('Should reject due to end-of-stream');
         } catch (err) {
-          assert.equal(err.message, endOfFile);
+          assert.instanceOf(err, EndOfStreamError);
         }
 
       });
@@ -453,7 +454,7 @@ describe('Tokenizer-types', () => {
         try {
           await readByte();
         } catch (err) {
-          assert.equal(err.message, 'End-Of-File');
+          assert.instanceOf(err, EndOfStreamError);
           assert.equal(expected, size, 'total number of parsed bytes');
         }
 
@@ -562,7 +563,7 @@ describe('Tokenizer-types', () => {
           await rst.readToken(Token.UINT8);
           assert.fail('Should reject due to end-of-stream');
         } catch (err) {
-          assert.equal(err.message, endOfFile);
+          assert.instanceOf(err, EndOfStreamError);
         }
       });
 
@@ -591,7 +592,7 @@ describe('Tokenizer-types', () => {
           const x = await tokenizer.peekNumber(Token.INT32_BE);
           assert.fail('Should throw Error: End-Of-File');
         } catch (err) {
-          assert.strictEqual(err.message, 'End-Of-File');
+          assert.instanceOf(err, EndOfStreamError);
         }
         await tokenizer.close();
       });
@@ -651,7 +652,7 @@ describe('Tokenizer-types', () => {
             await tokenizer.readBuffer(buf);
             assert.fail('Should throw EOF');
           } catch (err) {
-            assert.equal(err.message, endOfFile);
+            assert.instanceOf(err, EndOfStreamError);
           }
         });
 
@@ -669,7 +670,7 @@ describe('Tokenizer-types', () => {
             await rst.readToken(Token.INT32_BE);
             assert.fail('It should throw EndOfFile Error');
           } catch (err) {
-            assert.equal(err.message, endOfFile);
+            assert.instanceOf(err, EndOfStreamError);
           }
         });
 
@@ -681,7 +682,7 @@ describe('Tokenizer-types', () => {
             return rst.readBuffer(buffer).then(len => {
               assert.fail('It should throw EndOfFile Error');
             }).catch(err => {
-              assert.strictEqual(err.message, endOfFile);
+              assert.instanceOf(err, EndOfStreamError);
             });
           });
         });
@@ -694,7 +695,7 @@ describe('Tokenizer-types', () => {
             const len = await rst.peekBuffer(buffer);
             assert.fail('It should throw EndOfFile Error');
           } catch (err) {
-            assert.strictEqual(err.message, endOfFile);
+            assert.instanceOf(err, EndOfStreamError);
           }
         });
 

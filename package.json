@@ -16,7 +16,7 @@
     "lint-md": "remark -u preset-lint-recommended .",
     "lint": "npm run lint-md && npm run lint-ts",
     "lint-fix": "tslint --fix 'lib/**/*.ts' 'test/**/*.ts'",
-    "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test",
+    "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test.ts",
     "test-coverage": "nyc npm run test",
     "coveralls": "npm run test-coverage && nyc report --reporter=text-lcov | coveralls",
     "start": "npm run compile && npm run lint && npm run cover-test"
@@ -29,7 +29,7 @@
     "url": "git+https://github.com/Borewit/strtok3.git"
   },
   "license": "MIT",
-  "main": "./lib/index.js",
+  "main": "lib/index.js",
   "typings": "lib/index",
   "bugs": {
     "url": "https://github.com/Borewit/strtok3/issues"
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "then-read-stream": "^2.0.8"
+    "then-read-stream": "^3.0.0"
   },
   "keywords": [
     "tokenizer",

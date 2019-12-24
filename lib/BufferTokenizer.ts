@@ -1,4 +1,5 @@
-import { endOfFile, ITokenizer, IGetToken, IToken } from './types';
+import { ITokenizer, IGetToken, IToken } from './types';
+import { EndOfStreamError } from 'then-read-stream';
 
 export class BufferTokenizer implements ITokenizer {
 
@@ -42,7 +43,7 @@ export class BufferTokenizer implements ITokenizer {
     }
     const bytes2read = Math.min(this.buffer.length - position, length);
     if (!maybeLess && bytes2read < length) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     } else {
       this.buffer.copy(buffer, offset, position, position + bytes2read);
       return bytes2read;
@@ -63,7 +64,7 @@ export class BufferTokenizer implements ITokenizer {
 
   public async peekToken<T>(token: IGetToken<T>, position: number = this.position): Promise<T> {
     if (this.buffer.length - position < token.len) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     }
     return token.get(this.buffer, position);
   }

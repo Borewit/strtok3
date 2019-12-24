@@ -1,12 +1,11 @@
-import * as Stream from "stream";
+import * as Stream from 'stream';
 
 import * as fs from './FsPromise';
-import {ReadStreamTokenizer} from './ReadStreamTokenizer';
+import { ReadStreamTokenizer } from './ReadStreamTokenizer';
 import * as core from './core';
 
 export { fromFile } from './FileTokenizer';
-export { fromBuffer } from './core';
-export { IToken, IFlush, IGetToken, ITokenizer, endOfFile } from './types';
+export { IToken, IFlush, IGetToken, ITokenizer, EndOfStreamError, fromBuffer } from './core';
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
