@@ -16,7 +16,7 @@
     "lint-md": "remark -u preset-lint-recommended .",
     "lint": "npm run lint-md && npm run lint-ts",
     "lint-fix": "tslint --fix 'lib/**/*.ts' 'test/**/*.ts'",
-    "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test",
+    "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test.ts",
     "test-coverage": "nyc npm run test",
     "coveralls": "npm run test-coverage && nyc report --reporter=text-lcov | coveralls",
     "start": "npm run compile && npm run lint && npm run cover-test"
