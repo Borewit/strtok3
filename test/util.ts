@@ -1,5 +1,5 @@
 // Utilies for testing
-import {Readable} from "stream";
+import { Readable } from 'stream';
 
 /**
  * A mock stream implementation that breaks up provided data into
