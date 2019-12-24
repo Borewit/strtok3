@@ -1,4 +1,5 @@
-import { IGetToken, IToken, endOfFile, ITokenizer } from './types';
+import { IGetToken, IToken, ITokenizer } from './types';
+import { EndOfStreamError } from 'then-read-stream';
 
 /**
  * Core tokenizer
@@ -50,7 +51,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
     const buffer = Buffer.alloc(token.len);
     const len = await this.readBuffer(buffer, 0, token.len, position);
     if (!maybeless && len < token.len)
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     return token.get(buffer, 0);
   }
 
@@ -65,7 +66,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
     const buffer = Buffer.alloc(token.len);
     const len = await this.peekBuffer(buffer, 0, token.len, position);
     if (!maybeless && len < token.len)
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     return token.get(buffer, 0);
   }
 
@@ -77,7 +78,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   public async readNumber(token: IToken<number>): Promise<number> {
     const len = await this.readBuffer(this.numBuffer, 0, token.len, null);
     if (len < token.len)
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     return token.get(this.numBuffer, 0);
   }
 
@@ -89,7 +90,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   public async peekNumber(token: IToken<number>): Promise<number> {
     const len = await this.peekBuffer(this.numBuffer, 0, token.len);
     if (len < token.len)
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     return token.get(this.numBuffer, 0);
   }
 

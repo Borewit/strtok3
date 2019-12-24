@@ -1,6 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
-import { endOfFile } from './types';
-import { endOfStream, StreamReader } from 'then-read-stream';
+import { EndOfStreamError, StreamReader } from 'then-read-stream';
 import * as Stream from 'stream';
 
 import * as _debug from 'debug';
@@ -47,17 +46,10 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       }
     }
 
-    let bytesRead: number;
-    try {
-      bytesRead = await this.streamReader.read(buffer, offset, length);
-      this.position += bytesRead;
-    } catch (err) {
-      if (err.message === endOfStream) // Convert EndOfStream into EndOfFile
-        throw new Error(endOfFile);
-      else throw err;
-    }
+    const bytesRead = await this.streamReader.read(buffer, offset, length);
+    this.position += bytesRead;
     if (bytesRead < length) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     }
     return bytesRead;
   }
@@ -76,12 +68,11 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     // const _offset = position ? position : this.position;
     // debug(`peek ${_offset}...${_offset + length - 1}`);
 
-    let bytesRead;
     if (position) {
       const skipBytes = position - this.position;
       if (skipBytes > 0) {
         const skipBuffer = Buffer.alloc(length + skipBytes);
-        bytesRead = await this.peekBuffer(skipBuffer, 0, skipBytes + length, undefined, maybeless);
+        const bytesRead = await this.peekBuffer(skipBuffer, 0, skipBytes + length, undefined, maybeless);
         skipBuffer.copy(buffer, offset, skipBytes);
         return bytesRead - skipBytes;
       } else if (skipBytes < 0) {
@@ -89,15 +80,9 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       }
     }
 
-    try {
-      bytesRead = await this.streamReader.peek(buffer, offset, length);
-    } catch (err) {
-      if (err.message === endOfStream) // Convert EndOfStream into EndOfFile
-        throw new Error(endOfFile);
-      else throw err;
-    }
+    const bytesRead = await this.streamReader.peek(buffer, offset, length);
     if (!maybeless && bytesRead < length) {
-      throw new Error(endOfFile);
+      throw new EndOfStreamError();
     }
     return bytesRead;
   }

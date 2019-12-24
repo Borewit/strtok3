@@ -1,9 +1,3 @@
-/**
- * Used to reject read if end-of-Stream or end-of-file is reached
- * @type {Error}
- */
-export const endOfFile = "End-Of-File";
-
 export type IFlush = (b: Buffer, o: number) => void;
 
 export interface IGetToken<T> {

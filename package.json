@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "then-read-stream": "^2.0.8"
+    "then-read-stream": "^3.0.0"
   },
   "keywords": [
     "tokenizer",
