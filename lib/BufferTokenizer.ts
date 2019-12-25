@@ -1,5 +1,6 @@
-import { ITokenizer, IGetToken, IToken } from './types';
+import { ITokenizer } from './types';
 import { EndOfStreamError } from 'then-read-stream';
+import { IGetToken, IToken } from '@tokenizer/token';
 
 export class BufferTokenizer implements ITokenizer {
 

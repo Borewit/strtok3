@@ -1,30 +1,9 @@
-export type IFlush = (b: Buffer, o: number) => void;
-
-export interface IGetToken<T> {
-
-  /**
-   * Length in bytes of encoded value
-   */
-  len: number;
-
-  /**
-   * Decode value from buffer at offset
-   * @param buf - Buffer to read the decoded value from
-   * @param off - Decode offset
-   */
-  get(buf: Buffer, off: number): T;
-}
-
-export interface IToken<T> extends IGetToken<T> {
-  /**
-   * Encode value to buffer
-   * @param buffer - Buffer to write the encoded value to
-   * @param offset - Buffer write offset
-   * @param value - Value to decode of type T
-   * @param flush - ToDo
-   */
-  put(buffer: Buffer, offset: number, value: T, flush?: IFlush): number
-}
+/**
+ * The tokenizer allows us to read or peek from the tokenizer-stream.
+ * The tokenizer-stream is an abstraction of a stream, file or Buffer.
+ * It can also be translated in chunked reads, as done in @tokenizer/http;
+ */
+import { IGetToken } from '@tokenizer/token';
 
 export interface ITokenizer {
 

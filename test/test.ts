@@ -2,14 +2,13 @@ import * as Token from 'token-types';
 import { assert } from 'chai';
 import * as strtok3 from '../lib';
 import * as Path from 'path';
-import { ITokenizer } from '..';
 import * as fs from '../lib/FsPromise';
 import { FileTokenizer } from '../lib/FileTokenizer';
 import { EndOfStreamError } from 'then-read-stream';
 
 interface ITokenizerTest {
   name: string;
-  loadTokenizer: (testFile: string) => Promise<ITokenizer>;
+  loadTokenizer: (testFile: string) => Promise<strtok3.ITokenizer>;
 }
 
 describe('Tokenizer-types', () => {
@@ -18,7 +17,7 @@ describe('Tokenizer-types', () => {
     return Path.join(__dirname, 'resources', testFile);
   }
 
-  async function getTokenizerWithData(testData: string, test: ITokenizerTest): Promise<ITokenizer> {
+  async function getTokenizerWithData(testData: string, test: ITokenizerTest): Promise<strtok3.ITokenizer> {
     const testPath = getResourcePath('tmp.dat');
     await fs.writeFile(testPath, Buffer.from(testData, 'binary'));
     return test.loadTokenizer('tmp.dat');
@@ -463,7 +462,7 @@ describe('Tokenizer-types', () => {
 
       it('Handle peek token', async () => {
 
-        async function peekOnData(tokenizer: ITokenizer): Promise<void> {
+        async function peekOnData(tokenizer: strtok3.ITokenizer): Promise<void> {
           assert.strictEqual(tokenizer.position, 0);
 
           let value = await tokenizer.peekToken<number>(Token.UINT32_LE);
