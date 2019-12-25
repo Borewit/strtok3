@@ -26,11 +26,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Borewit/strtok3.git"
+    "url": "https://github.com/Borewit/strtok3.git"
   },
   "license": "MIT",
   "main": "lib/index.js",
-  "typings": "lib/index",
+  "typings": "lib/index.d.ts",
   "bugs": {
     "url": "https://github.com/Borewit/strtok3/issues"
   },
