@@ -2,7 +2,8 @@ import { ReadStreamTokenizer } from './ReadStreamTokenizer';
 import * as Stream from 'stream';
 import { BufferTokenizer } from './BufferTokenizer';
 export { EndOfStreamError } from 'then-read-stream';
-export { IToken, IFlush, IGetToken, ITokenizer } from './types';
+export {  ITokenizer } from './types';
+export { IToken, IGetToken } from '@tokenizer/token';
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
