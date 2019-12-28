@@ -1,4 +1,4 @@
-import { ITokenizer } from './types';
+import { ITokenizer, IFileInfo } from './types';
 import { EndOfStreamError } from 'then-read-stream';
 import { IGetToken, IToken } from '@tokenizer/token';
 
@@ -7,10 +7,11 @@ import { IGetToken, IToken } from '@tokenizer/token';
  */
 export abstract class AbstractTokenizer implements ITokenizer {
 
-  /**
-   * Total file or stream length in bytes
-   */
-  public fileSize?: number;
+  public fileInfo: IFileInfo;
+
+  protected constructor(fileInfo?: IFileInfo) {
+    this.fileInfo = fileInfo ? fileInfo : {};
+  }
 
   /**
    * Tokenizer-stream position

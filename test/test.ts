@@ -11,7 +11,7 @@ interface ITokenizerTest {
   loadTokenizer: (testFile: string) => Promise<strtok3.ITokenizer>;
 }
 
-describe('Tokenizer-types', () => {
+describe('strtok3', () => {
 
   function getResourcePath(testFile: string) {
     return Path.join(__dirname, 'resources', testFile);
@@ -108,7 +108,7 @@ describe('Tokenizer-types', () => {
 
         // ToDo
         const rst = await tokenizerType.loadTokenizer('test1.dat');
-        assert.equal(rst.fileSize, 16, ' ReadStreamTokenizer.fileSize');
+        assert.equal(rst.fileInfo.size, 16, ' ReadStreamTokenizer.fileSize.size');
 
         await rst.close();
       });
@@ -499,7 +499,7 @@ describe('Tokenizer-types', () => {
         const rst = await tokenizerType.loadTokenizer('test1.dat');
 
         if (rst instanceof FileTokenizer) {
-          assert.equal(rst.fileSize, 16, 'check file size property');
+          assert.equal(rst.fileInfo.size, 16, 'check file size property');
         }
         await peekOnData(rst);
         await rst.close();
@@ -579,14 +579,14 @@ describe('Tokenizer-types', () => {
 
       it('number', async () => {
         const tokenizer = await tokenizerType.loadTokenizer('test3.dat');
-        await tokenizer.ignore(tokenizer.fileSize - 4);
+        await tokenizer.ignore(tokenizer.fileInfo.size - 4);
         const x = await tokenizer.peekNumber(Token.INT32_BE);
         assert.strictEqual(x, 33752069);
       });
 
       it('should throw an Error if we reach EOF while peeking a number', async () => {
         const tokenizer = await tokenizerType.loadTokenizer('test3.dat');
-        await tokenizer.ignore(tokenizer.fileSize - 3);
+        await tokenizer.ignore(tokenizer.fileInfo.size - 3);
         try {
           const x = await tokenizer.peekNumber(Token.INT32_BE);
           assert.fail('Should throw Error: End-Of-File');
@@ -711,7 +711,7 @@ describe('Tokenizer-types', () => {
       it('should be able to read from a file', async () => {
 
         const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
-        assert.equal(tokenizer.fileSize, 16, 'check file size property');
+        assert.equal(tokenizer.fileInfo.size, 16, 'check file size property');
         let value = await tokenizer.readToken(Token.UINT32_LE);
         assert.equal(typeof value, 'number');
         assert.equal(value, 0x001a001a, 'UINT24_LE #1');

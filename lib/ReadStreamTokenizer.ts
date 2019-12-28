@@ -1,21 +1,27 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
 import { EndOfStreamError, StreamReader } from 'then-read-stream';
 import * as Stream from 'stream';
-
+import { IFileInfo } from './types';
 import * as _debug from 'debug';
 
 const debug = _debug('strtok3:ReadStreamTokenizer');
-
 const maxBufferSize = 1 * 1000 * 1000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
   private streamReader: StreamReader;
 
-  public constructor(stream: Stream.Readable, fileSize?: number) {
-    super();
+  public constructor(stream: Stream.Readable, fileInfo?: IFileInfo) {
+    super(fileInfo);
     this.streamReader = new StreamReader(stream);
-    this.fileSize = fileSize;
+  }
+
+  /**
+   * Get file information, an HTTP-client may implement this doing a HEAD request
+   * @return Promise with file information
+   */
+  public async getFileInfo(): Promise<IFileInfo> {
+    return this.fileInfo;
   }
 
   /**
