@@ -423,7 +423,7 @@ describe('Tokenizer-types', () => {
 
       });
 
-      it.skip('Transparency', async function() {
+      it('Transparency', async function() {
 
         this.timeout(5000);
 
