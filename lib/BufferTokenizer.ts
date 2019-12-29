@@ -1,15 +1,20 @@
-import { ITokenizer } from './types';
+import { IFileInfo, ITokenizer } from './types';
 import { EndOfStreamError } from 'then-read-stream';
 import { IGetToken, IToken } from '@tokenizer/token';
 
 export class BufferTokenizer implements ITokenizer {
 
+  public fileInfo: IFileInfo;
   public position: number = 0;
 
-  public fileSize: number;
-
-  constructor(private buffer: Buffer) {
-    this.fileSize = buffer.length;
+  /**
+   * Construct BufferTokenizer
+   * @param buffer - Buffer to tokenize
+   * @param fileInfo - Pass additional file information to the tokenizer
+   */
+  constructor(private buffer: Buffer, fileInfo?: IFileInfo) {
+    this.fileInfo = fileInfo ? fileInfo : {};
+    this.fileInfo.size = this.fileInfo.size ?  this.fileInfo.size : buffer.length;
   }
 
   /**

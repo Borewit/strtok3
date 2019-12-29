@@ -1,16 +1,36 @@
+import { IGetToken } from '@tokenizer/token';
+
+export interface IFileInfo {
+  /**
+   * File size in bytes
+   */
+  size?: number;
+  /**
+   * MIME-type of file
+   */
+  mimeType?: string;
+
+  /**
+   * File path
+   */
+  path?: string;
+
+  /**
+   * File URL
+   */
+  url?: string;
+}
+
 /**
  * The tokenizer allows us to read or peek from the tokenizer-stream.
  * The tokenizer-stream is an abstraction of a stream, file or Buffer.
- * It can also be translated in chunked reads, as done in @tokenizer/http;
  */
-import { IGetToken } from '@tokenizer/token';
-
 export interface ITokenizer {
 
   /**
-   * File length in bytes
+   * Provide access to information of the underlying information stream or file.
    */
-  fileSize?: number;
+  fileInfo: IFileInfo;
 
   /**
    * Offset in bytes (= number of bytes read) since beginning of file or stream

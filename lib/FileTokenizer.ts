@@ -1,11 +1,12 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
 import { EndOfStreamError } from 'then-read-stream';
 import * as fs from './FsPromise';
+import { IFileInfo } from './types';
 
 export class FileTokenizer extends AbstractTokenizer {
 
-  public constructor(private fd: number, public sourceFilePath: string, public fileSize?: number) {
-    super();
+  public constructor(private fd: number, fileInfo: IFileInfo) {
+    super(fileInfo);
   }
 
   /**
@@ -59,11 +60,11 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   /**
-   * @param length Number of bytes to ignore
+   * @param length - Number of bytes to ignore
    * @return resolves the number of bytes ignored, equals length if this available, otherwise the number of bytes available
    */
   public async ignore(length: number): Promise<number> {
-    const bytesLeft = this.fileSize - this.position;
+    const bytesLeft = this.fileInfo.size - this.position;
     if (length <= bytesLeft) {
       this.position += length;
       return length;
@@ -84,5 +85,5 @@ export async function fromFile(sourceFilePath: string): Promise<FileTokenizer> {
     throw new Error(`File not a file: ${sourceFilePath}`);
   }
   const fd = await fs.open(sourceFilePath, 'r');
-  return new FileTokenizer(fd, sourceFilePath, stat.size);
+  return new FileTokenizer(fd, {path: sourceFilePath, size: stat.size});
 }

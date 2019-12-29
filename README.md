@@ -30,7 +30,7 @@ It can read from:
 npm install --save strtok3
 ```
 
-## Usage
+## API
 
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
 *   [strtok3.fromFile](#method-strtok3fromfile)
@@ -46,6 +46,8 @@ All of the strtok3 methods return a [*tokenizer*](#tokenizer), either directly o
 | Parameter | Type                  | Description                |
 |-----------|-----------------------|----------------------------|
 | path      | Path to file (string) | Path to file to read from  |
+
+Note that [file-information](#IFileInfo) is automatically added.
 
 Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a file.
 
@@ -70,9 +72,10 @@ const Token = require('token-types');
 
 Create [*tokenizer*](#tokenizer) from a node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
 
-| Parameter | Type                                                                        | Description                     |
-|-----------|-----------------------------------------------------------------------------|---------------------------------|
-| stream    | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from             |
+| Parameter |  Optional | Type                                                                        | Description              |
+|-----------|-----------|-----------------------------------------------------------------------------|--------------------------|
+| stream    | no        | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from      |
+| fileInfo  | yes       | [IFileInfo](#IFileInfo)                                                     | Provide file information |
 
 Returns a [*tokenizer*](#tokenizer), via a Promise, which can be used to parse a buffer.
 
@@ -89,9 +92,10 @@ strtok3.fromStream(stream).then(tokenizer => {
 
 #### Method `strtok3.fromBuffer()`
 
-| Parameter | Type                                         | Description         |
-|-----------|----------------------------------------------|---------------------|
-| buffer    | [Buffer](https://nodejs.org/api/buffer.html) | Buffer to read from |
+| Parameter | Optional | Type                                         | Description              |
+|-----------|----------|----------------------------------------------|--------------------------|
+| buffer    | no       | [Buffer](https://nodejs.org/api/buffer.html) | Buffer to read from      |
+| fileInfo  | yes      | [IFileInfo](#IFileInfo)                      | Provide file information |
 
 Returns a [*tokenizer*](#tokenizer) which can be used to parse the provided buffer.
 
@@ -115,10 +119,10 @@ What is the difference with Nodejs.js stream?
 
 The [tokenizer.position](#attribute-tokenizerposition) keeps tracks of
 
-### Tokenizer attributes
+### strtok3 attributes
 
-#### Attribute `tokenizer.fileSize`
-Optional attribute of the total file or stream length in bytes
+#### Attribute `tokenizer.fileInfo`
+Optional attribute describing the file information, see [IFileInfo](#IFileInfo)
 
 #### Attribute `tokenizer.position`
 Pointer to the current position in the [*tokenizer*](#tokenizer) stream.
@@ -211,6 +215,33 @@ Return value `Promise<number>` Promise with number peeked from the *tokenizer-st
 
 #### Method `tokenizer.close()`
 Clean up resources, such as closing a file pointer if applicable.
+
+## IFileInfo
+
+File information interface which describes the underlying file:
+
+```ts
+export interface IFileInfo {
+  /**
+   * File size in bytes
+   */
+  size?: number;
+  /**
+   * MIME-type of file
+   */
+  mimeType?: string;
+
+  /**
+   * File path
+   */
+  path?: string;
+
+  /**
+   * File URL
+   */
+  url?: string;
+}
+```
 
 ## Token
 
