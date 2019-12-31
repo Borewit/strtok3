@@ -31,6 +31,10 @@
   "license": "MIT",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
   "bugs": {
     "url": "https://github.com/Borewit/strtok3/issues"
   },
