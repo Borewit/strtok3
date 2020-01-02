@@ -23,6 +23,7 @@ It can read from:
 *   A Node.js [stream](https://nodejs.org/api/stream.html).
 *   A [Buffer](https://nodejs.org/api/buffer.html)
 *   HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
+*   Chunked [Amazon S3](https://aws.amazon.com/s3) access provided by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
 
 ## Installation
 
