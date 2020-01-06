@@ -1,5 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
-import { EndOfStreamError } from 'then-read-stream';
+import { EndOfStreamError } from 'peek-readable';
 import * as fs from './FsPromise';
 import { IFileInfo } from './types';
 
