@@ -24,9 +24,9 @@ update_configs:
           dependency_name: "nyc"
       - match:
           dependency_name: "token-types"
-      -match:
-        dependency_name: "eslint"
-      -match:
-        dependency_name: "@typescript-eslint/eslint-plugin"
-      -match:
-        dependency_name: "@typescript-eslint/parser"
+      - match:
+          dependency_name: "eslint"
+      - match:
+          dependency_name: "@typescript-eslint/eslint-plugin"
+      - match:
+          dependency_name: "@typescript-eslint/parser"
