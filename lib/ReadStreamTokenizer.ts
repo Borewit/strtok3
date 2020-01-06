@@ -1,5 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
-import { EndOfStreamError, StreamReader } from 'then-read-stream';
+import { EndOfStreamError, StreamReader } from 'peek-readable';
 import * as Stream from 'stream';
 import { IFileInfo } from './types';
 import * as _debug from 'debug';

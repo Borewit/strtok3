@@ -2,8 +2,8 @@ import { ReadStreamTokenizer } from './ReadStreamTokenizer';
 import * as Stream from 'stream';
 import { BufferTokenizer } from './BufferTokenizer';
 import { IFileInfo } from './types';
-export { EndOfStreamError } from 'then-read-stream';
-export {  ITokenizer, IFileInfo } from './types';
+export { EndOfStreamError } from 'peek-readable';
+export { ITokenizer, IFileInfo } from './types';
 export { IToken, IGetToken } from '@tokenizer/token';
 
 /**

@@ -1,5 +1,5 @@
 import { ITokenizer, IFileInfo } from './types';
-import { EndOfStreamError } from 'then-read-stream';
+import { EndOfStreamError } from 'peek-readable';
 import { IGetToken, IToken } from '@tokenizer/token';
 
 /**

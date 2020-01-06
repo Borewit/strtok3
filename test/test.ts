@@ -4,7 +4,7 @@ import * as strtok3 from '../lib';
 import * as Path from 'path';
 import * as fs from '../lib/FsPromise';
 import { FileTokenizer } from '../lib/FileTokenizer';
-import { EndOfStreamError } from 'then-read-stream';
+import { EndOfStreamError } from 'peek-readable';
 
 interface ITokenizerTest {
   name: string;
