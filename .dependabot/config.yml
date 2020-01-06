@@ -30,3 +30,5 @@ update_configs:
           dependency_name: "@typescript-eslint/eslint-plugin"
       - match:
           dependency_name: "@typescript-eslint/parser"
+      - match:
+          dependency_name: "peek-readable"
