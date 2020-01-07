@@ -39,7 +39,7 @@
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.1.4",
     "@typescript-eslint/eslint-plugin": "^2.14.0",
-    "@typescript-eslint/parser": "^2.14.0",
+    "@typescript-eslint/parser": "^2.15.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.7",
     "del-cli": "^3.0.0",
