@@ -22,7 +22,7 @@
     "start": "npm run compile && npm run lint && npm run cover-test"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "repository": {
     "type": "git",
