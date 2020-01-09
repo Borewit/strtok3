@@ -269,7 +269,7 @@ export interface IGetToken<T> {
 The *tokenizer* reads `token.len` bytes from the *tokenizer-stream* into a Buffer.
 The `token.get` will be called with the Buffer. `token.get` is responsible for conversion from the buffer to the desired output type.
 
-# Browser compatibility
+## Browser compatibility
 To exclude fs based dependencies, you can use a submodule-import from 'strtok3/lib/core'.
 
 | function              | 'strtok3'           | 'strtok3/lib/core'  |
@@ -278,8 +278,7 @@ To exclude fs based dependencies, you can use a submodule-import from 'strtok3/l
 | `parseStream`         | ✓                   | ✓                   |
 | `fromFile`            | ✓                   |                     |
 
-
-## Working with Web-API readable stream
+### Working with Web-API readable stream
 To convert a [Web-API readable stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamDefaultReader) into a [Node.js readable stream]((https://nodejs.org/api/stream.html#stream_readable_streams)), you can use [readable-web-to-node-stream](https://github.com/Borewit/readable-web-to-node-stream) to convert one in another.
 
 Example submodule-import:
@@ -296,4 +295,3 @@ const {ReadableWebToNodeStream} = require('readable-web-to-node-stream');
   const tokenizer = strtok3core.fromStream(nodeStream); // And we now have tokenizer in a web environment
 })();
 ```
-
