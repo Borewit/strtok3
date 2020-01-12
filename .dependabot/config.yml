@@ -9,7 +9,6 @@ update_configs:
           dependency_name: "@types/node"
       - match:
           dependency_name: "@types/chai"
-          update_type: "semver:minor"
       - match:
           dependency_name: "ts-node"
       - match:
@@ -32,3 +31,5 @@ update_configs:
           dependency_name: "@typescript-eslint/parser"
       - match:
           dependency_name: "peek-readable"
+      - match:
+          dependency_name: "@tokenizer/token"
