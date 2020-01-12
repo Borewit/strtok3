@@ -10,3 +10,4 @@ src/
 tslint.json
 **/tsconfig.js
 **/*.log
+.idea
