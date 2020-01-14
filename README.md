@@ -28,7 +28,7 @@ It can read from:
 ## Installation
 
 ```sh
-npm install --save strtok3
+npm install strtok3
 ```
 
 ## API
