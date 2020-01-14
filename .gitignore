@@ -8,3 +8,4 @@ test/**/*.js.map
 test/**/*.d.ts
 test/resources/tmp.dat
 coverage
+.idea
