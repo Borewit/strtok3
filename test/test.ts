@@ -26,18 +26,18 @@ describe('strtok3', () => {
   const tokenizerTests: ITokenizerTest[] = [
     {
       name: 'fromStream()',
-      loadTokenizer: testFile => {
+      loadTokenizer: async testFile => {
         const stream = fs.createReadStream(getResourcePath(testFile));
         return strtok3.fromStream(stream);
       }
     }, {
       name: 'fromFile()',
-      loadTokenizer: testFile => {
+      loadTokenizer: async testFile => {
         return strtok3.fromFile(Path.join(__dirname, 'resources', testFile));
       }
     }, {
       name: 'fromBuffer()',
-      loadTokenizer: testFile => {
+      loadTokenizer: async testFile => {
         return fs.readFile(Path.join(__dirname, 'resources', testFile)).then(data => {
           return strtok3.fromBuffer(data);
         });
@@ -45,9 +45,81 @@ describe('strtok3', () => {
     }
   ];
 
-  tokenizerTests.forEach(tokenizerType => {
-
+  for (const tokenizerType of tokenizerTests) {
     describe(tokenizerType.name, () => {
+
+      describe('tokenizer read options', () => {
+
+        it('option.offset', async () => {
+          const buf = Buffer.alloc(7);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          assert.equal(await rst.readBuffer(buf, {length: 6, offset: 1}), 6);
+        });
+
+        it('option.length', async () => {
+          const buf = Buffer.alloc(7);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          assert.equal(await rst.readBuffer(buf, {length: 2}), 2);
+        });
+
+        it('default length', async () => {
+          const buf = Buffer.alloc(6);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          assert.equal(await rst.readBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
+        });
+
+        it('option.maybeLess = true', async () => {
+          const buffer = Buffer.alloc(4);
+          const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
+          const len = await rst.readBuffer(buffer, {mayBeLess: true});
+          assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
+        });
+
+        it('option.position', async () => {
+          const buffer = Buffer.alloc(5);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          const len = await rst.readBuffer(buffer, {position: 1});
+          assert.strictEqual(len, 5, 'return value');
+          assert.strictEqual(buffer.toString('binary'), '\x02\x03\x04\x05\x06');
+        });
+      });
+
+      describe('tokenizer peek options', () => {
+
+        it('option.offset', async () => {
+          const buf = Buffer.alloc(7);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          assert.equal(await rst.peekBuffer(buf, {length: 6, offset: 1}), 6);
+        });
+
+        it('option.length', async () => {
+          const buf = Buffer.alloc(7);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          assert.equal(await rst.peekBuffer(buf, {length: 2}), 2);
+        });
+
+        it('default length', async () => {
+          const buf = Buffer.alloc(6);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          assert.equal(await rst.peekBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
+        });
+
+        it('option.maybeLess = true', async () => {
+          const buffer = Buffer.alloc(4);
+          const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
+          const len = await rst.peekBuffer(buffer, {mayBeLess: true});
+          assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
+        });
+
+        it('option.position', async () => {
+          const buffer = Buffer.alloc(5);
+          const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
+          const len = await rst.peekBuffer(buffer, {position: 1});
+          assert.strictEqual(len, 5, 'return value');
+          assert.strictEqual(buffer.toString('binary'), '\x02\x03\x04\x05\x06');
+        });
+
+      });
 
       it('should decode buffer', async () => {
 
@@ -412,7 +484,7 @@ describe('strtok3', () => {
           assert.equal(typeof value, 'number');
           assert.equal(value, 0x1a001a00, 'UINT32_BE #2');
           value = await rst.readToken(Token.UINT32_LE);
-          assert.equal(typeof value,  'number');
+          assert.equal(typeof value, 'number');
           assert.equal(value, 0x001a001a, 'UINT32_LE #3');
           value = await rst.readToken(Token.UINT32_BE);
           assert.equal(typeof value, 'number');
@@ -512,35 +584,35 @@ describe('strtok3', () => {
         const readBuffer = Buffer.alloc(1);
 
         assert.equal(0, rst.position);
-        let len = await rst.peekBuffer(peekBuffer, 0, 3); // Peek #1
+        let len = await rst.peekBuffer(peekBuffer, {length: 3}); // Peek #1
         assert.equal(3, len);
         assert.deepEqual(peekBuffer, Buffer.from('\x01\x02\x03', 'binary'), 'Peek #1');
         assert.equal(rst.position, 0);
-        len = await rst.readBuffer(readBuffer, 0, 1); // Read #1
+        len = await rst.readBuffer(readBuffer, {length: 1}); // Read #1
         assert.equal(len, 1);
         assert.equal(rst.position, 1);
         assert.deepEqual(readBuffer, Buffer.from('\x01', 'binary'), 'Read #1');
-        len = await rst.peekBuffer(peekBuffer, 0, 3); // Peek #2
+        len = await rst.peekBuffer(peekBuffer, {length: 3}); // Peek #2
         assert.equal(len, 3);
         assert.equal(rst.position, 1);
         assert.deepEqual(peekBuffer, Buffer.from('\x02\x03\x04', 'binary'), 'Peek #2');
-        len = await rst.readBuffer(readBuffer, 0, 1); // Read #2
+        len = await rst.readBuffer(readBuffer, {length: 1}); // Read #2
         assert.equal(len, 1);
         assert.equal(rst.position, 2);
         assert.deepEqual(readBuffer, Buffer.from('\x02', 'binary'), 'Read #2');
-        len = await rst.peekBuffer(peekBuffer, 0, 3); // Peek #3
+        len = await rst.peekBuffer(peekBuffer, {length: 3}); // Peek #3
         assert.equal(len, 3);
         assert.equal(rst.position, 2);
         assert.deepEqual(peekBuffer, Buffer.from('\x03\x04\x05', 'binary'), 'Peek #3');
-        len = await rst.readBuffer(readBuffer, 0, 1); // Read #3
+        len = await rst.readBuffer(readBuffer, {length: 1}); // Read #3
         assert.equal(len, 1);
         assert.equal(rst.position, 3);
         assert.deepEqual(readBuffer, Buffer.from('\x03', 'binary'), 'Read #3');
-        len = await rst.peekBuffer(peekBuffer, 0, 2); // Peek #4
+        len = await rst.peekBuffer(peekBuffer, {length: 2}); // Peek #4
         assert.equal(len, 2, '3 bytes requested to peek, only 2 bytes left');
         assert.equal(rst.position, 3);
         assert.deepEqual(peekBuffer, Buffer.from('\x04\x05\x05', 'binary'), 'Peek #4');
-        len = await rst.readBuffer(readBuffer, 0, 1); // Read #4
+        len = await rst.readBuffer(readBuffer, {length: 1}); // Read #4
         assert.equal(len, 1);
         assert.equal(rst.position, 4);
         assert.deepEqual(readBuffer, Buffer.from('\x04', 'binary'), 'Read #4');
@@ -698,14 +770,6 @@ describe('strtok3', () => {
           }
         });
 
-        it('should not throw an EOF if we peek to buffer with maybeLess=true', async () => {
-
-          const buffer = Buffer.alloc(4);
-          const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
-          const len = await rst.peekBuffer(buffer, 0, buffer.length, rst.position, true);
-          assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
-        });
-
       });
 
       it('should be able to read from a file', async () => {
@@ -747,7 +811,5 @@ describe('strtok3', () => {
       });
 
     }); // End of test "Tokenizer-types"
-
-  });
-
+  }
 });

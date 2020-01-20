@@ -48,7 +48,7 @@ All of the strtok3 methods return a [*tokenizer*](#tokenizer), either directly o
 |-----------|-----------------------|----------------------------|
 | path      | Path to file (string) | Path to file to read from  |
 
-Note that [file-information](#IFileInfo) is automatically added.
+Note that [file-information](#file-information) is automatically added.
 
 Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a file.
 
@@ -139,62 +139,54 @@ There are to groups of methods
 #### Method `tokenizer.readBuffer()`
 
 Read buffer from stream.
-`readBuffer(buffer, offset?, length?, position?, maybeless?)`
+`readBuffer(buffer, options?)`
 
-| Parameter  | Type                                                           | Description                                                                                                                           |
-|------------|----------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| buffer     | [Buffer](https://nodejs.org/api/buffer.html) &#124; Uint8Array | Target buffer to write the data read to                                                                                               |
-| offset?    | number                                                         | The offset in the buffer to start writing at; if not provided, start at 0                                                             |
-| length?    | number                                                         | An integer specifying the number of bytes to read                                                                                     |
-| position?  | number                                                         | An integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position. |
-| maybeless? | boolean                                                        | If set, will not throw an EOF error if the less then the requested length could be read                                               |
+| Parameter  | Type                                                           | Description                                                                                                                                                                                                                            |
+|------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| buffer     | [Buffer](https://nodejs.org/api/buffer.html) &#124; Uint8Array | Target buffer to write the data read to                                                                                                                                                                                                |
+| options    | [IReadChunkOptions](#ireadchunkoptions)                        | An integer specifying the number of bytes to read                                                                                                                                                                                      |
 
-Return value `Promise<number>` Promise with number of bytes read
+Return value `Promise<number>` Promise with number of bytes read. The number of bytes read maybe if less, *mayBeLess* flag was set.
 
 #### Method `tokenizer.peekBuffer()`
 
 Peek (read ahead) buffer from [*tokenizer*](#tokenizer)
-`peekBuffer(buffer, offset?, length?, position?, maybeless?)`
+`peekBuffer(buffer,  options?)`
 
-| Parameter  | Type                     | Description                                                                                                           |
-|------------|--------------------------|-----------------------------------------------------------------------------------------------------------------------|
-| buffer     | Buffer &#124; Uint8Array | Target buffer to write the data read (peeked) to                                                                      |
-| offset?    | number                   | The offset in the buffer to start writing at; if not provided, start at 0                                             |
-| length?    | number                   | The number of bytes to read.                                                                                          |
-| position?  | number                   | Offset where to begin reading within the file. If position is null, data will be read from the current file position. |
-| maybeless? | boolean                  | If set, will not throw an EOF error if the less then the requested length could be read                               |
+| Parameter  | Type                                    | Description                                         |
+|------------|-----------------------------------------|-----------------------------------------------------|
+| buffer     | Buffer &#124; Uint8Array                | Target buffer to write the data read (peeked) to.   |
+| options    | [IReadChunkOptions](#ireadchunkoptions) | An integer specifying the number of bytes to read.  |                                                                                                                           |
 
-Return value `Promise<number>` Promise with number of bytes read
+Return value `Promise<number>` Promise with number of bytes read. The number of bytes read maybe if less, *mayBeLess* flag was set.
 
 #### Method `tokenizer.readToken()`
 
 Read a *token* from the tokenizer-stream.
-`readToken(token, position?, maybeless?)`
+`readToken(token, position?)`
 
-| Parameter  | Type                    | Description                                                                                                                           |
-|------------|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
-| token      | [IGetToken](#IGetToken) | Token to read from the tokenizer-stream.                                                                                              |
-| position?  | number                  | Offset where to begin reading within the file. If position is null, data will be read from the current file position.                 |
-| maybeless? | boolean                 | If set, will not throw an EOF error if the less then the requested length could be read.                                              |
+| Parameter  | Type                    | Description                                                                                                           |
+|------------|-------------------------|---------------------------------------------------------------------------------------------------------------------- |
+| token      | [IGetToken](#IGetToken) | Token to read from the tokenizer-stream.                                                                              |
+| position?  | number                  | Offset where to begin reading within the file. If position is null, data will be read from the current file position. |
 
-Return value `Promise<T>`. Promise with token value read from the *tokenizer-stream*.
+Return value `Promise<number>`. Promise with number of bytes read. The number of bytes read maybe if less, *mayBeLess* flag was set.
 
 #### Method `tokenizer.peekToken()`
 
-Peek a *token* from the tokenizer-stream.
-`peekToken(token, position?, maybeless?)`
+Peek a *token* from the [*tokenizer*](#tokenizer).
+`peekToken(token, position?)`
 
 | Parameter  | Type                       | Description                                                                                                             |
 |------------|----------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | token      | [IGetToken<T>](#IGetToken) | Token to read from the tokenizer-stream.                                                                                |
 | position?  | number                     | Offset where to begin reading within the file. If position is null, data will be read from the current file position.   |
-| maybeless? | boolean                    | If set, will not throw an EOF error if the less then the requested length could be read                                 |
 
-Return value `Promise<T>` Promise with token value peeked from the *tokenizer-stream*.
+Return value `Promise<T>` Promise with token value peeked from the [*tokenizer*](#tokenizer).
 
 #### Method `tokenizer.readNumber()`
 
-Peek a numeric [*token*](#token) from the *tokenizer-stream*.
+Peek a numeric [*token*](#token) from the [*tokenizer*](#tokenizer).
 `readNumber(token)`
 
 | Parameter  | Type                            | Description                                        |
@@ -217,32 +209,32 @@ Return value `Promise<number>` Promise with number peeked from the *tokenizer-st
 #### Method `tokenizer.close()`
 Clean up resources, such as closing a file pointer if applicable.
 
+### IReadChunkOptions
+
+Each attribute is optional:
+
+| Attribute | Type    | Description                                                                                                                                                                                                                   |
+|-----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| offset    | number  | The offset in the buffer to start writing at; if not provided, start at 0                                                                                                                                                     |
+| length    | number  | Requested number of bytes to read.                                                                                                                                                                                            |
+| position  | number  | Position where to peek from the file. If position is null, data will be read from the [current file position](#attribute-tokenizerposition). Position may not be less then [tokenizer.position](#attribute-tokenizerposition) |
+| mayBeLess | boolean | If and only if set, will not throw an EOF error if less then the requested *mayBeLess* could be read.                                                                                                                         |
+
+Example:
+```js
+  tokenizer.peekBuffer(buffer, {mayBeLess: true});
+```
+
 ## IFileInfo
 
-File information interface which describes the underlying file:
+File information interface which describes the underlying file, each attribute is optional.
 
-```ts
-export interface IFileInfo {
-  /**
-   * File size in bytes
-   */
-  size?: number;
-  /**
-   * MIME-type of file
-   */
-  mimeType?: string;
-
-  /**
-   * File path
-   */
-  path?: string;
-
-  /**
-   * File URL
-   */
-  url?: string;
-}
-```
+| Attribute | Type    | Description                                                                                       |
+|-----------|---------|---------------------------------------------------------------------------------------------------|
+| size      | number  | File size in bytes                                                                                | 
+| mimeType  | number  | [MIME-type](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types) of file. |
+| path      | number  | File path                                                                                         |
+| url       | boolean | File URL                                                                                          |
 
 ## Token
 

@@ -21,6 +21,32 @@ export interface IFileInfo {
   url?: string;
 }
 
+export interface IReadChunkOptions {
+
+  /**
+   * The offset in the buffer to start writing at; default is 0
+   */
+  offset?: number;
+
+  /**
+   * Number of bytes to read.
+   */
+  length?: number;
+
+  /**
+   * Position where to begin reading from the file.
+   * Default it is `tokenizer.position`.
+   * Position may not be less then `tokenizer.position`.
+   */
+  position?: number;
+
+  /**
+   * If set, will not throw an EOF error if not all of the requested data could be read
+   */
+  mayBeLess?: boolean;
+}
+
+
 /**
  * The tokenizer allows us to read or peek from the tokenizer-stream.
  * The tokenizer-stream is an abstraction of a stream, file or Buffer.
@@ -40,24 +66,18 @@ export interface ITokenizer {
   /**
    * Peek (read ahead) buffer from tokenizer
    * @param buffer - Target buffer to fill with data peek from the tokenizer-stream
-   * @param offset - The offset in the buffer to start writing at; if not provided, start at 0
-   * @param length - is an integer specifying the number of bytes to read
-   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
+   * @param options - Read behaviour options
    * @returns Promise with number of bytes read
    */
-  peekBuffer(buffer: Buffer, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
+  peekBuffer(buffer: Buffer, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Peek (read ahead) buffer from tokenizer
    * @param buffer - Target buffer to fill with data peeked from the tokenizer-stream
-   * @param offset - Offset in the buffer to start writing at; if not provided, start at 0
-   * @param length - The number of bytes to read
-   * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
-   * @param maybeless - If set, will not throw an EOF error if not all of the requested data could be read
+   * @param options - Additional read options
    * @returns Promise with number of bytes read
    */
-  readBuffer(buffer: Buffer, offset?: number, length?: number, position?: number, maybeless?: boolean): Promise<number>;
+  readBuffer(buffer: Buffer, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Peek a token from the tokenizer-stream.
@@ -71,9 +91,8 @@ export interface ITokenizer {
    * Read a token from the tokenizer-stream.
    * @param token - Token to peek from the tokenizer-stream.
    * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
-   * @param maybeless - If set, will not throw an EOF error if the less then the requested length could be read.
    */
-  readToken<T>(token: IGetToken<T>, position?: number | null, maybeless?: boolean): Promise<T>;
+  readToken<T>(token: IGetToken<T>, position?: number): Promise<T>;
 
   /**
    * Peek a numeric token from the stream
@@ -91,9 +110,9 @@ export interface ITokenizer {
 
   /**
    * Ignore given number of bytes
-   * @param actual number of bytes ignored
+   * @param length - Number of bytes ignored
    */
-  ignore(length: number);
+  ignore(length: number): Promise<number>;
 
   /**
    * Clean up resources.

@@ -1,4 +1,4 @@
-import { IFileInfo, ITokenizer } from './types';
+import { IFileInfo, IReadChunkOptions, ITokenizer } from './types';
 import { EndOfStreamError } from 'peek-readable';
 import { IGetToken, IToken } from '@tokenizer/token';
 
@@ -20,14 +20,19 @@ export class BufferTokenizer implements ITokenizer {
   /**
    * Read buffer from tokenizer
    * @param buffer
-   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an integer specifying the number of bytes to read
-   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @returns {Promise<TResult|number>}
+   * @param options - Read behaviour options
+   * @returns {Promise<number>}
    */
-  public async readBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number): Promise<number> {
-    this.position = position || this.position;
-    return this.peekBuffer(buffer, offset, length, this.position).then(bytesRead => {
+  public async readBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number> {
+
+    if (options && options.position) {
+      if (options.position < this.position) {
+        throw new Error('`options.position` can be less than `tokenizer.position`');
+      }
+      this.position = options.position;
+    }
+
+    return this.peekBuffer(buffer, options).then(bytesRead => {
       this.position += bytesRead;
       return bytesRead;
     });
@@ -36,19 +41,42 @@ export class BufferTokenizer implements ITokenizer {
   /**
    * Peek (read ahead) buffer from tokenizer
    * @param buffer
-   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an integer specifying the number of bytes to read
-   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @param maybeLess If true, will return the bytes available if available bytes is less then length.
-   * @returns {Promise<TResult|number>}
+   * @param options - Read behaviour options
+   * @returns {Promise<number>}
    */
-  public async peekBuffer(buffer: Buffer | Uint8Array, offset?: number, length?: number, position?: number, maybeLess: boolean = false): Promise<number> {
+  public async peekBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number> {
+
+    let offset = 0;
+    let length = buffer.length;
+    let position = this.position;
+
+    if (options) {
+      if (options.position) {
+        if (options.position < this.position) {
+          throw new Error('`options.position` can be less than `tokenizer.position`');
+        }
+        position = options.position;
+      }
+      if (Number.isInteger(options.length)) {
+        length = options.length;
+      } else {
+        length -= options.offset || 0;
+      }
+      if (options.offset) {
+        offset = options.offset;
+      }
+    }
+
+    if (length === 0) {
+      return Promise.resolve(0);
+    }
+
     position = position || this.position;
     if (!length) {
       length = buffer.length;
     }
     const bytes2read = Math.min(this.buffer.length - position, length);
-    if (!maybeLess && bytes2read < length) {
+    if ((!options || !options.mayBeLess) && bytes2read < length) {
       throw new EndOfStreamError();
     } else {
       this.buffer.copy(buffer, offset, position, position + bytes2read);
