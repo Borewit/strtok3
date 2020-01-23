@@ -118,7 +118,7 @@ What is the difference with Nodejs.js stream?
 *   The *tokenizer-stream* supports jumping / seeking in a the *tokenizer-stream* using [`tokenizer.ignore()`](#method-tokenizerignore)
 *   In addition to *read* methods, it has *peek* methods, to read a ahead and check what is coming.
 
-The [tokenizer.position](#attribute-tokenizerposition) keeps tracks of
+The [tokenizer.position](#attribute-tokenizerposition) keeps tracks of the read position.
 
 ### strtok3 attributes
 
