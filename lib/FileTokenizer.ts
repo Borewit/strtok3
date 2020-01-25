@@ -1,7 +1,7 @@
 import { AbstractTokenizer } from './AbstractTokenizer';
 import { EndOfStreamError } from 'peek-readable';
 import * as fs from './FsPromise';
-import { IFileInfo } from './types';
+import { IFileInfo, IReadChunkOptions } from './types';
 
 export class FileTokenizer extends AbstractTokenizer {
 
@@ -12,30 +12,37 @@ export class FileTokenizer extends AbstractTokenizer {
   /**
    * Read buffer from file
    * @param buffer
-   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an integer specifying the number of bytes to read, of not provided the buffer length will be used
-   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
+   * @param options - Read behaviour options
    * @returns Promise number of bytes read
    */
-  public async readBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position?: number): Promise<number> {
+  public async readBuffer(buffer: Buffer, options?: IReadChunkOptions): Promise<number> {
 
-    if (position) {
-      this.position = position;
+    let offset = 0;
+    let length = buffer.length;
+
+    if (options) {
+      if (options.position) {
+        if (options.position < this.position) {
+          throw new Error('`options.position` can be less than `tokenizer.position`');
+        }
+        this.position = options.position;
+      }
+      if (Number.isInteger(options.length)) {
+        length = options.length;
+      } else {
+        length -= options.offset || 0;
+      }
+      if (options.offset) {
+        offset = options.offset;
+      }
     }
-
     if (length === 0) {
       return Promise.resolve(0);
     }
 
-    if (!length) {
-      length = buffer.length;
-    }
-
     const res = await fs.read(this.fd, buffer, offset, length, this.position);
-    if (res.bytesRead < length)
-      throw new EndOfStreamError();
     this.position += res.bytesRead;
-    if (res.bytesRead < length) {
+    if (res.bytesRead < length && (!options || !options.mayBeLess)) {
       throw new EndOfStreamError();
     }
     return res.bytesRead;
@@ -44,16 +51,38 @@ export class FileTokenizer extends AbstractTokenizer {
   /**
    * Peek buffer from file
    * @param buffer
-   * @param offset is the offset in the buffer to start writing at; if not provided, start at 0
-   * @param length is an integer specifying the number of bytes to read, of not provided the buffer length will be used
-   * @param position is an integer specifying where to begin reading from in the file. If position is null, data will be read from the current file position.
-   * @param maybeless If set, will not throw an EOF error if the less then the requested length could be read
+   * @param options - Read behaviour options
    * @returns Promise number of bytes read
    */
-  public async peekBuffer(buffer: Buffer, offset: number = 0, length: number = buffer.length, position: number = this.position, maybeless: boolean = false): Promise<number> {
+  public async peekBuffer(buffer: Buffer, options?: IReadChunkOptions): Promise<number> {
+
+    let offset = 0;
+    let length = buffer.length;
+    let position = this.position;
+
+    if (options) {
+      if (options.position) {
+        if (options.position < this.position) {
+          throw new Error('`options.position` can be less than `tokenizer.position`');
+        }
+        position = options.position;
+      }
+      if (Number.isInteger(options.length)) {
+        length = options.length;
+      } else {
+        length -= options.offset || 0;
+      }
+      if (options.offset) {
+        offset = options.offset;
+      }
+    }
+
+    if (length === 0) {
+      return Promise.resolve(0);
+    }
 
     const res = await fs.read(this.fd, buffer, offset, length, position);
-    if (!maybeless && res.bytesRead < length) {
+    if ((!options || !options.mayBeLess) && res.bytesRead < length) {
       throw new EndOfStreamError();
     }
     return res.bytesRead;
