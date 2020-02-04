@@ -23,7 +23,7 @@ export class FileTokenizer extends AbstractTokenizer {
     if (options) {
       if (options.position) {
         if (options.position < this.position) {
-          throw new Error('`options.position` can be less than `tokenizer.position`');
+          throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
         }
         this.position = options.position;
       }
@@ -63,7 +63,7 @@ export class FileTokenizer extends AbstractTokenizer {
     if (options) {
       if (options.position) {
         if (options.position < this.position) {
-          throw new Error('`options.position` can be less than `tokenizer.position`');
+          throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
         }
         position = options.position;
       }

@@ -27,7 +27,7 @@ export class BufferTokenizer implements ITokenizer {
 
     if (options && options.position) {
       if (options.position < this.position) {
-        throw new Error('`options.position` can be less than `tokenizer.position`');
+        throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
       }
       this.position = options.position;
     }
