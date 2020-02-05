@@ -51,7 +51,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
           await this.ignore(skipBytes);
           return this.readBuffer(buffer, options);
         } else if (skipBytes < 0) {
-          throw new Error('`options.position` can be less than `tokenizer.position`');
+          throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
         }
       }
 
