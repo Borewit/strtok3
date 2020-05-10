@@ -46,7 +46,7 @@ update_configs:
       - match:
           dependency_name: "tslint"
       - match:
-          dependency_name: "eslint-plugin-arrow"
+          dependency_name: "eslint-plugin-prefer-arrow"
       - match:
           dependency_name: "@typescript-eslint/eslint-plugin-tslint"
       - match:
