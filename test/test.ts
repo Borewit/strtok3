@@ -5,6 +5,7 @@ import * as Path from 'path';
 import * as fs from '../lib/FsPromise';
 import { FileTokenizer } from '../lib/FileTokenizer';
 import { EndOfStreamError } from 'peek-readable';
+import { PassThrough } from 'stream';
 
 interface ITokenizerTest {
   name: string;
@@ -810,3 +811,15 @@ for (const tokenizerType of tokenizerTests) {
 
   }); // End of test "Tokenizer-types"
 }
+
+it('fromStream with mayBeLess flag', async () => {
+
+  // Initialize empty stream
+  const stream = new PassThrough();
+  const tokenizer = await strtok3.fromStream(stream);
+  stream.end();
+
+  // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
+  const buffer = Buffer.alloc(5);
+  await tokenizer.peekBuffer(buffer, {mayBeLess: true});
+});
