@@ -812,14 +812,36 @@ for (const tokenizerType of tokenizerTests) {
   }); // End of test "Tokenizer-types"
 }
 
-it('fromStream with mayBeLess flag', async () => {
+describe('fromStream with mayBeLess flag', () => {
 
-  // Initialize empty stream
-  const stream = new PassThrough();
-  const tokenizer = await strtok3.fromStream(stream);
-  stream.end();
+  it('mayBeLess=true', async () => {
+    // Initialize empty stream
+    const stream = new PassThrough();
+    const tokenizer = await strtok3.fromStream(stream);
+    stream.end();
 
-  // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
-  const buffer = Buffer.alloc(5);
-  await tokenizer.peekBuffer(buffer, {mayBeLess: true});
+    // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
+    const buffer = Buffer.alloc(5);
+    await tokenizer.peekBuffer(buffer, {mayBeLess: true});
+  });
+
+  it('mayBeLess=false', async () => {
+    try {
+      // Initialize empty stream
+      const stream = new PassThrough();
+      const tokenizer = await strtok3.fromStream(stream);
+      stream.end();
+
+      // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
+      const buffer = Buffer.alloc(5);
+      await tokenizer.peekBuffer(buffer, {mayBeLess: false});
+    } catch (err) {
+      assert.equal(err.message, 'End-Of-Stream');
+      return;
+    }
+    assert.fail('Should throw End-Of-Stream error');
+  });
+
 });
+
+
