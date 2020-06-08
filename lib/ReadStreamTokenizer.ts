@@ -117,6 +117,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       if (options && options.mayBeLess && err instanceof EndOfStreamError) {
         return bytesRead;
       }
+      throw err;
     }
     if ((!options || !options.mayBeLess) && bytesRead < length) {
       throw new EndOfStreamError();
