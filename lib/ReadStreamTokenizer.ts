@@ -5,7 +5,7 @@ import { IFileInfo, IReadChunkOptions } from './types';
 import * as _debug from 'debug';
 
 const debug = _debug('strtok3:ReadStreamTokenizer');
-const maxBufferSize = 1 * 1000 * 1000;
+const maxBufferSize = 256000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
