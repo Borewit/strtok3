@@ -822,7 +822,8 @@ describe('fromStream with mayBeLess flag', () => {
 
     // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
     const buffer = Buffer.alloc(5);
-    await tokenizer.peekBuffer(buffer, {mayBeLess: true});
+    const bytesRead = await tokenizer.peekBuffer(buffer, {mayBeLess: true});
+    assert.strictEqual(bytesRead, 0);
   });
 
   it('mayBeLess=false', async () => {
