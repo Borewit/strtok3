@@ -115,7 +115,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       bytesRead = await this.streamReader.peek(buffer, offset, length);
     } catch (err) {
       if (options && options.mayBeLess && err instanceof EndOfStreamError) {
-        return bytesRead;
+        return 0;
       }
       throw err;
     }
