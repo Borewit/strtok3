@@ -48,7 +48,7 @@
     "coveralls": "^3.1.0",
     "del-cli": "^3.0.0",
     "eslint": "^6.8.0",
-    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-prefer-arrow": "^1.2.1",
     "mocha": "^7.2.0",
     "nyc": "^15.1.0",
