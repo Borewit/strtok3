@@ -52,7 +52,7 @@
     "eslint-plugin-prefer-arrow": "^1.2.1",
     "mocha": "^7.2.0",
     "nyc": "^15.1.0",
-    "remark-cli": "^8.0.0",
+    "remark-cli": "^8.0.1",
     "remark-preset-lint-recommended": "^4.0.1",
     "source-map-support": "^0.5.16",
     "token-types": "^2.0.0",
