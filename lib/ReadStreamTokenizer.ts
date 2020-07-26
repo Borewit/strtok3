@@ -2,9 +2,9 @@ import { AbstractTokenizer } from './AbstractTokenizer';
 import { EndOfStreamError, StreamReader } from 'peek-readable';
 import * as Stream from 'stream';
 import { IFileInfo, IReadChunkOptions } from './types';
-import * as _debug from 'debug';
+// import * as _debug from 'debug';
 
-const debug = _debug('strtok3:ReadStreamTokenizer');
+// const debug = _debug('strtok3:ReadStreamTokenizer');
 const maxBufferSize = 256000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
@@ -126,7 +126,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public async ignore(length: number): Promise<number> {
-    debug(`ignore ${this.position}...${this.position + length - 1}`);
+    // debug(`ignore ${this.position}...${this.position + length - 1}`);
     const bufSize = Math.min(maxBufferSize, length);
     const buf = Buffer.alloc(bufSize);
     let totBytesRead = 0;
