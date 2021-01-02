@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Borewit/strtok3.svg?branch=master)](https://travis-ci.org/Borewit/strtok3)
+![Node.js CI](https://github.com/Borewit/strtok3/workflows/Node.js%20CI/badge.svg)
 [![NPM version](https://badge.fury.io/js/strtok3.svg)](https://npmjs.org/package/strtok3)
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmcharts.com/compare/strtok3,token-types?start=1200&interval=30)
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=Borewit/music-metadata)](https://dependabot.com)[![Coverage status](https://coveralls.io/repos/github/Borewit/strtok3/badge.svg?branch=master)](https://coveralls.io/github/Borewit/strtok3?branch=master)
