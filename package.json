@@ -6,6 +6,10 @@
     "name": "Borewit",
     "url": "https://github.com/Borewit"
   },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/Borewit"
+  },
   "scripts": {
     "clean": "del-cli lib/**/*.js lib/**/*.js.map lib/**/*.d.ts test/**/*.js test/**/*.js.map",
     "compile-src": "tsc -p lib",
