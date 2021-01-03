@@ -26,7 +26,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param options - Additional read options
    * @returns Promise with number of bytes read
    */
-  public abstract async readBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number>;
+  public abstract readBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Peek (read ahead) buffer from tokenizer
@@ -34,7 +34,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param options - Peek behaviour options
    * @returns Promise with number of bytes read
    */
-  public abstract async peekBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number>;
+  public abstract peekBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Read a token from the tokenizer-stream
@@ -93,7 +93,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param length - Number of bytes to skip (ignore)
    * @return actual number of bytes ignored
    */
-  public abstract async ignore(length: number): Promise<number>;
+  public abstract ignore(length: number): Promise<number>;
 
   public async close(): Promise<void> {
     // empty
