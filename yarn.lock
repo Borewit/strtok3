@@ -2577,10 +2577,10 @@ pathval@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/pathval/-/pathval-1.1.0.tgz#b942e6d4bde653005ef6b71361def8727d0645e0"
 
-peek-readable@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/peek-readable/-/peek-readable-3.1.0.tgz#250b08b7de09db8573d7fd8ea475215bbff14348"
-  integrity sha512-KGuODSTV6hcgdZvDrIDBUkN0utcAVj1LL7FfGbM0viKTtCHmtZcuEJ+lGqsp0fTFkGqesdtemV2yUSMeyy3ddA==
+peek-readable@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/peek-readable/-/peek-readable-3.1.1.tgz#795c1429374f256e4b5ab6c584cecfd3a110024f"
+  integrity sha512-QHJag0oYYPVkx6rVPEgCLEUMo6VRYbV3GUrqy00lxXJBEIw9LhPCP5MQI6mEfahJO9KYUP8W8qD8kC0V9RyZFQ==
 
 performance-now@^2.1.0:
   version "2.1.0"
