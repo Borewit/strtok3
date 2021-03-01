@@ -176,6 +176,11 @@
   resolved "https://registry.yarnpkg.com/@tokenizer/token/-/token-0.1.1.tgz#f0d92c12f87079ddfd1b29f614758b9696bc29e3"
   integrity sha512-XO6INPbZCxdprl+9qa/AAbFFOMzzwqYxpjPgLICrMD6C2FCw6qfJOPcBk6JqqPLSaZ/Qx87qn4rpPmPMwaAK6w==
 
+"@tokenizer/token@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@tokenizer/token/-/token-0.2.0.tgz#7bb0b297cbc9a3476c6556516336a81b86eb04d1"
+  integrity sha512-fflBWuCBMLlP1cdB0oltjTGxBLwMCX8Z4P7mcK+IA/v4+tBH/ECe1YRcZJHgoiupzTx9HT4cFmqQycNq4ZivaQ==
+
 "@types/chai@^4.2.15":
   version "4.2.15"
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.15.tgz#b7a6d263c2cecf44b6de9a051cf496249b154553"
