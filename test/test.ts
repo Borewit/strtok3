@@ -18,7 +18,7 @@ function getResourcePath(testFile: string) {
 
 async function getTokenizerWithData(testData: string, test: ITokenizerTest): Promise<strtok3.ITokenizer> {
   const testPath = getResourcePath('tmp.dat');
-  await fs.writeFile(testPath, Buffer.from(testData, 'binary'));
+  await fs.writeFile(testPath, Buffer.from(testData, 'latin1'));
   return test.loadTokenizer('tmp.dat');
 }
 
@@ -642,7 +642,7 @@ for (const tokenizerType of tokenizerTests) {
       const rst = await getTokenizerWithData('\x05peter', tokenizerType);
       // should decode string from chunk
       assert.strictEqual(rst.position, 0);
-      const value = await rst.peekToken(new Token.StringType(5, 'utf-8'), 1);
+      const value = await rst.peekToken(new Token.StringType(5, 'latin1'), 1);
       assert.equal(typeof value, 'string');
       assert.equal(value, 'peter');
       assert.strictEqual(rst.position, 0);

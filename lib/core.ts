@@ -20,10 +20,10 @@ export function fromStream(stream: Stream.Readable, fileInfo?: IFileInfo): ReadS
 
 /**
  * Construct ReadStreamTokenizer from given Buffer.
- * @param buffer - Buffer to tokenize
+ * @param uint8Array - Uint8Array to tokenize
  * @param fileInfo - Pass additional file information to the tokenizer
  * @returns BufferTokenizer
  */
-export function fromBuffer(buffer: Buffer, fileInfo?: IFileInfo): BufferTokenizer {
-  return new BufferTokenizer(buffer, fileInfo);
+export function fromBuffer(uint8Array: Uint8Array, fileInfo?: IFileInfo): BufferTokenizer {
+  return new BufferTokenizer(uint8Array, fileInfo);
 }

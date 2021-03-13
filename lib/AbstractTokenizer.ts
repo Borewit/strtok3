@@ -18,7 +18,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    */
   public position: number = 0;
 
-  private numBuffer = Buffer.alloc(10);
+  private numBuffer = new Uint8Array(8);
 
   /**
    * Read buffer from tokenizer
@@ -26,7 +26,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param options - Additional read options
    * @returns Promise with number of bytes read
    */
-  public abstract readBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number>;
+  public abstract readBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Peek (read ahead) buffer from tokenizer
@@ -34,7 +34,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param options - Peek behaviour options
    * @returns Promise with number of bytes read
    */
-  public abstract peekBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number>;
+  public abstract peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Read a token from the tokenizer-stream
@@ -42,12 +42,12 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param position - If provided, the desired position in the tokenizer-stream
    * @returns Promise with token data
    */
-  public async readToken<T>(token: IGetToken<T>, position?: number): Promise<T> {
-    const buffer = Buffer.alloc(token.len);
-    const len = await this.readBuffer(buffer, {position});
+  public async readToken<Value>(token: IGetToken<Value>, position?: number): Promise<Value> {
+    const uint8Array = Buffer.alloc(token.len);
+    const len = await this.readBuffer(uint8Array, {position});
     if (len < token.len)
       throw new EndOfStreamError();
-    return token.get(buffer, 0);
+    return token.get(uint8Array, 0);
   }
 
   /**
@@ -56,12 +56,12 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
    * @returns Promise with token data
    */
-  public async peekToken<T>(token: IGetToken<T>, position: number = this.position): Promise<T> {
-    const buffer = Buffer.alloc(token.len);
-    const len = await this.peekBuffer(buffer, {position});
+  public async peekToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value> {
+    const uint8Array = Buffer.alloc(token.len);
+    const len = await this.peekBuffer(uint8Array, {position});
     if (len < token.len)
       throw new EndOfStreamError();
-    return token.get(buffer, 0);
+    return token.get(uint8Array, 0);
   }
 
   /**

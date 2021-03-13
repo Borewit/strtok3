@@ -20,7 +20,7 @@ The `strtok3` contains a few methods to turn different input into a [*tokenizer*
 It can read from:
 *   A file (taking a file path as an input)
 *   A Node.js [stream](https://nodejs.org/api/stream.html).
-*   A [Buffer](https://nodejs.org/api/buffer.html)
+*   A [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)
 *   HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
 *   Chunked [Amazon S3](https://aws.amazon.com/s3) access provided by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
 
@@ -35,7 +35,8 @@ npm install strtok3
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
 *   [strtok3.fromFile](#method-strtok3fromfile)
 *   [strtok3.fromStream](#method-strtok3fromstream)
-*   [strtok3.fromBuffer](#method-strtok3frombuffer)
+*   [strtok3.fromBuffer](#method-strtok3fromBuffer)
+*   [strtok3.fromUint8Array](#method-strtok3fromUint8Array)
 
 ### strtok3 methods
 
@@ -92,10 +93,10 @@ strtok3.fromStream(stream).then(tokenizer => {
 
 #### Method `strtok3.fromBuffer()`
 
-| Parameter | Optional | Type                                         | Description              |
-|-----------|----------|----------------------------------------------|--------------------------|
-| buffer    | no       | [Buffer](https://nodejs.org/api/buffer.html) | Buffer to read from      |
-| fileInfo  | yes      | [IFileInfo](#IFileInfo)                      | Provide file information |
+| Parameter  | Optional | Type                                             | Description                            |
+|------------|----------|--------------------------------------------------|----------------------------------------|
+| uint8Array | no       | [Uint8Array](https://nodejs.org/api/buffer.html) | Uint8Array or Buffer to read from      |
+| fileInfo   | yes      | [IFileInfo](#IFileInfo)                          | Provide file information               |
 
 Returns a [*tokenizer*](#tokenizer) which can be used to parse the provided buffer.
 
