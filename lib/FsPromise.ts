@@ -6,7 +6,7 @@ import * as fs from 'fs';
 
 export interface IReadResult {
   bytesRead: number,
-  buffer: Buffer
+  buffer: Uint8Array
 }
 
 export const pathExists = fs.existsSync;
@@ -45,7 +45,7 @@ export async function open(path: fs.PathLike, mode?: string): Promise<number> {
   });
 }
 
-export async function read(fd: number, buffer: Buffer, offset: number, length: number, position: number): Promise<IReadResult> {
+export async function read(fd: number, buffer: Uint8Array, offset: number, length: number, position: number): Promise<IReadResult> {
   return new Promise<IReadResult>((resolve, reject) => {
     fs.read(fd, buffer, offset, length, position, (err, bytesRead, _buffer) => {
       if (err)
