@@ -43,7 +43,7 @@
     "url": "https://github.com/Borewit/strtok3/issues"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.18",
+    "@types/chai": "^4.2.19",
     "@types/mocha": "^8.2.2",
     "@types/node": "^15.12.4",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
