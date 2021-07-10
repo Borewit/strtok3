@@ -197,7 +197,7 @@ Return value `Promise<number>` Promise with number peeked from the *tokenizer-st
 
 #### Method `tokenizer.ignore()`
 
-Peek a numeric [*token*](#token) from the tokenizer-stream.
+Advanse the offset pointer with the number of bytes provided. 
 `ignore(length)`
 
 | Parameter  | Type   | Description                                                          |
