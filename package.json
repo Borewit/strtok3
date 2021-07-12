@@ -1,6 +1,6 @@
 {
   "name": "strtok3",
-  "version": "6.1.2",
+  "version": "6.1.3",
   "description": "A promise based streaming tokenizer",
   "author": {
     "name": "Borewit",
