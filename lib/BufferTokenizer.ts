@@ -12,9 +12,9 @@ export class BufferTokenizer implements ITokenizer {
    * @param buffer - Buffer to tokenize
    * @param fileInfo - Pass additional file information to the tokenizer
    */
-  constructor(private buffer: Buffer, fileInfo?: IFileInfo) {
+  constructor(private uint8Array: Uint8Array, fileInfo?: IFileInfo) {
     this.fileInfo = fileInfo ? fileInfo : {};
-    this.fileInfo.size = this.fileInfo.size ?  this.fileInfo.size : buffer.length;
+    this.fileInfo.size = this.fileInfo.size ?  this.fileInfo.size : uint8Array.length;
   }
 
   /**
@@ -23,7 +23,7 @@ export class BufferTokenizer implements ITokenizer {
    * @param options - Read behaviour options
    * @returns {Promise<number>}
    */
-  public async readBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number> {
+  public async readBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
     if (options && options.position) {
       if (options.position < this.position) {
@@ -40,14 +40,14 @@ export class BufferTokenizer implements ITokenizer {
 
   /**
    * Peek (read ahead) buffer from tokenizer
-   * @param buffer
+   * @param uint8Array
    * @param options - Read behaviour options
    * @returns {Promise<number>}
    */
-  public async peekBuffer(buffer: Buffer | Uint8Array, options?: IReadChunkOptions): Promise<number> {
+  public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
     let offset = 0;
-    let length = buffer.length;
+    let length = uint8Array.length;
     let position = this.position;
 
     if (options) {
@@ -73,13 +73,15 @@ export class BufferTokenizer implements ITokenizer {
 
     position = position || this.position;
     if (!length) {
-      length = buffer.length;
+      length = uint8Array.length;
     }
-    const bytes2read = Math.min(this.buffer.length - position, length);
+    const bytes2read = Math.min(this.uint8Array.length - position, length);
     if ((!options || !options.mayBeLess) && bytes2read < length) {
       throw new EndOfStreamError();
     } else {
-      this.buffer.copy(buffer, offset, position, position + bytes2read);
+      // old: this.buffer.copy(buffer, offset, position, position + bytes2read);
+      // uint8Array.set(this.uint8Array.subarray(position, position + bytes2read), offset);
+      Buffer.from(this.uint8Array).copy(uint8Array, offset, position, position + bytes2read);
       return bytes2read;
     }
   }
@@ -91,16 +93,16 @@ export class BufferTokenizer implements ITokenizer {
       this.position += token.len;
       return tv;
     } catch (err) {
-      this.position += this.buffer.length - position;
+      this.position += this.uint8Array.length - position;
       throw err;
     }
   }
 
   public async peekToken<T>(token: IGetToken<T>, position: number = this.position): Promise<T> {
-    if (this.buffer.length - position < token.len) {
+    if (this.uint8Array.length - position < token.len) {
       throw new EndOfStreamError();
     }
-    return token.get(this.buffer, position);
+    return token.get(this.uint8Array, position);
   }
 
   public async readNumber(token: IToken<number>): Promise<number> {
@@ -115,7 +117,7 @@ export class BufferTokenizer implements ITokenizer {
    * @return actual number of bytes ignored
    */
   public async ignore(length: number): Promise<number> {
-    const bytesIgnored = Math.min(this.buffer.length - this.position, length);
+    const bytesIgnored = Math.min(this.uint8Array.length - this.position, length);
     this.position += bytesIgnored;
     return bytesIgnored;
   }

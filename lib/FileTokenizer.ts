@@ -54,7 +54,7 @@ export class FileTokenizer extends AbstractTokenizer {
    * @param options - Read behaviour options
    * @returns Promise number of bytes read
    */
-  public async peekBuffer(buffer: Buffer, options?: IReadChunkOptions): Promise<number> {
+  public async peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
     let offset = 0;
     let length = buffer.length;
