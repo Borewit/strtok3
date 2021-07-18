@@ -79,9 +79,7 @@ export class BufferTokenizer implements ITokenizer {
     if ((!options || !options.mayBeLess) && bytes2read < length) {
       throw new EndOfStreamError();
     } else {
-      // old: this.buffer.copy(buffer, offset, position, position + bytes2read);
-      // uint8Array.set(this.uint8Array.subarray(position, position + bytes2read), offset);
-      Buffer.from(this.uint8Array).copy(uint8Array, offset, position, position + bytes2read);
+      uint8Array.set(this.uint8Array.subarray(position, position + bytes2read), offset);
       return bytes2read;
     }
   }
