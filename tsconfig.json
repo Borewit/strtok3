@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "inlineSources": false,
-    "module": "commonjs",
+    "module": "ES6",
     "moduleResolution": "node",
     "target": "ES2017"
   }
