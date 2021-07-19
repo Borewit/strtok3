@@ -1,6 +1,6 @@
 {
   "name": "strtok3",
-  "version": "6.2.1",
+  "version": "6.2.2",
   "description": "A promise based streaming tokenizer",
   "author": {
     "name": "Borewit",
@@ -26,7 +26,7 @@
     "start": "npm run compile && npm run lint && npm run cover-test"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=12.20"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,10 @@
   },
   "license": "MIT",
   "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./core": "./lib/core.js"
+  },
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*.js",
@@ -68,7 +72,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "peek-readable": "^4.0.0"
+    "peek-readable": "^5.0.0-alpha.0"
   },
   "keywords": [
     "tokenizer",
