@@ -72,54 +72,41 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
   /**
    * Peek (read ahead) buffer from tokenizer
-   * @param buffer - Target buffer to write the data read to
+   * @param uint8Array - Uint8Array (or Buffer) to write data to
    * @param options - Read behaviour options
    * @returns Promise with number of bytes peeked
    */
-  public async peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
+  public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
-    // const _offset = position ? position : this.position;
-    // debug(`peek ${_offset}...${_offset + length - 1}`);
+    options = this.normalizeOptions(uint8Array, options);
+    let bytesRead = 0;
 
-    let offset = 0;
-    let bytesRead: number;
-    let length = buffer.length;
-    if (options) {
-
-      if (options.offset) {
-        offset = options.offset;
+    if (options.position) {
+      const skipBytes = options.position - this.position;
+      if (skipBytes > 0) {
+        const skipBuffer = new Uint8Array(options.length + skipBytes);
+        bytesRead = await this.peekBuffer(skipBuffer, {mayBeLess: options.mayBeLess});
+        uint8Array.set(skipBuffer.subarray(skipBytes), options.offset);
+        return bytesRead - skipBytes;
+      } else if (skipBytes < 0) {
+        throw new Error('Cannot peek from a negative offset in a stream');
       }
+    }
 
-      if (Number.isInteger(options.length)) {
-        length = options.length;
-      } else {
-        length -= options.offset || 0;
-      }
-
-      if (options.position) {
-        const skipBytes = options.position - this.position;
-        if (skipBytes > 0) {
-          const skipBuffer = new Uint8Array(length + skipBytes);
-          bytesRead = await this.peekBuffer(skipBuffer, {mayBeLess: options.mayBeLess});
-          buffer.set(skipBuffer.subarray(skipBytes), offset);
-          return bytesRead - skipBytes;
-        } else if (skipBytes < 0) {
-          throw new Error('Cannot peek from a negative offset in a stream');
+    if (options.length > 0) {
+      try {
+        bytesRead = await this.streamReader.peek(uint8Array, options.offset, options.length);
+      } catch (err) {
+        if (options && options.mayBeLess && err instanceof EndOfStreamError) {
+          return 0;
         }
+        throw err;
+      }
+      if ((!options.mayBeLess) && bytesRead < options.length) {
+        throw new EndOfStreamError();
       }
     }
 
-    try {
-      bytesRead = await this.streamReader.peek(buffer, offset, length);
-    } catch (err) {
-      if (options && options.mayBeLess && err instanceof EndOfStreamError) {
-        return 0;
-      }
-      throw err;
-    }
-    if ((!options || !options.mayBeLess) && bytesRead < length) {
-      throw new EndOfStreamError();
-    }
     return bytesRead;
   }
 

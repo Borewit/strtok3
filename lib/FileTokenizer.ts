@@ -50,57 +50,19 @@ export class FileTokenizer extends AbstractTokenizer {
 
   /**
    * Peek buffer from file
-   * @param buffer
+   * @param uint8Array - Uint8Array (or Buffer) to write data to
    * @param options - Read behaviour options
    * @returns Promise number of bytes read
    */
-  public async peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
+  public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
-    let offset = 0;
-    let length = buffer.length;
-    let position = this.position;
+    options = this.normalizeOptions(uint8Array, options);
 
-    if (options) {
-      if (options.position) {
-        if (options.position < this.position) {
-          throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
-        }
-        position = options.position;
-      }
-      if (Number.isInteger(options.length)) {
-        length = options.length;
-      } else {
-        length -= options.offset || 0;
-      }
-      if (options.offset) {
-        offset = options.offset;
-      }
-    }
-
-    if (length === 0) {
-      return Promise.resolve(0);
-    }
-
-    const res = await fs.read(this.fd, buffer, offset, length, position);
-    if ((!options || !options.mayBeLess) && res.bytesRead < length) {
+    const res = await fs.read(this.fd, uint8Array, options.offset, options.length, options.position);
+    if ((!options.mayBeLess) && res.bytesRead < options.length) {
       throw new EndOfStreamError();
     }
     return res.bytesRead;
-  }
-
-  /**
-   * @param length - Number of bytes to ignore
-   * @return resolves the number of bytes ignored, equals length if this available, otherwise the number of bytes available
-   */
-  public async ignore(length: number): Promise<number> {
-    const bytesLeft = this.fileInfo.size - this.position;
-    if (length <= bytesLeft) {
-      this.position += length;
-      return length;
-    } else {
-      this.position += bytesLeft;
-      return bytesLeft;
-    }
   }
 
   public async close(): Promise<void> {

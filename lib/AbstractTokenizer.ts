@@ -30,11 +30,11 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   /**
    * Peek (read ahead) buffer from tokenizer
-   * @param buffer - Target buffer to fill with data peek from the tokenizer-stream
+   * @param uint8Array- Target buffer to fill with data peek from the tokenizer-stream
    * @param options - Peek behaviour options
    * @returns Promise with number of bytes read
    */
-  public abstract peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
+  public abstract peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
    * Read a token from the tokenizer-stream
@@ -42,7 +42,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param position - If provided, the desired position in the tokenizer-stream
    * @returns Promise with token data
    */
-  public async readToken<Value>(token: IGetToken<Value>, position?: number): Promise<Value> {
+  public async readToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value> {
     const uint8Array = Buffer.alloc(token.len);
     const len = await this.readBuffer(uint8Array, {position});
     if (len < token.len)
@@ -89,14 +89,32 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   /**
-   * Ignore number of bytes, advances the pointer in under tokenizer-stream.
-   * @param length - Number of bytes to skip (ignore)
-   * @return actual number of bytes ignored
+   *  Ignore number of bytes, advances the pointer in under tokenizer-stream.
+   * @param length - Number of bytes to ignore
+   * @return resolves the number of bytes ignored, equals length if this available, otherwise the number of bytes available
    */
-  public abstract ignore(length: number): Promise<number>;
+  public async ignore(length: number): Promise<number> {
+    const bytesLeft = this.fileInfo.size - this.position;
+    if (length <= bytesLeft) {
+      this.position += length;
+      return length;
+    } else {
+      this.position += bytesLeft;
+      return bytesLeft;
+    }
+  }
 
   public async close(): Promise<void> {
     // empty
   }
 
+  protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): IReadChunkOptions {
+    options = {
+      offset: 0,
+      length: uint8Array.length - ((options && options.offset) ? options.offset : 0),
+      position: this.position,
+      ...options
+    };
+    return options;
+  }
 }
