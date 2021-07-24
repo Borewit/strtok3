@@ -2718,10 +2718,10 @@ pathval@^1.1.1:
   resolved "https://registry.yarnpkg.com/pathval/-/pathval-1.1.1.tgz#8534e77a77ce7ac5a2512ea21e0fdb8fcf6c3d8d"
   integrity sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==
 
-peek-readable@^5.0.0-alpha.0:
-  version "5.0.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/peek-readable/-/peek-readable-5.0.0-alpha.0.tgz#b598affc8dcaa25779b2d80784646d89436de80a"
-  integrity sha512-lANxHS1/4JynEGnPAb1nYp+T4Dshtg7EXl9KM55FJo7m2Jljhg3xIsUFFY+izbuLKg1K5yQC87jQQoVZpondag==
+peek-readable@^5.0.0-alpha.1:
+  version "5.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/peek-readable/-/peek-readable-5.0.0-alpha.1.tgz#b44dce4590181aa9583288b5202819446e4ddb5b"
+  integrity sha512-Uq/Ltdmpd//b6Xz7vPrRAQwPoXL0KmqcHzSm9FXryHTAWNWQeIkC/EggPPFPE0XTrH1uXWxLNltgMtAn6bSm6A==
 
 performance-now@^2.1.0:
   version "2.1.0"
