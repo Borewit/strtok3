@@ -1,0 +1,16 @@
+{
+  "cache": false,
+  "check-coverage": false,
+  "extension": [
+    ".ts"
+  ],
+  "sourceMap": true,
+  "instrument": true,
+  "reporter": [
+        "lcov",
+        "text"
+  ],
+  "all": true,
+  "instrument": true,
+  "report-dir": "coverage"
+}

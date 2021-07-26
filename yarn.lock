@@ -2333,10 +2333,10 @@ mkdirp@^0.5.1, mkdirp@^0.5.3:
   dependencies:
     minimist "^1.2.5"
 
-mocha@^9.0.2:
-  version "9.0.2"
-  resolved "https://registry.yarnpkg.com/mocha/-/mocha-9.0.2.tgz#e84849b61f406a680ced85af76425f6f3108d1a0"
-  integrity sha512-FpspiWU+UT9Sixx/wKimvnpkeW0mh6ROAKkIaPokj3xZgxeRhcna/k5X57jJghEr8X+Cgu/Vegf8zCX5ugSuTA==
+mocha@^9.0.3:
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/mocha/-/mocha-9.0.3.tgz#128cd6bbd3ee0adcdaef715f357f76ec1e6227c7"
+  integrity sha512-hnYFrSefHxYS2XFGtN01x8un0EwNu2bzKvhpRFhgoybIvMaOkkL60IVPmkb5h6XDmUl4IMSB+rT5cIO4/4bJgg==
   dependencies:
     "@ungap/promise-all-settled" "1.1.2"
     ansi-colors "4.1.1"
@@ -2718,10 +2718,10 @@ pathval@^1.1.1:
   resolved "https://registry.yarnpkg.com/pathval/-/pathval-1.1.1.tgz#8534e77a77ce7ac5a2512ea21e0fdb8fcf6c3d8d"
   integrity sha512-Dp6zGqpTdETdR63lehJYPeIOqpiNBNtc7BpWSLrOje7UaIsE5aY92r/AunQA7rsXvet3lrJ3JnZX29UPTKXyKQ==
 
-peek-readable@^5.0.0-alpha.1:
-  version "5.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/peek-readable/-/peek-readable-5.0.0-alpha.1.tgz#b44dce4590181aa9583288b5202819446e4ddb5b"
-  integrity sha512-Uq/Ltdmpd//b6Xz7vPrRAQwPoXL0KmqcHzSm9FXryHTAWNWQeIkC/EggPPFPE0XTrH1uXWxLNltgMtAn6bSm6A==
+peek-readable@^5.0.0-alpha.2:
+  version "5.0.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/peek-readable/-/peek-readable-5.0.0-alpha.2.tgz#cff1ecd5d80a63396ba84758637718426166abbc"
+  integrity sha512-4Fwkby27SAK9G6naOM7Ic2WKUrppwP9J//qJ+ddwTkXiX4pGFsnCclcBKJ7NG48TduDZifPf9GhS1RtOCjc9KA==
 
 performance-now@^2.1.0:
   version "2.1.0"
@@ -3309,7 +3309,7 @@ sliced@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/sliced/-/sliced-1.0.1.tgz#0b3a662b5d04c3177b1926bea82b03f837a2ef41"
 
-source-map-support@^0.5.16, source-map-support@^0.5.17:
+source-map-support@^0.5.17:
   version "0.5.19"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.19.tgz#a98b62f86dcaf4f67399648c085291ab9e8fed61"
   integrity sha512-Wonm7zOCIJzBGQdB+thsPar0kYuCIzYvxZwlBa87yi/Mdjv7Tip2cyVbLj5o0cFPN4EVkuTwb3GDDyUx2DGnGw==

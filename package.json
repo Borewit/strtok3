@@ -17,9 +17,10 @@
     "compile": "npm run compile-src && npm run compile-test",
     "build": "npm run clean && npm run compile",
     "eslint": "eslint lib test --ext .ts --ignore-pattern *.d.ts",
+    "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
     "lint-md": "remark -u preset-lint-recommended .",
     "lint": "npm run lint-md && npm run eslint",
-    "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test.ts",
+    "test": "mocha",
     "test-coverage": "nyc npm run test",
     "send-coveralls": "nyc report --reporter=text-lcov | coveralls",
     "send-codacy": "nyc report --reporter=text-lcov | codacy-coverage",
@@ -62,18 +63,17 @@
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-prefer-arrow": "^1.2.3",
-    "mocha": "^9.0.2",
+    "mocha": "^9.0.3",
     "nyc": "^15.1.0",
     "remark-cli": "^9.0.0",
     "remark-preset-lint-recommended": "^5.0.0",
-    "source-map-support": "^0.5.16",
     "token-types": "^4.1.0",
     "ts-node": "^10.1.0",
     "tslint": "^6.1.3",
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "peek-readable": "^5.0.0-alpha.1"
+    "peek-readable": "^5.0.0-alpha.2"
   },
   "keywords": [
     "tokenizer",
