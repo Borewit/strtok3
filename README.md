@@ -30,6 +30,13 @@ It can read from:
 npm install strtok3
 ```
 
+Using TypeScript you should also install [@tokenizer/token](https://github.com/Borewit/tokenizer-token) as a development
+dependency:
+
+```shell
+npm install --save-dev @tokenizer/token
+```
+
 ## API
 
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
