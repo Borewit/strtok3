@@ -48,7 +48,7 @@ All of the strtok3 methods return a [*tokenizer*](#tokenizer), either directly o
 |-----------|-----------------------|----------------------------|
 | path      | Path to file (string) | Path to file to read from  |
 
-Note that [file-information](#file-information) is automatically added.
+> __Note__: that [file-information](#file-information) is automatically added.
 
 Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a file.
 
@@ -131,10 +131,9 @@ If a *position* is provided to a *read* or *peek* method, is should be, at least
 
 ### Tokenizer methods 
 
-There are to groups of methods
-
-*   *read* methods: used to read a *token* of [Buffer](https://nodejs.org/api/buffer.html) from the [*tokenizer*](#tokenizer). The position of the *tokenizer-stream* will advance with the size of the token.
-*   *peek* methods: same as the read, but it will *not* advance the pointer. It allows to read (peek) ahead.
+There are two kind of methods:
+1.   *read* methods: used to read a *token* of [Buffer](https://nodejs.org/api/buffer.html) from the [*tokenizer*](#tokenizer). The position of the *tokenizer-stream* will advance with the size of the token.
+2.   *peek* methods: same as the read, but it will *not* advance the pointer. It allows to read (peek) ahead.
 
 #### Method `tokenizer.readBuffer()`
 
