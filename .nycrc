@@ -12,5 +12,7 @@
   ],
   "all": true,
   "instrument": true,
-  "report-dir": "coverage"
+  "report-dir": "coverage",
+  "include": "lib/**/*.ts",
+  "exclude": "lib/types.ts"
 }
