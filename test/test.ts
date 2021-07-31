@@ -845,4 +845,11 @@ describe('fromStream with mayBeLess flag', () => {
 
 });
 
+it('should determine the file size using a file stream', async () => {
+  const stream = fs.createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
+  const tokenizer = await strtok3.fromStream(stream);
+  assert.isDefined(tokenizer.fileInfo, '`fileInfo` should be defined');
+  assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
+});
+
 
