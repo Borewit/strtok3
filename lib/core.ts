@@ -1,5 +1,5 @@
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
-import Stream from 'node:stream';
+import Stream from '#stream';
 import { BufferTokenizer } from './BufferTokenizer.js';
 import { IFileInfo } from './types.js';
 export { EndOfStreamError } from 'peek-readable';

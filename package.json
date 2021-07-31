@@ -43,6 +43,12 @@
     },
     "./core": "./lib/core.js"
   },
+  "imports": {
+    "#stream": {
+      "default": "readable-stream",
+      "node": "node:stream"
+    }
+  },
   "types": "lib/index.d.ts",
   "files": [
     "lib/**/*.js",
