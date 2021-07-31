@@ -1,4 +1,4 @@
-import * as Stream from 'stream';
+import Stream from 'node:stream';
 
 import * as fs from './FsPromise.js';
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';

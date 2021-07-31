@@ -1,12 +1,12 @@
 import * as Token from 'token-types';
 import { assert } from 'chai';
 import * as strtok3 from '../lib/index.js';
-import * as Path from 'node:path';
+import Path from 'node:path';
 import * as fs from '../lib/FsPromise.js';
 import { FileTokenizer } from '../lib/FileTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
 import { PassThrough } from 'node:stream';
-import * as mocha from 'mocha';
+import mocha from 'mocha';
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';

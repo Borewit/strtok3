@@ -37,7 +37,10 @@
   "main": "lib/index.js",
   "type": "module",
   "exports": {
-    ".": "./lib/index.js",
+    ".": {
+      "node": "./lib/index.js",
+      "default": "./lib/core.js"
+    },
     "./core": "./lib/core.js"
   },
   "types": "lib/index.d.ts",
