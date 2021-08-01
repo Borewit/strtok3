@@ -11,38 +11,16 @@ export class FileTokenizer extends AbstractTokenizer {
 
   /**
    * Read buffer from file
-   * @param buffer
+   * @param uint8Array - Uint8Array to write result to
    * @param options - Read behaviour options
    * @returns Promise number of bytes read
    */
-  public async readBuffer(buffer: Buffer, options?: IReadChunkOptions): Promise<number> {
-
-    let offset = 0;
-    let length = buffer.length;
-
-    if (options) {
-      if (options.position) {
-        if (options.position < this.position) {
-          throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
-        }
-        this.position = options.position;
-      }
-      if (Number.isInteger(options.length)) {
-        length = options.length;
-      } else {
-        length -= options.offset || 0;
-      }
-      if (options.offset) {
-        offset = options.offset;
-      }
-    }
-    if (length === 0) {
-      return Promise.resolve(0);
-    }
-
-    const res = await fs.read(this.fd, buffer, offset, length, this.position);
+  public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
+    const normOptions = this.normalizeOptions(uint8Array, options);
+    this.position = normOptions.position;
+    const res = await fs.read(this.fd, uint8Array, normOptions.offset, normOptions.length, normOptions.position);
     this.position += res.bytesRead;
-    if (res.bytesRead < length && (!options || !options.mayBeLess)) {
+    if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
       throw new EndOfStreamError();
     }
     return res.bytesRead;
@@ -56,10 +34,10 @@ export class FileTokenizer extends AbstractTokenizer {
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
-    options = this.normalizeOptions(uint8Array, options);
+    const normOptions = this.normalizeOptions(uint8Array, options);
 
-    const res = await fs.read(this.fd, uint8Array, options.offset, options.length, options.position);
-    if ((!options.mayBeLess) && res.bytesRead < options.length) {
+    const res = await fs.read(this.fd, uint8Array, normOptions.offset, normOptions.length, normOptions.position);
+    if ((!normOptions.mayBeLess) && res.bytesRead < normOptions.length) {
       throw new EndOfStreamError();
     }
     return res.bytesRead;

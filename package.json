@@ -19,6 +19,7 @@
     "eslint": "eslint lib test --ext .ts --ignore-pattern *.d.ts",
     "lint-md": "remark -u preset-lint-recommended .",
     "lint": "npm run lint-md && npm run eslint",
+    "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
     "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test.ts",
     "test-coverage": "nyc npm run test",
     "send-coveralls": "nyc report --reporter=text-lcov | coveralls",
@@ -68,7 +69,7 @@
   },
   "dependencies": {
     "@tokenizer/token": "^0.3.0",
-    "peek-readable": "^4.0.0"
+    "peek-readable": "^4.0.1"
   },
   "keywords": [
     "tokenizer",
