@@ -54,13 +54,32 @@
       "error",
       "always"
     ],
-    /*
-    "@typescript-eslint/space-within-parens": [
-      "error",
-      "always"
-    ],*/
     "@typescript-eslint/triple-slash-reference": "error",
     "@typescript-eslint/unified-signatures": "error",
+    "@typescript-eslint/tslint/config": [
+      "error",
+      {
+        "rules": {
+          "jsdoc-format": [
+            true,
+            "check-multiline-start"
+          ],
+          "no-reference-import": true,
+          "prefer-conditional-expression": true,
+          "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-separator",
+            "check-type",
+            "check-typecast",
+            "check-type-operator",
+            "check-rest-spread"
+          ]
+        }
+      }
+    ],
     "arrow-parens": [
       "error",
       "as-needed"
@@ -85,27 +104,9 @@
       "string",
       "Boolean",
       "boolean",
-      "Undefined",
-      "undefined"
+      "Undefined"
     ],
     "id-match": "error",
-    /*
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        "devDependencies": false
-      }
-    ], */
-    /*
-    "import/no-internal-modules": [
-      "error",
-      {
-        "allow": [
-          "strtok3/*",
-          "file-type/*"
-        ]
-      }
-    ],*/
     "import/order": "off",
     "max-classes-per-file": "off",
     "max-len": [
@@ -164,29 +165,6 @@
     "spaced-comment": "error",
     "use-isnan": "error",
     "valid-typeof": "off",
-    "@typescript-eslint/tslint/config": [
-      "error",
-      {
-        "rules": {
-          "jsdoc-format": [
-            true,
-            "check-multiline-start"
-          ],
-          "no-reference-import": true,
-          "prefer-conditional-expression": true,
-          "whitespace": [
-            true,
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-type",
-            "check-typecast",
-            "check-type-operator",
-            "check-rest-spread"
-          ]
-        }
-      }
-    ]
+
   }
 }

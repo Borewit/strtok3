@@ -34,7 +34,7 @@ export async function close(fd: number): Promise<void> {
   });
 }
 
-export async function open(path: fs.PathLike, mode?: string): Promise<number> {
+export async function open(path: fs.PathLike, mode: fs.Mode): Promise<number> {
   return new Promise<number>((resolve, reject) => {
     fs.open(path, mode, (err, fd) => {
       if (err)

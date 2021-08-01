@@ -46,7 +46,6 @@ export interface IReadChunkOptions {
   mayBeLess?: boolean;
 }
 
-
 /**
  * The tokenizer allows us to read or peek from the tokenizer-stream.
  * The tokenizer-stream is an abstraction of a stream, file or Buffer.

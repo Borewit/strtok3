@@ -1,5 +1,5 @@
 import { ReadStreamTokenizer } from './ReadStreamTokenizer';
-import * as Stream from 'stream';
+import { Readable } from 'stream';
 import { BufferTokenizer } from './BufferTokenizer';
 import { IFileInfo } from './types';
 export { EndOfStreamError } from 'peek-readable';
@@ -13,7 +13,7 @@ export { IToken, IGetToken } from '@tokenizer/token';
  * @param fileInfo - Pass the file information, like size and MIME-type of the correspnding stream.
  * @returns ReadStreamTokenizer
  */
-export function fromStream(stream: Stream.Readable, fileInfo?: IFileInfo): ReadStreamTokenizer {
+export function fromStream(stream: Readable, fileInfo?: IFileInfo): ReadStreamTokenizer {
   fileInfo = fileInfo ? fileInfo : {};
   return new ReadStreamTokenizer(stream, fileInfo);
 }
