@@ -17,9 +17,9 @@
     "compile": "npm run compile-src && npm run compile-test",
     "build": "npm run clean && npm run compile",
     "eslint": "eslint lib test --ext .ts --ignore-pattern *.d.ts",
-    "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
     "lint-md": "remark -u preset-lint-recommended .",
     "lint": "npm run lint-md && npm run eslint",
+    "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
     "test": "mocha",
     "test-coverage": "c8 npm run test",
     "send-coveralls": "c8 report --reporter=text-lcov | coveralls",
@@ -54,9 +54,9 @@
   "devDependencies": {
     "@tokenizer/token": "^0.3.0",
     "@types/chai": "^4.2.21",
-    "@types/debug": "^4.1.6",
+    "@types/debug": "^4.1.7",
     "@types/mocha": "^9.0.0",
-    "@types/node": "^16.4.6",
+    "@types/node": "^16.4.7",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/eslint-plugin-tslint": "^4.28.5",
     "@typescript-eslint/parser": "^2.34.0",
@@ -76,6 +76,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "@tokenizer/token": "^0.3.0",
     "peek-readable": "^5.0.0-alpha.3"
   },
   "keywords": [

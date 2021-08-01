@@ -502,7 +502,7 @@ for (const tokenizerType of tokenizerTests) {
 
     });
 
-    it('Transparency', async function() {
+    it('Transparency', async function () {
 
       this.timeout(5000);
 
@@ -520,17 +520,12 @@ for (const tokenizerType of tokenizerTests) {
       const rst = await tokenizerType.loadTokenizer(testFile);
       let expected = 0;
 
-      function readByte() {
-        return rst.readNumber(Token.UINT8)
-          .then(v => {
-            assert.strictEqual(v, expected % 255, 'offset=' + expected);
-            ++expected;
-            return readByte();
-          });
-      }
-
       try {
-        await readByte();
+        do {
+          const v = await rst.readNumber(Token.UINT8);
+          assert.strictEqual(v, expected % 255, 'offset=' + expected);
+          ++expected;
+        } while (true);
       } catch (err) {
         assert.instanceOf(err, EndOfStreamError);
         assert.strictEqual(expected, size, 'total number of parsed bytes');
@@ -658,6 +653,8 @@ for (const tokenizerType of tokenizerTests) {
 
     it('number', async () => {
       const tokenizer = await tokenizerType.loadTokenizer('test3.dat');
+      assert.isDefined(tokenizer.fileInfo, 'tokenizer.fileInfo');
+      // @ts-ignore
       await tokenizer.ignore(tokenizer.fileInfo.size - 4);
       const x = await tokenizer.peekNumber(Token.INT32_BE);
       assert.strictEqual(x, 33752069);
@@ -665,6 +662,8 @@ for (const tokenizerType of tokenizerTests) {
 
     it('should throw an Error if we reach EOF while peeking a number', async () => {
       const tokenizer = await tokenizerType.loadTokenizer('test3.dat');
+      assert.isDefined(tokenizer.fileInfo, 'tokenizer.fileInfo');
+      // @ts-ignore
       await tokenizer.ignore(tokenizer.fileInfo.size - 3);
       try {
         const x = await tokenizer.peekNumber(Token.INT32_BE);
@@ -853,4 +852,9 @@ describe('fromStream with mayBeLess flag', () => {
 
 });
 
-
+it('should determine the file size using a file stream', async () => {
+  const stream = fs.createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
+  const tokenizer = await strtok3.fromStream(stream);
+  assert.isDefined(tokenizer.fileInfo, '`fileInfo` should be defined');
+  assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
+});

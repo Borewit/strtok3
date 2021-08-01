@@ -42,13 +42,13 @@ export class BufferTokenizer extends AbstractTokenizer {
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
-    options = this.normalizeOptions(uint8Array, options);
+    const normOptions = this.normalizeOptions(uint8Array, options);
 
-    const bytes2read = Math.min(this.uint8Array.length - options.position, options.length);
-    if ((!options.mayBeLess) && bytes2read < options.length) {
+    const bytes2read = Math.min(this.uint8Array.length - normOptions.position, normOptions.length);
+    if ((!normOptions.mayBeLess) && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
     } else {
-      uint8Array.set(this.uint8Array.subarray(options.position, options.position + bytes2read), options.offset);
+      uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read), normOptions.offset);
       return bytes2read;
     }
   }

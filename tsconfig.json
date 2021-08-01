@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "target": "ES2019",
     "esModuleInterop": true,
+    "strict": true
   }
 }
 

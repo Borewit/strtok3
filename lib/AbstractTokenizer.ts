@@ -2,6 +2,13 @@ import { ITokenizer, IFileInfo, IReadChunkOptions } from './types';
 import { EndOfStreamError } from 'peek-readable';
 import { IGetToken, IToken } from '@tokenizer/token';
 
+interface INormalizedReadChunkOptions extends IReadChunkOptions {
+  offset: number;
+  length: number;
+  position: number;
+  mayBeLess?: boolean;
+}
+
 /**
  * Core tokenizer
  */
@@ -94,27 +101,41 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @return resolves the number of bytes ignored, equals length if this available, otherwise the number of bytes available
    */
   public async ignore(length: number): Promise<number> {
-    const bytesLeft = this.fileInfo.size - this.position;
-    if (length <= bytesLeft) {
-      this.position += length;
-      return length;
-    } else {
-      this.position += bytesLeft;
-      return bytesLeft;
+    if (this.fileInfo.size !== undefined) {
+      const bytesLeft = this.fileInfo.size - this.position;
+      if (length > bytesLeft) {
+        this.position += bytesLeft;
+        return bytesLeft;
+      }
     }
+    this.position += length;
+    return length;
   }
 
   public async close(): Promise<void> {
     // empty
   }
 
-  protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): IReadChunkOptions {
-    options = {
+  protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): INormalizedReadChunkOptions {
+
+    if (options && options.position !== undefined && options.position < this.position) {
+      throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
+    }
+
+    if (options) {
+      return {
+        mayBeLess: options.mayBeLess === true,
+        offset: options.offset ? options.offset : 0,
+        length: options.length ? options.length : (uint8Array.length - (options.offset ? options.offset : 0)),
+        position: options.position ? options.position : this.position
+      };
+    }
+
+    return {
+      mayBeLess: false,
       offset: 0,
-      length: uint8Array.length - ((options && options.offset) ? options.offset : 0),
-      position: this.position,
-      ...options
+      length: uint8Array.length,
+      position: this.position
     };
-    return options;
   }
 }

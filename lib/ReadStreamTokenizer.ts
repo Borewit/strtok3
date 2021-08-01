@@ -1,6 +1,6 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError, StreamReader } from 'peek-readable';
-import Stream from 'node:stream';
+import { Readable } from 'node:stream';
 import { IFileInfo, IReadChunkOptions } from './types';
 
 const maxBufferSize = 256000;
@@ -9,7 +9,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
   private streamReader: StreamReader;
 
-  public constructor(stream: Stream.Readable, fileInfo?: IFileInfo) {
+  public constructor(stream: Readable, fileInfo?: IFileInfo) {
     super(fileInfo);
     this.streamReader = new StreamReader(stream);
   }
@@ -24,47 +24,27 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
   /**
    * Read buffer from tokenizer
-   * @param buffer - Target buffer to fill with data read from the tokenizer-stream
+   * @param uint8Array - Target Uint8Array to fill with data read from the tokenizer-stream
    * @param options - Read behaviour options
    * @returns Promise with number of bytes read
    */
-  public async readBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-
-    // const _offset = position ? position : this.position;
-    // debug(`readBuffer ${_offset}...${_offset + length - 1}`);
-
-    let offset = 0;
-    let length = buffer.length;
-    if (options) {
-
-      if (Number.isInteger(options.length)) {
-        length = options.length;
-      } else {
-        length -= options.offset || 0;
-      }
-
-      if (options.position) {
-        const skipBytes = options.position - this.position;
-        if (skipBytes > 0) {
-          await this.ignore(skipBytes);
-          return this.readBuffer(buffer, options);
-        } else if (skipBytes < 0) {
-          throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
-        }
-      }
-
-      if (options.offset) {
-        offset = options.offset;
-      }
+  public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
+    const normOptions = this.normalizeOptions(uint8Array, options);
+    const skipBytes = normOptions.position - this.position;
+    if (skipBytes > 0) {
+      await this.ignore(skipBytes);
+      return this.readBuffer(uint8Array, options);
+    } else if (skipBytes < 0) {
+      throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
     }
 
-    if (length === 0) {
+    if (normOptions.length === 0) {
       return 0;
     }
 
-    const bytesRead = await this.streamReader.read(buffer, offset, length);
+    const bytesRead = await this.streamReader.read(uint8Array, normOptions.offset, normOptions.length);
     this.position += bytesRead;
-    if ((!options || !options.mayBeLess) && bytesRead < length) {
+    if ((!options || !options.mayBeLess) && bytesRead < normOptions.length) {
       throw new EndOfStreamError();
     }
     return bytesRead;
@@ -78,31 +58,31 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
-    options = this.normalizeOptions(uint8Array, options);
+    const normOptions = this.normalizeOptions(uint8Array, options);
     let bytesRead = 0;
 
-    if (options.position) {
-      const skipBytes = options.position - this.position;
+    if (normOptions.position) {
+      const skipBytes = normOptions.position - this.position;
       if (skipBytes > 0) {
-        const skipBuffer = new Uint8Array(options.length + skipBytes);
-        bytesRead = await this.peekBuffer(skipBuffer, {mayBeLess: options.mayBeLess});
-        uint8Array.set(skipBuffer.subarray(skipBytes), options.offset);
+        const skipBuffer = new Uint8Array(normOptions.length + skipBytes);
+        bytesRead = await this.peekBuffer(skipBuffer, {mayBeLess: normOptions.mayBeLess});
+        uint8Array.set(skipBuffer.subarray(skipBytes), normOptions.offset);
         return bytesRead - skipBytes;
       } else if (skipBytes < 0) {
         throw new Error('Cannot peek from a negative offset in a stream');
       }
     }
 
-    if (options.length > 0) {
+    if (normOptions.length > 0) {
       try {
-        bytesRead = await this.streamReader.peek(uint8Array, options.offset, options.length);
+        bytesRead = await this.streamReader.peek(uint8Array, normOptions.offset, normOptions.length);
       } catch (err) {
         if (options && options.mayBeLess && err instanceof EndOfStreamError) {
           return 0;
         }
         throw err;
       }
-      if ((!options.mayBeLess) && bytesRead < options.length) {
+      if ((!normOptions.mayBeLess) && bytesRead < normOptions.length) {
         throw new EndOfStreamError();
       }
     }
