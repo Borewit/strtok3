@@ -10,7 +10,7 @@ export { IToken, IGetToken } from '@tokenizer/token';
  * Construct ReadStreamTokenizer from given Stream.
  * Will set fileSize, if provided given Stream has set the .path property/
  * @param stream - Read from Node.js Stream.Readable
- * @param fileInfo - Pass the file information, like size and MIME-type of the correspnding stream.
+ * @param fileInfo - Pass the file information, like size and MIME-type of the corresponding stream.
  * @returns ReadStreamTokenizer
  */
 export function fromStream(stream: Readable, fileInfo?: IFileInfo): ReadStreamTokenizer {
