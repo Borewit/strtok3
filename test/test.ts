@@ -7,6 +7,7 @@ import { FileTokenizer } from '../lib/FileTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
 import { PassThrough } from 'node:stream';
 import mocha from 'mocha';
+import { Buffer } from 'node:buffer';
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';

@@ -1,5 +1,6 @@
 // Utilies for testing
 import { Readable } from 'stream';
+import { Buffer } from 'node:buffer';
 
 /**
  * A mock stream implementation that breaks up provided data into
