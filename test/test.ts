@@ -836,7 +836,11 @@ describe('fromStream with mayBeLess flag', () => {
       const buffer = Buffer.alloc(5);
       await tokenizer.peekBuffer(buffer, {mayBeLess: false});
     } catch (err) {
-      assert.strictEqual(err.message, 'End-Of-Stream');
+      if (err instanceof Error) {
+        assert.strictEqual(err.message, 'End-Of-Stream');
+      } else {
+        assert.fail('Expected: err instanceof Error');
+      }
       return;
     }
     assert.fail('Should throw End-Of-Stream error');
