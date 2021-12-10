@@ -1,4 +1,4 @@
-// Utilies for testing
+// Utility functions for testing
 import { Readable } from 'stream';
 
 /**
