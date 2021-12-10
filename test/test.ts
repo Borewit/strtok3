@@ -667,7 +667,7 @@ for (const tokenizerType of tokenizerTests) {
       // @ts-ignore
       await tokenizer.ignore(tokenizer.fileInfo.size - 3);
       try {
-        const x = await tokenizer.peekNumber(Token.INT32_BE);
+        await tokenizer.peekNumber(Token.INT32_BE);
         assert.fail('Should throw Error: End-Of-File');
       } catch (err) {
         assert.instanceOf(err, EndOfStreamError);
@@ -770,7 +770,7 @@ for (const tokenizerType of tokenizerTests) {
         const buffer = Buffer.alloc(4);
         const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
         try {
-          const len = await rst.peekBuffer(buffer);
+          await rst.peekBuffer(buffer);
           assert.fail('It should throw EndOfFile Error');
         } catch (err) {
           assert.instanceOf(err, EndOfStreamError);
@@ -845,7 +845,11 @@ describe('fromStream with mayBeLess flag', () => {
       const buffer = Buffer.alloc(5);
       await tokenizer.peekBuffer(buffer, {mayBeLess: false});
     } catch (err) {
-      assert.strictEqual(err.message, 'End-Of-Stream');
+      if (err instanceof Error) {
+        assert.strictEqual(err.message, 'End-Of-Stream');
+      } else {
+        assert.fail('Expected: err instanceof Error');
+      }
       return;
     }
     assert.fail('Should throw End-Of-Stream error');
