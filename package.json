@@ -61,7 +61,7 @@
     "nyc": "^15.1.0",
     "remark-cli": "^10.0.1",
     "remark-preset-lint-recommended": "^5.0.0",
-    "source-map-support": "^0.5.16",
+    "source-map-support": "^0.5.21",
     "token-types": "^4.1.1",
     "ts-node": "^10.4.0",
     "tslint": "^6.1.3",
