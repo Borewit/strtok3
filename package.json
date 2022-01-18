@@ -34,7 +34,6 @@
     "url": "https://github.com/Borewit/strtok3.git"
   },
   "license": "MIT",
-  "main": "lib/index.js",
   "type": "module",
   "exports": {
     ".": {
