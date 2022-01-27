@@ -40,7 +40,8 @@
       "node": "./lib/index.js",
       "default": "./lib/core.js"
     },
-    "./core": "./lib/core.js"
+    "./core": "./lib/core.js",
+    "./lib/core": "./lib/core.js"
   },
   "types": "lib/index.d.ts",
   "files": [
