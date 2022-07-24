@@ -22,7 +22,6 @@
     "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
     "test": "mocha --require ts-node/register --require source-map-support/register --full-trace test/test.ts",
     "test-coverage": "nyc npm run test",
-    "send-coveralls": "nyc report --reporter=text-lcov | coveralls",
     "send-codacy": "nyc report --reporter=text-lcov | codacy-coverage",
     "start": "npm run compile && npm run lint && npm run cover-test"
   },
@@ -51,7 +50,6 @@
     "@typescript-eslint/eslint-plugin": "^5.10.2",
     "@typescript-eslint/parser": "^5.10.2",
     "chai": "^4.3.6",
-    "coveralls": "^3.1.1",
     "del-cli": "^4.0.1",
     "eslint": "^8.8.0",
     "eslint-config-prettier": "^8.3.0",
