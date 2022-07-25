@@ -12,8 +12,7 @@
     "sourceType": "module"
   },
   "plugins": [
-    "@typescript-eslint",
-    "@typescript-eslint/tslint"
+    "@typescript-eslint"
   ],
   "rules": {
     "quotes": [
@@ -164,7 +163,6 @@
     "radix": "error",
     "spaced-comment": "error",
     "use-isnan": "error",
-    "valid-typeof": "off",
-
+    "valid-typeof": "off"
   }
 }
