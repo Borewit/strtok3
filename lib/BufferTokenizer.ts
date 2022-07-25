@@ -1,4 +1,4 @@
-import { IFileInfo, IReadChunkOptions } from './types';
+import { IFileInfo, IReadChunkOptions } from './types.js';
 import { EndOfStreamError } from 'peek-readable';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 

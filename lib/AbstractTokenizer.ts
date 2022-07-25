@@ -1,4 +1,4 @@
-import { ITokenizer, IFileInfo, IReadChunkOptions } from './types';
+import { ITokenizer, IFileInfo, IReadChunkOptions } from './types.js';
 import { EndOfStreamError } from 'peek-readable';
 import { IGetToken, IToken } from '@tokenizer/token';
 import { Buffer } from 'node:buffer';
