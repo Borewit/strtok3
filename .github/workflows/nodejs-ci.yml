@@ -13,7 +13,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 14.x
+          node-version: 16.x
 
       - name: Install production dependencies, check node engine compatiblity
         run: yarn install --production=true
@@ -45,7 +45,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12.x, 14.x, 16.x]
+        node-version: [12.x, 14.x, 16.x, 18.x]
 
     steps:
 
@@ -68,28 +68,19 @@ jobs:
       - name: Test with Node.js ${{ matrix.node-version }}
         run: yarn run test-coverage
 
-  coverage:
-    name: 'Test code coverage'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: 'Checkout the repository'
-        uses: actions/checkout@v2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16
-
-      - name: Install dependencies
-        run: yarn install --ignore-engines
-
-      - name: Test with Node.js ${{ matrix.node-version }}
-        run: yarn run test-coverage
-
-      - name: Submit test coverage
+      - name: Coveralls Parallel
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.github_token }}
           flag-name: run-${{ matrix.test_number }}
-          path-to-lcov: "./coverage/lcov.info"
+          parallel: true
+
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Coveralls Finished
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
+          parallel-finished: true

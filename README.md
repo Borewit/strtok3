@@ -30,6 +30,10 @@ It can read from:
 npm install strtok3
 ```
 
+### Compatibility
+
+NPM module is compliant with [ECMAScript 2018 (ES9)](https://en.wikipedia.org/wiki/ECMAScript#9th_Edition_%E2%80%93_ECMAScript_2018).
+
 ## API
 
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
