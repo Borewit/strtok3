@@ -22,7 +22,6 @@
     "fix": "eslint lib test --ext .ts --ignore-pattern *.d.ts --fix",
     "test": "mocha",
     "test-coverage": "c8 npm run test",
-    "send-coveralls": "c8 report | coveralls",
     "send-codacy": "c8 report --reporter=text-lcov | codacy-coverage",
     "start": "npm run compile && npm run lint && npm run cover-test"
   },
