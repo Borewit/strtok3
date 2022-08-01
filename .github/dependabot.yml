@@ -1,5 +1,7 @@
 version: 2
 updates:
+
+  # CommonJS
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -8,7 +10,22 @@ updates:
     open-pull-requests-limit: 10
     labels:
       - dependencies
+      - CJS
     versioning-strategy: increase
     ignore:
       - dependency-name: "@types/node"
         update-types: [ "version-update:semver-patch" ]
+
+
+  # TypeScript Module
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      time: "06:00"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    target-branch: "es-module"
+    labels:
+      - dependencies
+      - ESM
