@@ -1,7 +1,7 @@
 version: 2
 updates:
 
-  # CommonJS
+  # CommonJS (CJS)
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -12,6 +12,7 @@ updates:
       - dependencies
       - CJS
     versioning-strategy: increase
+    target-branch: "commonjs"
     ignore:
       - dependency-name: "@types/node"
         update-types: [ "version-update:semver-patch" ]
@@ -19,7 +20,7 @@ updates:
         update-types: ["version-update:semver-major"]
 
 
-  # TypeScript Module
+  # ECMAScript Module (ESM)
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -27,7 +28,7 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 10
     versioning-strategy: increase
-    target-branch: "es-module"
+    target-branch: "master"
     labels:
       - dependencies
       - ESM
