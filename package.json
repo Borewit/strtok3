@@ -69,7 +69,7 @@
   },
   "dependencies": {
     "@tokenizer/token": "^0.3.0",
-    "peek-readable": "^4.1.0"
+    "peek-readable": "^5.0.0"
   },
   "keywords": [
     "tokenizer",
