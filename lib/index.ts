@@ -1,10 +1,10 @@
-import { Readable } from 'stream';
-import * as fs from './FsPromise';
-import { ReadStreamTokenizer } from './ReadStreamTokenizer';
-import * as core from './core';
+import { Readable } from 'node:stream';
+import * as fs from './FsPromise.js';
+import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
+import * as core from './core.js';
 
-export { fromFile } from './FileTokenizer';
-export { ITokenizer, EndOfStreamError, fromBuffer, IFileInfo } from './core';
+export { fromFile } from './FileTokenizer.js';
+export { ITokenizer, EndOfStreamError, fromBuffer, IFileInfo } from './core.js';
 export { IToken, IGetToken } from '@tokenizer/token';
 
 /**

@@ -1,25 +1,27 @@
 version: 2
 updates:
 
-  # CommonJS
+  # CommonJS (CJS)
   - package-ecosystem: npm
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
       time: "04:00"
     open-pull-requests-limit: 10
     labels:
       - dependencies
       - CJS
     versioning-strategy: increase
+    target-branch: "commonjs"
     ignore:
       - dependency-name: "@types/node"
         update-types: [ "version-update:semver-patch" ]
       - dependency-name: "mocha"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "peek-readable"
+        versions: ["5.x"]
 
-
-  # TypeScript Module
+  # ECMAScript Module (ESM)
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -27,7 +29,10 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 10
     versioning-strategy: increase
-    target-branch: "es-module"
+    target-branch: "master"
     labels:
       - dependencies
       - ESM
+    ignore:
+      - dependency-name: "peek-readable"
+        versions: ["4.x"]

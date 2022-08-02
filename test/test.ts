@@ -1,11 +1,20 @@
 import * as Token from 'token-types';
 import { assert } from 'chai';
-import * as strtok3 from '../lib';
-import * as Path from 'path';
-import * as fs from '../lib/FsPromise';
-import { FileTokenizer } from '../lib/FileTokenizer';
+import * as strtok3 from '../lib/index.js';
+import Path from 'node:path';
+import * as fs from '../lib/FsPromise.js';
+import { FileTokenizer } from '../lib/FileTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
-import { PassThrough } from 'stream';
+import { PassThrough } from 'node:stream';
+import mocha from 'mocha';
+import { Buffer } from 'node:buffer';
+
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import .meta.url));
+
+const {describe, it} = mocha;
 
 interface ITokenizerTest {
   name: string;
