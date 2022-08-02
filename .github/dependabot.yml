@@ -20,6 +20,8 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "peek-readable"
         versions: ["5.x"]
+      - dependency-name: "token-types"
+        versions: ["5.x"]
 
   # ECMAScript Module (ESM)
   - package-ecosystem: npm
