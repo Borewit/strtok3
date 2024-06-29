@@ -56,9 +56,9 @@ export async function read(fd: number, buffer: Uint8Array, offset: number, lengt
   });
 }
 
-export async function writeFile(path: fs.PathLike, data: Buffer | string): Promise<void> {
+export async function writeFile(path: fs.PathLike, data: Uint8Array | string, options: fs.WriteFileOptions = null): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    fs.writeFile(path, data, err => {
+    fs.writeFile(path, data, options, err => {
       if (err)
         reject(err);
       else
@@ -67,12 +67,12 @@ export async function writeFile(path: fs.PathLike, data: Buffer | string): Promi
   });
 }
 
-export function writeFileSync(path: fs.PathLike, data: Buffer | string): void {
+export function writeFileSync(path: fs.PathLike, data: Uint8Array | string): void {
   fs.writeFileSync(path, data);
 }
 
-export async function readFile(path: fs.PathLike): Promise<Buffer> {
-  return new Promise<Buffer>((resolve, reject) => {
+export async function readFile(path: fs.PathLike): Promise<Uint8Array> {
+  return new Promise<Uint8Array>((resolve, reject) => {
     fs.readFile(path, (err, buffer) => {
       if (err)
         reject(err);
