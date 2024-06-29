@@ -61,7 +61,7 @@
     "mocha": "^9.2.2",
     "nyc": "^15.1.0",
     "remark-cli": "^11.0.0",
-    "remark-preset-lint-recommended": "^6.1.2",
+    "remark-preset-lint-recommended": "^7.0.0",
     "source-map-support": "^0.5.21",
     "token-types": "^4.2.1",
     "ts-node": "^10.9.1",
