@@ -65,7 +65,7 @@
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-jsdoc": "^46.8.2",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-unicorn": "^49.0.0",
+    "eslint-plugin-unicorn": "^54.0.0",
     "mocha": "^10.0.0",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.0",
