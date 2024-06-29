@@ -3,9 +3,7 @@
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmcharts.com/compare/strtok3,token-types?start=1200&interval=30)
 [![DeepScan grade](https://deepscan.io/api/teams/5165/projects/8526/branches/103329/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5165&pid=8526&bid=103329)
 [![Known Vulnerabilities](https://snyk.io/test/github/Borewit/strtok3/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Borewit/strtok3?targetFile=package.json)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/Borewit/strtok3.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Borewit/strtok3/alerts/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/59dd6795e61949fb97066ca52e6097ef)](https://www.codacy.com/app/Borewit/strtok3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Borewit/strtok3&amp;utm_campaign=Badge_Grade)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/Borewit/strtok3.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Borewit/strtok3/context:javascript)
 # strtok3
 
 A promise based streaming [*tokenizer*](#tokenizer) for [Node.js](http://nodejs.org) and browsers.
