@@ -7,7 +7,7 @@ import { FileTokenizer } from '../lib/FileTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
 import { PassThrough } from 'node:stream';
 import mocha from 'mocha';
-import { Buffer } from 'node:buffer';
+import { stringToUint8Array, uint8ArrayToString } from 'uint8array-extras';
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -27,7 +27,7 @@ function getResourcePath(testFile: string) {
 
 async function getTokenizerWithData(testData: string, test: ITokenizerTest): Promise<strtok3.ITokenizer> {
   const testPath = getResourcePath('tmp.dat');
-  await fs.writeFile(testPath, Buffer.from(testData, 'latin1'));
+  await fs.writeFile(testPath, testData, { encoding: 'latin1' });
   return test.loadTokenizer('tmp.dat');
 }
 
@@ -59,72 +59,72 @@ for (const tokenizerType of tokenizerTests) {
     describe('tokenizer read options', () => {
 
       it('option.offset', async () => {
-        const buf = Buffer.alloc(7);
+        const buf = new Uint8Array(7);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         assert.strictEqual(await rst.readBuffer(buf, {length: 6, offset: 1}), 6);
       });
 
       it('option.length', async () => {
-        const buf = Buffer.alloc(7);
+        const buf = new Uint8Array(7);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         assert.strictEqual(await rst.readBuffer(buf, {length: 2}), 2);
       });
 
       it('default length', async () => {
-        const buf = Buffer.alloc(6);
+        const buf = new Uint8Array(6);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         assert.strictEqual(await rst.readBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
       });
 
       it('option.maybeLess = true', async () => {
-        const buffer = Buffer.alloc(4);
+        const buffer = new Uint8Array(4);
         const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
         const len = await rst.readBuffer(buffer, {mayBeLess: true});
         assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
       });
 
       it('option.position', async () => {
-        const buffer = Buffer.alloc(5);
+        const buffer = new Uint8Array(5);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         const len = await rst.readBuffer(buffer, {position: 1});
         assert.strictEqual(len, 5, 'return value');
-        assert.strictEqual(buffer.toString('binary'), '\x02\x03\x04\x05\x06');
+        assert.strictEqual(uint8ArrayToString(buffer, 'latin1'), '\x02\x03\x04\x05\x06');
       });
     });
 
     describe('tokenizer peek options', () => {
 
       it('option.offset', async () => {
-        const buf = Buffer.alloc(7);
+        const buf = new Uint8Array(7);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         assert.strictEqual(await rst.peekBuffer(buf, {length: 6, offset: 1}), 6);
       });
 
       it('option.length', async () => {
-        const buf = Buffer.alloc(7);
+        const buf = new Uint8Array(7);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         assert.strictEqual(await rst.peekBuffer(buf, {length: 2}), 2);
       });
 
       it('default length', async () => {
-        const buf = Buffer.alloc(6);
+        const buf = new Uint8Array(6);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         assert.strictEqual(await rst.peekBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
       });
 
       it('option.maybeLess = true', async () => {
-        const buffer = Buffer.alloc(4);
+        const buffer = new Uint8Array(4);
         const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
         const len = await rst.peekBuffer(buffer, {mayBeLess: true});
         assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
       });
 
       it('option.position', async () => {
-        const buffer = Buffer.alloc(5);
+        const buffer = new Uint8Array(5);
         const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
         const len = await rst.peekBuffer(buffer, {position: 1});
         assert.strictEqual(len, 5, 'return value');
-        assert.strictEqual(buffer.toString('binary'), '\x02\x03\x04\x05\x06');
+        assert.strictEqual(uint8ArrayToString(buffer, 'latin1'), '\x02\x03\x04\x05\x06');
       });
 
     });
@@ -175,7 +175,7 @@ for (const tokenizerType of tokenizerTests) {
 
       const rst = await getTokenizerWithData('\x05peter', tokenizerType);
 
-      const buf = Buffer.alloc(4);
+      const buf = new Uint8Array(4);
 
       // should decode UINT8 from chunk
       assert.strictEqual(rst.position, 0);
@@ -197,16 +197,16 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode signed 8-bit integer (INT8)', () => {
 
-        const b = Buffer.alloc(1);
+        const b = new Uint8Array(1);
 
         Token.INT8.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00');
 
         Token.INT8.put(b, 0, 0x22);
-        assert.strictEqual(b.toString('binary'), '\x22');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x22');
 
         Token.INT8.put(b, 0, -0x22);
-        assert.strictEqual(b.toString('binary'), '\xde');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xde');
       });
 
       it('should decode signed 8-bit integer (INT8)', async () => {
@@ -235,16 +235,16 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode signed 16-bit big-endian integer (INT16_BE)', () => {
 
-        const b = Buffer.alloc(2);
+        const b = new Uint8Array(2);
 
         Token.INT16_BE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00');
 
         Token.INT16_BE.put(b, 0, 0x0f0b);
-        assert.strictEqual(b.toString('binary'), '\x0f\x0b');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x0f\x0b');
 
         Token.INT16_BE.put(b, 0, -0x0f0b);
-        assert.strictEqual(b.toString('binary'), '\xf0\xf5');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xf0\xf5');
       });
 
       it('should decode signed 16-bit big-endian integer (INT16_BE)', async () => {
@@ -269,16 +269,16 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode signed 24-bit big-endian integer (INT24_BE)', async () => {
 
-        const b = Buffer.alloc(3);
+        const b = new Uint8Array(3);
 
         Token.INT24_BE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00');
 
         Token.INT24_BE.put(b, 0, 0x0f0ba0);
-        assert.strictEqual(b.toString('binary'), '\x0f\x0b\xa0');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x0f\x0b\xa0');
 
         Token.INT24_BE.put(b, 0, -0x0f0bcc);
-        assert.strictEqual(b.toString('binary'), '\xf0\xf4\x34');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xf0\xf4\x34');
       });
 
       it('should decode signed 24-bit big-endian integer (INT24_BE)', async () => {
@@ -304,16 +304,16 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode signed 32-bit big-endian integer (INT32_BE)', () => {
 
-        const b = Buffer.alloc(4);
+        const b = new Uint8Array(4);
 
         Token.INT32_BE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\x00');
 
         Token.INT32_BE.put(b, 0, 0x0f0bcca0);
-        assert.strictEqual(b.toString('binary'), '\x0f\x0b\xcc\xa0');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x0f\x0b\xcc\xa0');
 
         Token.INT32_BE.put(b, 0, -0x0f0bcca0);
-        assert.strictEqual(b.toString('binary'), '\xf0\xf4\x33\x60');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xf0\xf4\x33\x60');
       });
 
       it('should decode signed 32-bit big-endian integer (INT32_BE)', async () => {
@@ -337,13 +337,13 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode signed 8-bit big-endian integer (INT8)', () => {
 
-        const b = Buffer.alloc(1);
+        const b = new Uint8Array(1);
 
         Token.UINT8.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00');
 
         Token.UINT8.put(b, 0, 0xff);
-        assert.strictEqual(b.toString('binary'), '\xff');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff');
       });
 
       it('should decode unsigned 8-bit integer (UINT8)', async () => {
@@ -364,25 +364,25 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode unsigned 16-bit big-endian integer (UINT16_LE)', () => {
 
-        const b = Buffer.alloc(4);
+        const b = new Uint8Array(4);
 
         Token.UINT16_LE.put(b, 0, 0x00);
         Token.UINT16_LE.put(b, 2, 0xffaa);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\xaa\xff');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\xaa\xff');
       });
 
       it('should encode unsigned 16-bit little-endian integer (UINT16_BE)', () => {
-        const b = Buffer.alloc(4);
+        const b = new Uint8Array(4);
         Token.UINT16_BE.put(b, 0, 0xf);
         Token.UINT16_BE.put(b, 2, 0xffaa);
-        assert.strictEqual(b.toString('binary'), '\x00\x0f\xff\xaa');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x0f\xff\xaa');
       });
 
       it('should encode unsigned 16-bit mixed little/big-endian integers', () => {
-        const b = Buffer.alloc(4);
+        const b = new Uint8Array(4);
         Token.UINT16_BE.put(b, 0, 0xffaa);
         Token.UINT16_LE.put(b, 2, 0xffaa);
-        assert.strictEqual(b.toString('binary'), '\xff\xaa\xaa\xff');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff\xaa\xaa\xff');
       });
 
       it('should decode unsigned mixed 16-bit big/little-endian integer', async () => {
@@ -407,30 +407,30 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode unsigned 24-bit little-endian integer (UINT24_LE)', () => {
 
-        const b = Buffer.alloc(3);
+        const b = new Uint8Array(3);
 
         Token.UINT24_LE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00');
 
         Token.UINT24_LE.put(b, 0, 0xff);
-        assert.strictEqual(b.toString('binary'), '\xff\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff\x00\x00');
 
         Token.UINT24_LE.put(b, 0, 0xaabbcc);
-        assert.strictEqual(b.toString('binary'), '\xcc\xbb\xaa');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xcc\xbb\xaa');
       });
 
       it('should encode unsigned 24-bit big-endian integer (UINT24_BE)', () => {
 
-        const b = Buffer.alloc(3);
+        const b = new Uint8Array(3);
 
         Token.UINT24_BE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00');
 
         Token.UINT24_BE.put(b, 0, 0xff);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\xff');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\xff');
 
         Token.UINT24_BE.put(b, 0, 0xaabbcc);
-        assert.strictEqual(b.toString('binary'), '\xaa\xbb\xcc');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xaa\xbb\xcc');
       });
 
       it('should decode signed 24-bit big/little-endian integer (UINT24_LE/INT24_BE)', async () => {
@@ -455,30 +455,30 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should encode unsigned 32-bit little-endian integer (UINT32_LE)', () => {
 
-        const b = Buffer.alloc(4);
+        const b = new Uint8Array(4);
 
         Token.UINT32_LE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\x00');
 
         Token.UINT32_LE.put(b, 0, 0xff);
-        assert.strictEqual(b.toString('binary'), '\xff\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff\x00\x00\x00');
 
         Token.UINT32_LE.put(b, 0, 0xaabbccdd);
-        assert.strictEqual(b.toString('binary'), '\xdd\xcc\xbb\xaa');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xdd\xcc\xbb\xaa');
       });
 
       it('should encode unsigned 32-bit big-endian integer (INT32_BE)', () => {
 
-        const b = Buffer.alloc(4);
+        const b = new Uint8Array(4);
 
         Token.UINT32_BE.put(b, 0, 0x00);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00\x00');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\x00');
 
         Token.UINT32_BE.put(b, 0, 0xff);
-        assert.strictEqual(b.toString('binary'), '\x00\x00\x00\xff');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\xff');
 
         Token.UINT32_BE.put(b, 0, 0xaabbccdd);
-        assert.strictEqual(b.toString('binary'), '\xaa\xbb\xcc\xdd');
+        assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xaa\xbb\xcc\xdd');
       });
 
       it('should decode unsigned 32-bit little/big-endian integer (UINT32_LE/UINT32_BE)', async () => {
@@ -508,7 +508,7 @@ for (const tokenizerType of tokenizerTests) {
       this.timeout(5000);
 
       const size = 10 * 1024;
-      const buf = Buffer.alloc(size);
+      const buf = new Uint8Array(size);
 
       for (let i = 0; i < size; ++i) {
         buf[i] = i % 255;
@@ -583,42 +583,42 @@ for (const tokenizerType of tokenizerTests) {
     it('Overlapping peeks', async () => {
 
       const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05', tokenizerType);
-      const peekBuffer = Buffer.alloc(3);
-      const readBuffer = Buffer.alloc(1);
+      const peekBuffer = new Uint8Array(3);
+      const readBuffer = new Uint8Array(1);
 
       assert.strictEqual(0, rst.position);
       let len = await rst.peekBuffer(peekBuffer, {length: 3}); // Peek #1
       assert.strictEqual(3, len);
-      assert.deepEqual(peekBuffer, Buffer.from('\x01\x02\x03', 'binary'), 'Peek #1');
+      assert.deepEqual(peekBuffer, stringToUint8Array('\x01\x02\x03'), 'Peek #1');
       assert.strictEqual(rst.position, 0);
       len = await rst.readBuffer(readBuffer, {length: 1}); // Read #1
       assert.strictEqual(len, 1);
       assert.strictEqual(rst.position, 1);
-      assert.deepEqual(readBuffer, Buffer.from('\x01', 'binary'), 'Read #1');
+      assert.deepEqual(readBuffer, stringToUint8Array('\x01'), 'Read #1');
       len = await rst.peekBuffer(peekBuffer, {length: 3}); // Peek #2
       assert.strictEqual(len, 3);
       assert.strictEqual(rst.position, 1);
-      assert.deepEqual(peekBuffer, Buffer.from('\x02\x03\x04', 'binary'), 'Peek #2');
+      assert.deepEqual(peekBuffer, stringToUint8Array('\x02\x03\x04'), 'Peek #2');
       len = await rst.readBuffer(readBuffer, {length: 1}); // Read #2
       assert.strictEqual(len, 1);
       assert.strictEqual(rst.position, 2);
-      assert.deepEqual(readBuffer, Buffer.from('\x02', 'binary'), 'Read #2');
+      assert.deepEqual(readBuffer, stringToUint8Array('\x02'), 'Read #2');
       len = await rst.peekBuffer(peekBuffer, {length: 3}); // Peek #3
       assert.strictEqual(len, 3);
       assert.strictEqual(rst.position, 2);
-      assert.deepEqual(peekBuffer, Buffer.from('\x03\x04\x05', 'binary'), 'Peek #3');
+      assert.deepEqual(peekBuffer, stringToUint8Array('\x03\x04\x05'), 'Peek #3');
       len = await rst.readBuffer(readBuffer, {length: 1}); // Read #3
       assert.strictEqual(len, 1);
       assert.strictEqual(rst.position, 3);
-      assert.deepEqual(readBuffer, Buffer.from('\x03', 'binary'), 'Read #3');
+      assert.deepEqual(readBuffer, stringToUint8Array('\x03'), 'Read #3');
       len = await rst.peekBuffer(peekBuffer, {length: 2}); // Peek #4
       assert.strictEqual(len, 2, '3 bytes requested to peek, only 2 bytes left');
       assert.strictEqual(rst.position, 3);
-      assert.deepEqual(peekBuffer, Buffer.from('\x04\x05\x05', 'binary'), 'Peek #4');
+      assert.deepEqual(peekBuffer, stringToUint8Array('\x04\x05\x05'), 'Peek #4');
       len = await rst.readBuffer(readBuffer, {length: 1}); // Read #4
       assert.strictEqual(len, 1);
       assert.strictEqual(rst.position, 4);
-      assert.deepEqual(readBuffer, Buffer.from('\x04', 'binary'), 'Read #4');
+      assert.deepEqual(readBuffer, stringToUint8Array('\x04'), 'Read #4');
 
       await rst.close();
     });
@@ -722,7 +722,7 @@ for (const tokenizerType of tokenizerTests) {
 
         const stat = await fs.stat(getResourcePath(testFile));
         const tokenizer = await tokenizerType.loadTokenizer(testFile);
-        const buf = Buffer.alloc(stat.size);
+        const buf = new Uint8Array(stat.size);
         const bytesRead = await tokenizer.readBuffer(buf);
         assert.ok(typeof bytesRead === 'number', 'readBuffer promise should provide a number');
         assert.strictEqual(stat.size, bytesRead);
@@ -754,7 +754,7 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should throw an EOF if we read to buffer', async () => {
 
-        const buffer = Buffer.alloc(4);
+        const buffer = new Uint8Array(4);
 
         return getTokenizerWithData('\x89\x54\x40', tokenizerType).then(rst => {
           return rst.readBuffer(buffer).then(len => {
@@ -767,7 +767,7 @@ for (const tokenizerType of tokenizerTests) {
 
       it('should throw an EOF if we peek to buffer', async () => {
 
-        const buffer = Buffer.alloc(4);
+        const buffer = new Uint8Array(4);
         const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
         try {
           await rst.peekBuffer(buffer);
@@ -812,7 +812,7 @@ for (const tokenizerType of tokenizerTests) {
     });
 
     it('should be able to read 0 bytes from a file', async () => {
-      const bufZero = Buffer.alloc(0);
+      const bufZero = new Uint8Array(0);
       const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
       await tokenizer.readBuffer(bufZero);
     });
@@ -829,7 +829,7 @@ describe('fromStream with mayBeLess flag', () => {
     stream.end();
 
     // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
-    const buffer = Buffer.alloc(5);
+    const buffer = new Uint8Array(5);
     const bytesRead = await tokenizer.peekBuffer(buffer, {mayBeLess: true});
     assert.strictEqual(bytesRead, 0);
   });
@@ -842,7 +842,7 @@ describe('fromStream with mayBeLess flag', () => {
       stream.end();
 
       // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
-      const buffer = Buffer.alloc(5);
+      const buffer = new Uint8Array(5);
       await tokenizer.peekBuffer(buffer, {mayBeLess: false});
     } catch (err) {
       if (err instanceof Error) {

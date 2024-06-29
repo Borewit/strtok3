@@ -1,5 +1,6 @@
 // Utility functions for testing
 import { Readable } from 'node:stream';
+import { stringToUint8Array } from 'uint8array-extras';
 
 /**
  * A mock stream implementation that breaks up provided data into
@@ -9,10 +10,10 @@ import { Readable } from 'node:stream';
 export class SourceStream extends Readable {
 
   public static FromString(str: string = ''): SourceStream {
-    return new SourceStream(Buffer.from(str, 'binary'));
+    return new SourceStream(stringToUint8Array(str));
   }
 
-  public constructor(private buf: Buffer) {
+  public constructor(private buf: Uint8Array) {
     super();
   }
 
