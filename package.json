@@ -64,7 +64,7 @@
     "remark-preset-lint-recommended": "^6.1.2",
     "source-map-support": "^0.5.21",
     "token-types": "^4.2.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^4.8.4"
   },
   "dependencies": {
