@@ -12,17 +12,17 @@ A promise based streaming [*tokenizer*](#tokenizer) for [Node.js](http://nodejs.
 This node module is a successor of [strtok2](https://github.com/Borewit/strtok2).
 
 The `strtok3` contains a few methods to turn different input into a [*tokenizer*](#tokenizer). Designed to
-*   Support a streaming environment
-*   Decoding of binary data, strings and numbers in mind
-*   Read [predefined](https://github.com/Borewit/token-types) or custom tokens.
-*   Optimized [*tokenizers*](#tokenizer) for reading from [file](#method-strtok3fromfile), [stream](#method-strtok3fromstream) or [buffer](#method-strtok3frombuffer).
+* Support a streaming environment
+* Decoding of binary data, strings and numbers in mind
+* Read [predefined](https://github.com/Borewit/token-types) or custom tokens.
+* Optimized [*tokenizers*](#tokenizer) for reading from [file](#method-strtok3fromfile), [stream](#method-strtok3fromstream) or [buffer](#method-strtok3frombuffer).
 
 It can read from:
-*   A file (taking a file path as an input)
-*   A Node.js [stream](https://nodejs.org/api/stream.html).
-*   A [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)
-*   HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
-*   Chunked [Amazon S3](https://aws.amazon.com/s3) access provided by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
+* A file (taking a file path as an input)
+* A Node.js [stream](https://nodejs.org/api/stream.html).
+* A [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)
+* HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
+* Chunked [Amazon S3](https://aws.amazon.com/s3) access provided by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
 
 ## Installation
 
@@ -39,10 +39,10 @@ Requires Node.js ≥ 14.16 engine.
 ## API
 
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
-*   [strtok3.fromFile](#method-strtok3fromfile)
-*   [strtok3.fromStream](#method-strtok3fromstream)
-*   [strtok3.fromBuffer](#method-strtok3fromBuffer)
-*   [strtok3.fromUint8Array](#method-strtok3fromUint8Array)
+* [strtok3.fromFile](#method-strtok3fromfile)
+* [strtok3.fromStream](#method-strtok3fromstream)
+* [strtok3.fromBuffer](#method-strtok3fromBuffer)
+* [strtok3.fromUint8Array](#method-strtok3fromUint8Array)
 
 ### strtok3 methods
 
@@ -121,8 +121,8 @@ The tokenizer allows us to *read* or *peek* from the *tokenizer-stream*. The *to
 It can also be translated in chunked reads, as done in [@tokenizer/http](https://github.com/Borewit/tokenizer-http);
 
 What is the difference with Nodejs.js stream?
-*   The *tokenizer-stream* supports jumping / seeking in a the *tokenizer-stream* using [`tokenizer.ignore()`](#method-tokenizerignore)
-*   In addition to *read* methods, it has *peek* methods, to read a ahead and check what is coming.
+* The *tokenizer-stream* supports jumping / seeking in a the *tokenizer-stream* using [`tokenizer.ignore()`](#method-tokenizerignore)
+* In addition to *read* methods, it has *peek* methods, to read a ahead and check what is coming.
 
 The [tokenizer.position](#attribute-tokenizerposition) keeps tracks of the read position.
 
@@ -138,8 +138,8 @@ If a *position* is provided to a *read* or *peek* method, is should be, at least
 ### Tokenizer methods 
 
 There are two kind of methods:
-1.   *read* methods: used to read a *token* of [Buffer](https://nodejs.org/api/buffer.html) from the [*tokenizer*](#tokenizer). The position of the *tokenizer-stream* will advance with the size of the token.
-2.   *peek* methods: same as the read, but it will *not* advance the pointer. It allows to read (peek) ahead.
+1. *read* methods: used to read a *token* of [Buffer](https://nodejs.org/api/buffer.html) from the [*tokenizer*](#tokenizer). The position of the *tokenizer-stream* will advance with the size of the token.
+2. *peek* methods: same as the read, but it will *not* advance the pointer. It allows to read (peek) ahead.
 
 #### Method `tokenizer.readBuffer()`
 
