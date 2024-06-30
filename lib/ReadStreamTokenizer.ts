@@ -1,17 +1,13 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
-import { EndOfStreamError, StreamReader } from 'peek-readable';
-import { Readable } from 'node:stream';
+import { EndOfStreamError, IStreamReader } from 'peek-readable';
 import { IFileInfo, IReadChunkOptions } from './types.js';
 
 const maxBufferSize = 256000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
-  private streamReader: StreamReader;
-
-  public constructor(stream: Readable, fileInfo?: IFileInfo) {
+  public constructor(private streamReader: IStreamReader, fileInfo?: IFileInfo) {
     super(fileInfo);
-    this.streamReader = new StreamReader(stream);
   }
 
   /**
