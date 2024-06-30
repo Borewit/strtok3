@@ -1,0 +1,44 @@
+# Release Drafter template
+# Ref: https://github.com/marketplace/actions/release-drafter
+
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+categories:
+  - title: 🚀 Enhancements
+    labels:
+      - enhancement
+  - title: 🎨 Improvements
+    labels:
+      - improvement
+  - title: 🐛 Bug Fixes
+    labels:
+      - bug
+  - title: 🔧 Under the hood
+    labels:
+      - debt
+  - title: ⬆️ Dependencies
+    labels:
+      - dependencies
+exclude-labels:
+  - 'DevOps'
+  - dev-dependencies
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
+version-resolver:
+  major:
+    labels:
+      - 'major'
+  minor:
+    labels:
+      - 'minor'
+  patch:
+    labels:
+      - 'patch'
+  default: patch
+template: |
+  ## Changes
+
+  $CHANGES
+
+  ## NPM release
+  NPM release: [$REPOSITORY@$RESOLVED_VERSION](https://www.npmjs.com/package/$REPOSITORY/v/$RESOLVED_VERSION)
