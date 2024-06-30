@@ -39,6 +39,7 @@ Requires Node.js ≥ 14.16 engine.
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
 * [strtok3.fromFile](#method-strtok3fromfile)
 * [strtok3.fromStream](#method-strtok3fromstream)
+* [strtok3.fromWeb](#method-strtok3fromwebstream)
 * [strtok3.fromBuffer](#method-strtok3fromBuffer)
 * [strtok3.fromUint8Array](#method-strtok3fromUint8Array)
 
@@ -75,20 +76,31 @@ import * as Token from 'token-types';
 
 #### Method `strtok3.fromStream()`
 
-Create [*tokenizer*](#tokenizer) from a node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
+Create [*tokenizer*](#tokenizer) from a Node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
 
 | Parameter |  Optional | Type                                                                        | Description              |
 |-----------|-----------|-----------------------------------------------------------------------------|--------------------------|
 | stream    | no        | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from      |
 | fileInfo  | yes       | [IFileInfo](#IFileInfo)                                                     | Provide file information |
 
-Returns a [*tokenizer*](#tokenizer), via a Promise, which can be used to parse a buffer.
+Returns a Promise providing a [*tokenizer*](#tokenizer).
+
+#### Method `strtok3.fromWebStream()`
+
+Create [*tokenizer*](#tokenizer) from a [WHATWG ReadableStream](https://nodejs.org/api/webstreams.html#web-streams-api).
+
+| Parameter      |  Optional | Type                                                                     | Description                        |
+|----------------|-----------|--------------------------------------------------------------------------|------------------------------------|
+| readableStream | no        | [ReadableStream](https://nodejs.org/api/webstreams.html#web-streams-api) | WHATWG ReadableStream to read from |
+| fileInfo       | yes       | [IFileInfo](#IFileInfo)                                                  | Provide file information           |
+
+Returns a Promise providing a [*tokenizer*](#tokenizer)
 
 ```js
 import strtok3 from 'strtok3';
 import * as Token from 'token-types';
 
-strtok3.fromStream(stream).then(tokenizer => {
+strtok3.fromWebStream(readableStream).then(tokenizer => {
   return tokenizer.readToken(Token.UINT8).then(myUint8Number => {
     console.log(`My number: ${myUint8Number}`);
   });
@@ -102,7 +114,7 @@ strtok3.fromStream(stream).then(tokenizer => {
 | uint8Array | no       | [Uint8Array](https://nodejs.org/api/buffer.html) | Uint8Array or Buffer to read from      |
 | fileInfo   | yes      | [IFileInfo](#IFileInfo)                          | Provide file information               |
 
-Returns a [*tokenizer*](#tokenizer) which can be used to parse the provided buffer.
+Returns a Promise providing a [*tokenizer*](#tokenizer).
 
 ```js
 import * as strtok3 from 'strtok3';

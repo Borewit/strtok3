@@ -1,41 +1,41 @@
-// Utility functions for testing
-import { Readable } from 'node:stream';
-import { stringToUint8Array } from 'uint8array-extras';
+import * as fs from 'fs/promises';
+import { ReadableStream } from 'node:stream/web';
 
-/**
- * A mock stream implementation that breaks up provided data into
- * random-sized chunks and emits 'data' events. This is used to simulate
- * data arriving with arbitrary packet boundaries.
- */
-export class SourceStream extends Readable {
+export async function makeReadableByteFileStream(filename: string): Promise<ReadableStream<Uint8Array>> {
 
-  public static FromString(str: string = ''): SourceStream {
-    return new SourceStream(stringToUint8Array(str));
-  }
+  let position = 0;
+  const fileHandle = await fs.open(filename, "r");
 
-  public constructor(private buf: Uint8Array) {
-    super();
-  }
+  return new ReadableStream({
+    type: "bytes",
 
-  public _read() {
+    async pull(controller) {
 
-    /* ToDo: segment data
-     const len = Math.min(
-     this.min + Math.floor(Math.random() * (this.max - this.min)),
-     this.buf.length
-     );
+      // @ts-ignore
+      const view = controller.byobRequest.view;
 
-     const b = this.buf.slice(0, len);
+      try {
+        const { bytesRead } = await fileHandle.read(view, 0, view.byteLength, position);
+        if (bytesRead === 0) {
+          await fileHandle.close();
+          controller.close();
+          // @ts-ignore
+          controller.byobRequest.respond(0);
+        } else {
+          position += bytesRead;
+          // @ts-ignore
+          controller.byobRequest.respond(bytesRead);
+        }
+      } catch (err) {
+        controller.error(err);
+        await fileHandle.close();
+      }
+    },
 
-     if (len < this.buf.length) {
-     this.buf = this.buf.slice(len, this.buf.length);
-     this.push(b);
-     } else {
-     this.push(null); // push the EOF-signaling `null` chunk
-     }*/
+    async cancel() {
+      await fileHandle.close();
+    },
 
-    this.push(this.buf);
-    this.push(null); // push the EOF-signaling `null` chunk
-  }
-
+    autoAllocateChunkSize: 1024
+  });
 }
