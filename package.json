@@ -50,7 +50,7 @@
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.62.0",
     "chai": "^4.3.6",
-    "del-cli": "^5.0.0",
+    "del-cli": "^5.1.0",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-import-resolver-typescript": "^3.5.2",
