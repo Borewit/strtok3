@@ -69,14 +69,14 @@
     "mocha": "^10.5.2",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.0",
-    "token-types": "^5.0.1",
+    "token-types": "^6.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.2",
     "uint8array-extras": "^1.2.0"
   },
   "dependencies": {
     "@tokenizer/token": "^0.3.0",
-    "peek-readable": "^5.0.0"
+    "peek-readable": "^5.1.1"
   },
   "keywords": [
     "tokenizer",
