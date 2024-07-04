@@ -3855,10 +3855,10 @@ to-vfile@^7.0.0:
     is-buffer "^2.0.0"
     vfile "^5.1.0"
 
-token-types@^4.2.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/token-types/-/token-types-4.2.1.tgz#0f897f03665846982806e138977dbe72d44df753"
-  integrity sha512-6udB24Q737UD/SDsKAHI9FCRP7Bqc9D/MQUV02ORQg5iskjtLJlZJNdN4kKtcdtwCeWIwIHDGaUsTsCCAa8sFQ==
+token-types@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/token-types/-/token-types-6.0.0.tgz#1ab26be1ef9c434853500c071acfe5c8dd6544a3"
+  integrity sha512-lbDrTLVsHhOMljPscd0yitpozq7Ga2M5Cvez5AjGg8GASBjtt6iERCAJ93yommPmz62fb45oFIXHEZ3u9bfJEA==
   dependencies:
     "@tokenizer/token" "^0.3.0"
     ieee754 "^1.2.1"
