@@ -1,4 +1,4 @@
-![Node.js CI](https://github.com/Borewit/strtok3/workflows/Node.js%20CI/badge.svg)
+[![Node.js CI](https://github.com/Borewit/strtok3/actions/workflows/nodejs-ci.yml/badge.svg?branch=master)](https://github.com/Borewit/strtok3/actions/workflows/nodejs-ci.yml?query=branch%3Amaster)
 [![NPM version](https://badge.fury.io/js/strtok3.svg)](https://npmjs.org/package/strtok3)
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmcharts.com/compare/strtok3,token-types?start=1200&interval=30)
 [![DeepScan grade](https://deepscan.io/api/teams/5165/projects/8526/branches/103329/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5165&pid=8526&bid=103329)
@@ -32,7 +32,7 @@ npm install strtok3
 
 Module: version 7 migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 JavaScript is compliant with [ECMAScript 2019 (ES10)](https://en.wikipedia.org/wiki/ECMAScript#10th_Edition_%E2%80%93_ECMAScript_2019).
-Requires Node.js ≥ 14.16 engine.
+Requires Node.js ≥ 16 engine.
 
 ## API
 
