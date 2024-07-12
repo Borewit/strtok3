@@ -48,6 +48,9 @@
           },
           "Symbol": {
             "message": "Avoid using the `Symbol` type. Did you mean `symbol`?"
+          },
+          "Buffer": {
+            "message": "Do not use Node.js specific Buffer type, use Uint8Array"
           }
         }
       }
@@ -179,6 +182,12 @@
     "no-redeclare": "error",
     "no-return-await": "error",
     "no-restricted-globals": ["error", "Buffer"],
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": ["node:buffer"]
+      }
+    ],
     "no-sequences": "error",
     "no-shadow": "off",
     "no-sparse-arrays": "error",
