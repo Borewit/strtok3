@@ -178,6 +178,7 @@
     "no-new-wrappers": "error",
     "no-redeclare": "error",
     "no-return-await": "error",
+    "no-restricted-globals": ["error", "Buffer"],
     "no-sequences": "error",
     "no-shadow": "off",
     "no-sparse-arrays": "error",
