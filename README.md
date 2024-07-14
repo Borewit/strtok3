@@ -1,4 +1,5 @@
 [![Node.js CI](https://github.com/Borewit/strtok3/actions/workflows/nodejs-ci.yml/badge.svg?branch=master)](https://github.com/Borewit/strtok3/actions/workflows/nodejs-ci.yml?query=branch%3Amaster)
+[![CodeQL](https://github.com/Borewit/strtok3/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/Borewit/strtok3/actions/workflows/codeql.yml)
 [![NPM version](https://badge.fury.io/js/strtok3.svg)](https://npmjs.org/package/strtok3)
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmcharts.com/compare/strtok3,token-types?start=1200&interval=30)
 [![DeepScan grade](https://deepscan.io/api/teams/5165/projects/8526/branches/103329/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5165&pid=8526&bid=103329)
