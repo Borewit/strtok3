@@ -91,5 +91,6 @@
     "uint",
     "stream",
     "streaming"
-  ]
+  ],
+  "packageManager": "yarn@4.3.1"
 }
