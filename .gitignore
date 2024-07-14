@@ -1,5 +1,20 @@
-*.iml
+# Node module
 node_modules
+
+#IntelliJ IDEA:
+.idea
+*.iml
+
+# Yarn:
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Project
 lib/**/*.js
 lib/**/*.js.map
 lib/**/*.d.ts
@@ -8,4 +23,3 @@ test/**/*.js.map
 test/**/*.d.ts
 test/resources/tmp.dat
 coverage
-.idea
