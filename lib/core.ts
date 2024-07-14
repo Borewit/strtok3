@@ -2,7 +2,7 @@ import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { Readable } from 'node:stream';
 import { BufferTokenizer } from './BufferTokenizer.js';
 import { IFileInfo } from './types.js';
-import { StreamReader, WebStreamReader} from "peek-readable";
+import { StreamReader, WebStreamReader} from 'peek-readable';
 import type { ReadableStream } from 'node:stream/web';
 export { EndOfStreamError } from 'peek-readable';
 export { ITokenizer, IFileInfo } from './types.js';

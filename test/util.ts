@@ -4,10 +4,10 @@ import { ReadableStream } from 'node:stream/web';
 export async function makeReadableByteFileStream(filename: string): Promise<ReadableStream<Uint8Array>> {
 
   let position = 0;
-  const fileHandle = await fs.open(filename, "r");
+  const fileHandle = await fs.open(filename, 'r');
 
   return new ReadableStream({
-    type: "bytes",
+    type: 'bytes',
 
     async pull(controller) {
 

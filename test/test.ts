@@ -1,17 +1,17 @@
 import * as Token from 'token-types';
-import {assert} from 'chai';
-import {fromStream, fromWebStream, fromFile, fromBuffer, ITokenizer} from '../lib/index.js';
+import { assert } from 'chai';
+import { fromStream, fromWebStream, fromFile, fromBuffer, ITokenizer } from '../lib/index.js';
 import Path from 'node:path';
 import * as fs from '../lib/FsPromise.js';
-import {FileTokenizer} from '../lib/FileTokenizer.js';
-import {EndOfStreamError} from 'peek-readable';
-import {PassThrough} from 'node:stream';
+import { FileTokenizer } from '../lib/FileTokenizer.js';
+import { EndOfStreamError } from 'peek-readable';
+import { PassThrough } from 'node:stream';
 import mocha from 'mocha';
-import {stringToUint8Array, uint8ArrayToString} from 'uint8array-extras';
+import { stringToUint8Array, uint8ArrayToString } from 'uint8array-extras';
 
-import {dirname} from 'path';
-import {fileURLToPath} from 'url';
-import {makeReadableByteFileStream} from "./util.js";
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { makeReadableByteFileStream } from './util.js';
 
 const __dirname = dirname(fileURLToPath(import .meta.url));
 
