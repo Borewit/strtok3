@@ -1,11 +1,11 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
-import * as fs from './FsPromise.js';
 import { IFileInfo, IReadChunkOptions } from './types.js';
+import { FileHandle, open as fsOpen } from 'node:fs/promises';
 
 export class FileTokenizer extends AbstractTokenizer {
 
-  public constructor(private fd: number, fileInfo: IFileInfo) {
+  public constructor(private fileHandle: FileHandle, fileInfo: IFileInfo) {
     super(fileInfo);
   }
 
@@ -18,7 +18,7 @@ export class FileTokenizer extends AbstractTokenizer {
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(uint8Array, options);
     this.position = normOptions.position;
-    const res = await fs.read(this.fd, uint8Array, normOptions.offset, normOptions.length, normOptions.position);
+    const res = await this.fileHandle.read(uint8Array, normOptions.offset, normOptions.length, normOptions.position);
     this.position += res.bytesRead;
     if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
       throw new EndOfStreamError();
@@ -36,7 +36,7 @@ export class FileTokenizer extends AbstractTokenizer {
 
     const normOptions = this.normalizeOptions(uint8Array, options);
 
-    const res = await fs.read(this.fd, uint8Array, normOptions.offset, normOptions.length, normOptions.position);
+    const res = await this.fileHandle.read(uint8Array, normOptions.offset, normOptions.length, normOptions.position);
     if ((!normOptions.mayBeLess) && res.bytesRead < normOptions.length) {
       throw new EndOfStreamError();
     }
@@ -44,15 +44,12 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public async close(): Promise<void> {
-    return fs.close(this.fd);
+    return this.fileHandle.close();
   }
 }
 
 export async function fromFile(sourceFilePath: string): Promise<FileTokenizer> {
-  const stat = await fs.stat(sourceFilePath);
-  if (!stat.isFile) {
-    throw new Error(`File not a file: ${sourceFilePath}`);
-  }
-  const fd = await fs.open(sourceFilePath, 'r');
-  return new FileTokenizer(fd, {path: sourceFilePath, size: stat.size});
+  const fileHandle = await fsOpen(sourceFilePath, 'r');
+  const stat = await fileHandle.stat();
+  return new FileTokenizer(fileHandle, {path: sourceFilePath, size: stat.size});
 }

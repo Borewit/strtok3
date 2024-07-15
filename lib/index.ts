@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
-import * as fs from './FsPromise.js';
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
+import { stat as fsStat } from 'node:fs/promises';
 import * as core from './core.js';
 
 export { fromFile } from './FileTokenizer.js';
@@ -17,7 +17,7 @@ export { IToken, IGetToken } from '@tokenizer/token';
 export async function fromStream(stream: Readable, fileInfo?: core.IFileInfo): Promise<ReadStreamTokenizer> {
   fileInfo = fileInfo ? fileInfo : {};
   if ((stream as any).path) {
-    const stat = await fs.stat((stream as any).path);
+    const stat = await fsStat((stream as any).path);
     fileInfo.path = (stream as any).path;
     fileInfo.size = stat.size;
   }
