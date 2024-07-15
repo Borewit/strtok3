@@ -2,10 +2,12 @@ import * as Token from 'token-types';
 import { assert } from 'chai';
 import { fromStream, fromWebStream, fromFile, fromBuffer, ITokenizer } from '../lib/index.js';
 import Path from 'node:path';
-import * as fs from '../lib/FsPromise.js';
 import { FileTokenizer } from '../lib/FileTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
 import { PassThrough } from 'node:stream';
+import * as fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+
 import mocha from 'mocha';
 import { stringToUint8Array, uint8ArrayToString } from 'uint8array-extras';
 
@@ -39,7 +41,7 @@ describe('Matrix tests', () => {
     {
       name: 'fromStream()',
       loadTokenizer: async testFile => {
-        const stream = fs.createReadStream(getResourcePath(testFile));
+        const stream = createReadStream(getResourcePath(testFile));
         return fromStream(stream);
       },
       hasFileInfo: true
@@ -877,7 +879,7 @@ describe('fromStream with mayBeLess flag', () => {
 });
 
 it('should determine the file size using a file stream', async () => {
-  const stream = fs.createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
+  const stream = createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
   const tokenizer = await fromStream(stream);
   assert.isDefined(tokenizer.fileInfo, '`fileInfo` should be defined');
   assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
