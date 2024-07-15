@@ -4447,10 +4447,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"peek-readable@npm:^5.1.2":
-  version: 5.1.2
-  resolution: "peek-readable@npm:5.1.2"
-  checksum: 10c0/015d7f50c17f07efde09a1507d4be67ff01d5819533bbfdbb79232f280aca81ea34053988f49ce9f0e77876487182bbd23ce9178aabe58515f06a91df0b028f0
+"peek-readable@npm:^5.1.3":
+  version: 5.1.3
+  resolution: "peek-readable@npm:5.1.3"
+  checksum: 10c0/4697a0e50778171467c0cdb3059c0810809787ae0dcbb4d44316dd2846be1829f62a790d6e9f8c9600a91aca74520ece7731b5914e3180ca1364268d168bd0e3
   languageName: node
   linkType: hard
 
@@ -5494,7 +5494,7 @@ __metadata:
     eslint-plugin-unicorn: "npm:^54.0.0"
     global: "npm:^4.4.0"
     mocha: "npm:^10.6.0"
-    peek-readable: "npm:^5.1.2"
+    peek-readable: "npm:^5.1.3"
     remark-cli: "npm:^12.0.1"
     remark-preset-lint-recommended: "npm:^7.0.0"
     token-types: "npm:^6.0.0"
