@@ -1,44 +1,42 @@
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
-import { IFileInfo } from './types.js';
 import { StreamReader, WebStreamReader } from 'peek-readable';
+import type { ITokenizerOptions } from './types.js';
 import type { ReadableStream } from 'node:stream/web';
 import type { Readable } from 'node:stream';
 
 export { EndOfStreamError } from 'peek-readable';
-export { ITokenizer, IFileInfo } from './types.js';
-export { IToken, IGetToken } from '@tokenizer/token';
+export type { ITokenizer, IFileInfo, ITokenizerOptions, OnClose } from './types.js';
+export type { IToken, IGetToken } from '@tokenizer/token';
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
  * Will set fileSize, if provided given Stream has set the .path property/
  * @param stream - Read from Node.js Stream.Readable
- * @param fileInfo - Pass the file information, like size and MIME-type of the corresponding stream.
+ * @param options - Tokenizer options
  * @returns ReadStreamTokenizer
  */
-export function fromStream(stream: Readable, fileInfo?: IFileInfo): ReadStreamTokenizer {
-  fileInfo = fileInfo ? fileInfo : {};
-  return new ReadStreamTokenizer(new StreamReader(stream), fileInfo);
+export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadStreamTokenizer {
+  return new ReadStreamTokenizer(new StreamReader(stream), options);
 }
 
 /**
  * Construct ReadStreamTokenizer from given ReadableStream (WebStream API).
  * Will set fileSize, if provided given Stream has set the .path property/
  * @param webStream - Read from Node.js Stream.Readable
- * @param fileInfo - Pass the file information, like size and MIME-type of the corresponding stream.
+ * @param options - Tokenizer options
  * @returns ReadStreamTokenizer
  */
-export function fromWebStream(webStream: ReadableStream<Uint8Array>, fileInfo?: IFileInfo): ReadStreamTokenizer {
-  fileInfo = fileInfo ? fileInfo : {};
-  return new ReadStreamTokenizer(new WebStreamReader(webStream), fileInfo);
+export function fromWebStream(webStream: ReadableStream<Uint8Array>, options?: ITokenizerOptions): ReadStreamTokenizer {
+  return new ReadStreamTokenizer(new WebStreamReader(webStream), options);
 }
 
 /**
  * Construct ReadStreamTokenizer from given Buffer.
  * @param uint8Array - Uint8Array to tokenize
- * @param fileInfo - Pass additional file information to the tokenizer
+ * @param options - Tokenizer options
  * @returns BufferTokenizer
  */
-export function fromBuffer(uint8Array: Uint8Array, fileInfo?: IFileInfo): BufferTokenizer {
-  return new BufferTokenizer(uint8Array, fileInfo);
+export function fromBuffer(uint8Array: Uint8Array, options?: ITokenizerOptions): BufferTokenizer {
+  return new BufferTokenizer(uint8Array, options);
 }
