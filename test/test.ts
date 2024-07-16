@@ -69,7 +69,7 @@ describe('Matrix tests', () => {
   ];
 
   tokenizerTests
-    .filter((x, n) => n === 1)
+    // .filter((x, n) => n === 1)
     .forEach(tokenizerType => {
       describe(tokenizerType.name, () => {
 
@@ -79,18 +79,21 @@ describe('Matrix tests', () => {
             const buf = new Uint8Array(7);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             assert.strictEqual(await rst.readBuffer(buf, {length: 6, offset: 1}), 6);
+            await rst.close();
           });
 
           it('option.length', async () => {
             const buf = new Uint8Array(7);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             assert.strictEqual(await rst.readBuffer(buf, {length: 2}), 2);
+            await rst.close();
           });
 
           it('default length', async () => {
             const buf = new Uint8Array(6);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             assert.strictEqual(await rst.readBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
+            await rst.close();
           });
 
           it('option.maybeLess = true', async () => {
@@ -98,6 +101,7 @@ describe('Matrix tests', () => {
             const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
             const len = await rst.readBuffer(buffer, {mayBeLess: true});
             assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
+            await rst.close();
           });
 
           it('option.position', async () => {
@@ -106,6 +110,7 @@ describe('Matrix tests', () => {
             const len = await rst.readBuffer(buffer, {position: 1});
             assert.strictEqual(len, 5, 'return value');
             assert.strictEqual(uint8ArrayToString(buffer, 'latin1'), '\x02\x03\x04\x05\x06');
+            await rst.close();
           });
         });
 
@@ -115,18 +120,21 @@ describe('Matrix tests', () => {
             const buf = new Uint8Array(7);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             assert.strictEqual(await rst.peekBuffer(buf, {length: 6, offset: 1}), 6);
+            await rst.close();
           });
 
           it('option.length', async () => {
             const buf = new Uint8Array(7);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             assert.strictEqual(await rst.peekBuffer(buf, {length: 2}), 2);
+            await rst.close();
           });
 
           it('default length', async () => {
             const buf = new Uint8Array(6);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             assert.strictEqual(await rst.peekBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
+            await rst.close();
           });
 
           it('option.maybeLess = true', async () => {
@@ -134,6 +142,7 @@ describe('Matrix tests', () => {
             const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
             const len = await rst.peekBuffer(buffer, {mayBeLess: true});
             assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
+            await rst.close();
           });
 
           it('option.position', async () => {
@@ -142,6 +151,7 @@ describe('Matrix tests', () => {
             const len = await rst.peekBuffer(buffer, {position: 1});
             assert.strictEqual(len, 5, 'return value');
             assert.strictEqual(uint8ArrayToString(buffer, 'latin1'), '\x02\x03\x04\x05\x06');
+            await rst.close();
           });
 
         });
@@ -166,6 +176,8 @@ describe('Matrix tests', () => {
             assert.fail('Should reject due to end-of-stream');
           } catch (err) {
             assert.instanceOf(err, EndOfStreamError);
+          } finally {
+            await rst.close();
           }
         });
 
@@ -184,6 +196,8 @@ describe('Matrix tests', () => {
             assert.fail('Should reject due to end-of-stream');
           } catch (err) {
             assert.instanceOf(err, EndOfStreamError);
+          } finally {
+            await rst.close();
           }
 
         });
@@ -199,6 +213,7 @@ describe('Matrix tests', () => {
           const bufferLength = await rst.readBuffer(buf);
           assert.strictEqual(bufferLength, buf.length);
           assert.strictEqual(rst.position, buf.length);
+          await rst.close();
         });
 
         it('should contain fileSize if constructed from file-read-stream', async () => {
@@ -654,6 +669,8 @@ describe('Matrix tests', () => {
             assert.fail('Should reject due to end-of-stream');
           } catch (err) {
             assert.instanceOf(err, EndOfStreamError);
+          } finally {
+            await rst.close();
           }
         });
 
@@ -666,6 +683,8 @@ describe('Matrix tests', () => {
           assert.strictEqual(typeof value, 'string');
           assert.strictEqual(value, 'peter');
           assert.strictEqual(rst.position, 0);
+
+          await rst.close();
         });
 
         it('number', async () => {
@@ -675,6 +694,8 @@ describe('Matrix tests', () => {
           await tokenizer.ignore(1);
           const x = await tokenizer.peekNumber(Token.INT32_BE);
           assert.strictEqual(x, 33752069);
+
+          await tokenizer.close();
         });
 
         it('should throw an Error if we reach EOF while peeking a number', async () => {
@@ -749,6 +770,8 @@ describe('Matrix tests', () => {
               assert.fail('Should throw EOF');
             } catch (err) {
               assert.instanceOf(err, EndOfStreamError);
+            } finally {
+              await tokenizer.close();
             }
           });
 
@@ -757,6 +780,7 @@ describe('Matrix tests', () => {
             const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
             const num = await rst.readToken(Token.UINT24_BE);
             assert.strictEqual(num, 9000000);
+            await rst.close();
           });
 
           it('should be thrown if a token EOF reached in the middle of a token', async () => {
@@ -767,6 +791,8 @@ describe('Matrix tests', () => {
               assert.fail('It should throw EndOfFile Error');
             } catch (err) {
               assert.instanceOf(err, EndOfStreamError);
+            } finally {
+              await rst.close();
             }
           });
 
@@ -779,6 +805,8 @@ describe('Matrix tests', () => {
                 assert.fail('It should throw EndOfFile Error');
               }).catch(err => {
                 assert.instanceOf(err, EndOfStreamError);
+              }).finally(() => {
+                return rst.close();
               });
             });
           });
@@ -792,6 +820,8 @@ describe('Matrix tests', () => {
               assert.fail('It should throw EndOfFile Error');
             } catch (err) {
               assert.instanceOf(err, EndOfStreamError);
+            } finally {
+              await rst.close();
             }
           });
 
@@ -815,6 +845,7 @@ describe('Matrix tests', () => {
           value = await tokenizer.readToken(Token.UINT32_BE);
           assert.strictEqual(typeof value, 'number');
           assert.strictEqual(value, 0x1a001a00, 'UINT32_BE #4');
+          await tokenizer.close();
         });
 
         it('should be able to parse the IgnoreType-token', async () => {
@@ -829,12 +860,14 @@ describe('Matrix tests', () => {
           value = await tokenizer.readToken(Token.UINT32_BE);
           assert.strictEqual(typeof value, 'number');
           assert.strictEqual(value, 0x1a001a00, 'UINT32_BE #4');
+          await tokenizer.close();
         });
 
         it('should be able to read 0 bytes from a file', async () => {
           const bufZero = new Uint8Array(0);
           const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
           await tokenizer.readBuffer(bufZero);
+          await tokenizer.close();
         });
 
       }); // End of test "Tokenizer-types"
@@ -853,13 +886,15 @@ describe('fromStream with mayBeLess flag', () => {
     const buffer = new Uint8Array(5);
     const bytesRead = await tokenizer.peekBuffer(buffer, {mayBeLess: true});
     assert.strictEqual(bytesRead, 0);
+    await tokenizer.close();
   });
 
   it('mayBeLess=false', async () => {
+    let tokenizer;
     try {
       // Initialize empty stream
       const stream = new PassThrough();
-      const tokenizer = await fromStream(stream);
+      tokenizer = await fromStream(stream);
       stream.end();
 
       // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
@@ -872,6 +907,10 @@ describe('fromStream with mayBeLess flag', () => {
         assert.fail('Expected: err instanceof Error');
       }
       return;
+    } finally {
+      if(tokenizer) {
+        await tokenizer.close();
+      }
     }
     assert.fail('Should throw End-Of-Stream error');
   });
@@ -883,4 +922,5 @@ it('should determine the file size using a file stream', async () => {
   const tokenizer = await fromStream(stream);
   assert.isDefined(tokenizer.fileInfo, '`fileInfo` should be defined');
   assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
+  await tokenizer.close();
 });
