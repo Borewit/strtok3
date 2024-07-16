@@ -1,6 +1,6 @@
-import { ITokenizer, IFileInfo, IReadChunkOptions } from './types.js';
+import type { ITokenizer, IFileInfo, IReadChunkOptions, OnClose, ITokenizerOptions } from './types.js';
+import type { IGetToken, IToken } from '@tokenizer/token';
 import { EndOfStreamError } from 'peek-readable';
-import { IGetToken, IToken } from '@tokenizer/token';
 
 interface INormalizedReadChunkOptions extends IReadChunkOptions {
   offset: number;
@@ -16,8 +16,16 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   public fileInfo: IFileInfo;
 
-  protected constructor(fileInfo?: IFileInfo) {
-    this.fileInfo = fileInfo ? fileInfo : {};
+  private onClose?: OnClose;
+
+  /**
+   * Constructor
+   * @param options Tokenizer options
+   * @protected
+   */
+  protected constructor(options?: ITokenizerOptions) {
+    this.fileInfo = options?.fileInfo ?? {};
+    this.onClose = options?.onClose;
   }
 
   /**
@@ -37,7 +45,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   /**
    * Peek (read ahead) buffer from tokenizer
-   * @param uint8Array- Target buffer to fill with data peek from the tokenizer-stream
+   * @param uint8Array - Target buffer to fill with data peeked from the tokenizer-stream
    * @param options - Peek behaviour options
    * @returns Promise with number of bytes read
    */
@@ -113,7 +121,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   public async close(): Promise<void> {
-    // empty
+    await this.onClose?.();
   }
 
   protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): INormalizedReadChunkOptions {

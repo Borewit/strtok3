@@ -9,7 +9,7 @@ import * as fs from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
 
 import mocha from 'mocha';
-import { stringToUint8Array, uint8ArrayToString } from 'uint8array-extras';
+import { stringToUint8Array } from 'uint8array-extras';
 
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -48,7 +48,8 @@ describe('Matrix tests', () => {
     }, {
       name: 'fromWebStream()',
       loadTokenizer: async testFile => {
-        return fromWebStream(await makeReadableByteFileStream(Path.join(__dirname, 'resources', testFile)));
+        const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', testFile));
+        return fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile()});
       },
       hasFileInfo: false
     }, {
@@ -109,7 +110,7 @@ describe('Matrix tests', () => {
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             const len = await rst.readBuffer(buffer, {position: 1});
             assert.strictEqual(len, 5, 'return value');
-            assert.strictEqual(uint8ArrayToString(buffer, 'latin1'), '\x02\x03\x04\x05\x06');
+            assert.deepEqual(buffer, Uint8Array.from([0x02, 0x03, 0x04, 0x05, 0x06]));
             await rst.close();
           });
         });
@@ -150,7 +151,7 @@ describe('Matrix tests', () => {
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
             const len = await rst.peekBuffer(buffer, {position: 1});
             assert.strictEqual(len, 5, 'return value');
-            assert.strictEqual(uint8ArrayToString(buffer, 'latin1'), '\x02\x03\x04\x05\x06');
+            assert.deepEqual(buffer, Uint8Array.from([0x02, 0x03, 0x04, 0x05, 0x06]));
             await rst.close();
           });
 
@@ -231,13 +232,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(1);
 
             Token.INT8.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00]));
 
             Token.INT8.put(b, 0, 0x22);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x22');
+            assert.deepEqual(b, Uint8Array.from([0x22]));
 
             Token.INT8.put(b, 0, -0x22);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xde');
+            assert.deepEqual(b, Uint8Array.from([0xde]));
           });
 
           it('should decode signed 8-bit integer (INT8)', async () => {
@@ -269,13 +270,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(2);
 
             Token.INT16_BE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00]));
 
             Token.INT16_BE.put(b, 0, 0x0f0b);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x0f\x0b');
+            assert.deepEqual(b, Uint8Array.from([0x0f, 0x0b]));
 
             Token.INT16_BE.put(b, 0, -0x0f0b);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xf0\xf5');
+            assert.deepEqual(b, Uint8Array.from([0xf0, 0xf5]));
           });
 
           it('should decode signed 16-bit big-endian integer (INT16_BE)', async () => {
@@ -303,13 +304,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(3);
 
             Token.INT24_BE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0x00]));
 
             Token.INT24_BE.put(b, 0, 0x0f0ba0);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x0f\x0b\xa0');
+            assert.deepEqual(b, Uint8Array.from([0x0f, 0x0b, 0xa0]));
 
             Token.INT24_BE.put(b, 0, -0x0f0bcc);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xf0\xf4\x34');
+            assert.deepEqual(b, Uint8Array.from([0xf0, 0xf4, 0x34]));
           });
 
           it('should decode signed 24-bit big-endian integer (INT24_BE)', async () => {
@@ -338,13 +339,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(4);
 
             Token.INT32_BE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0x00, 0x00]));
 
             Token.INT32_BE.put(b, 0, 0x0f0bcca0);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x0f\x0b\xcc\xa0');
+            assert.deepEqual(b, Uint8Array.from([0x0f, 0x0b, 0xcc, 0xa0]));
 
             Token.INT32_BE.put(b, 0, -0x0f0bcca0);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xf0\xf4\x33\x60');
+            assert.deepEqual(b, Uint8Array.from([0xf0, 0xf4, 0x33, 0x60]));
           });
 
           it('should decode signed 32-bit big-endian integer (INT32_BE)', async () => {
@@ -371,10 +372,10 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(1);
 
             Token.UINT8.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00]));
 
             Token.UINT8.put(b, 0, 0xff);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff');
+            assert.deepEqual(b, Uint8Array.from([0xff]));
           });
 
           it('should decode unsigned 8-bit integer (UINT8)', async () => {
@@ -399,21 +400,21 @@ describe('Matrix tests', () => {
 
             Token.UINT16_LE.put(b, 0, 0x00);
             Token.UINT16_LE.put(b, 2, 0xffaa);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\xaa\xff');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0xaa, 0xff]));
           });
 
           it('should encode unsigned 16-bit little-endian integer (UINT16_BE)', () => {
             const b = new Uint8Array(4);
             Token.UINT16_BE.put(b, 0, 0xf);
             Token.UINT16_BE.put(b, 2, 0xffaa);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x0f\xff\xaa');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x0f, 0xff, 0xaa]));
           });
 
           it('should encode unsigned 16-bit mixed little/big-endian integers', () => {
             const b = new Uint8Array(4);
             Token.UINT16_BE.put(b, 0, 0xffaa);
             Token.UINT16_LE.put(b, 2, 0xffaa);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff\xaa\xaa\xff');
+            assert.deepEqual(b, Uint8Array.from([0xff, 0xaa, 0xaa, 0xff]));
           });
 
           it('should decode unsigned mixed 16-bit big/little-endian integer', async () => {
@@ -441,13 +442,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(3);
 
             Token.UINT24_LE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x000, 0x00]));
 
             Token.UINT24_LE.put(b, 0, 0xff);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0xff, 0x00, 0x00]));
 
             Token.UINT24_LE.put(b, 0, 0xaabbcc);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xcc\xbb\xaa');
+            assert.deepEqual(b, Uint8Array.from([0xcc, 0xbb, 0xaa]));
           });
 
           it('should encode unsigned 24-bit big-endian integer (UINT24_BE)', () => {
@@ -455,13 +456,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(3);
 
             Token.UINT24_BE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0x00]));
 
             Token.UINT24_BE.put(b, 0, 0xff);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\xff');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0xff]));
 
             Token.UINT24_BE.put(b, 0, 0xaabbcc);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xaa\xbb\xcc');
+            assert.deepEqual(b, Uint8Array.from([0xaa, 0xbb, 0xcc]));
           });
 
           it('should decode signed 24-bit big/little-endian integer (UINT24_LE/INT24_BE)', async () => {
@@ -489,13 +490,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(4);
 
             Token.UINT32_LE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0x00, 0x00]));
 
             Token.UINT32_LE.put(b, 0, 0xff);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xff\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0xff, 0x00, 0x00, 0x00]));
 
             Token.UINT32_LE.put(b, 0, 0xaabbccdd);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xdd\xcc\xbb\xaa');
+            assert.deepEqual(b, Uint8Array.from([0xdd, 0xcc, 0xbb, 0xaa]));
           });
 
           it('should encode unsigned 32-bit big-endian integer (INT32_BE)', () => {
@@ -503,13 +504,13 @@ describe('Matrix tests', () => {
             const b = new Uint8Array(4);
 
             Token.UINT32_BE.put(b, 0, 0x00);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\x00');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0x00, 0x00]));
 
             Token.UINT32_BE.put(b, 0, 0xff);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\x00\x00\x00\xff');
+            assert.deepEqual(b, Uint8Array.from([0x00, 0x00, 0x00, 0xff]));
 
             Token.UINT32_BE.put(b, 0, 0xaabbccdd);
-            assert.strictEqual(uint8ArrayToString(b, 'latin1'), '\xaa\xbb\xcc\xdd');
+            assert.deepEqual(b, Uint8Array.from([0xaa, 0xbb, 0xcc, 0xdd]));
           });
 
           it('should decode unsigned 32-bit little/big-endian integer (UINT32_LE/UINT32_BE)', async () => {

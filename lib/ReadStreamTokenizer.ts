@@ -1,21 +1,18 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
-import { EndOfStreamError, IStreamReader } from 'peek-readable';
-import { IFileInfo, IReadChunkOptions } from './types.js';
+import { EndOfStreamError, type IStreamReader } from 'peek-readable';
+import type { IReadChunkOptions, ITokenizerOptions } from './types.js';
 
 const maxBufferSize = 256000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
 
-  public constructor(private streamReader: IStreamReader, fileInfo?: IFileInfo) {
-    super(fileInfo);
-  }
-
   /**
-   * Get file information, an HTTP-client may implement this doing a HEAD request
-   * @return Promise with file information
+   * Constructor
+   * @param streamReader stream-reader to read from
+   * @param options Tokenizer options
    */
-  public async getFileInfo(): Promise<IFileInfo> {
-    return this.fileInfo;
+  public constructor(private streamReader: IStreamReader, options?: ITokenizerOptions) {
+    super(options);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { IFileInfo, IReadChunkOptions } from './types.js';
+import { ITokenizerOptions, IReadChunkOptions } from './types.js';
 import { EndOfStreamError } from 'peek-readable';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 
@@ -7,11 +7,11 @@ export class BufferTokenizer extends AbstractTokenizer {
   /**
    * Construct BufferTokenizer
    * @param uint8Array - Uint8Array to tokenize
-   * @param fileInfo - Pass additional file information to the tokenizer
+   * @param options Tokenizer options
    */
-  constructor(private uint8Array: Uint8Array, fileInfo?: IFileInfo) {
-    super(fileInfo);
-    this.fileInfo.size = this.fileInfo.size ?  this.fileInfo.size : uint8Array.length;
+  constructor(private uint8Array: Uint8Array, options?: ITokenizerOptions) {
+    super(options);
+    this.fileInfo.size = this.fileInfo.size ? this.fileInfo.size : uint8Array.length;
   }
 
   /**
@@ -53,7 +53,7 @@ export class BufferTokenizer extends AbstractTokenizer {
     }
   }
 
-  public async close(): Promise<void> {
-    // empty
+  public close(): Promise<void> {
+    return super.close();
   }
 }

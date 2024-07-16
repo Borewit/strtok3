@@ -1,12 +1,12 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
-import { IFileInfo, IReadChunkOptions } from './types.js';
+import type { IReadChunkOptions, ITokenizerOptions } from './types.js';
 import { FileHandle, open as fsOpen } from 'node:fs/promises';
 
 export class FileTokenizer extends AbstractTokenizer {
 
-  public constructor(private fileHandle: FileHandle, fileInfo: IFileInfo) {
-    super(fileInfo);
+  public constructor(private fileHandle: FileHandle, options: ITokenizerOptions) {
+    super(options);
   }
 
   /**
@@ -44,12 +44,13 @@ export class FileTokenizer extends AbstractTokenizer {
   }
 
   public async close(): Promise<void> {
-    return this.fileHandle.close();
+    await this.fileHandle.close();
+    return super.close();
   }
 }
 
 export async function fromFile(sourceFilePath: string): Promise<FileTokenizer> {
   const fileHandle = await fsOpen(sourceFilePath, 'r');
   const stat = await fileHandle.stat();
-  return new FileTokenizer(fileHandle, {path: sourceFilePath, size: stat.size});
+  return new FileTokenizer(fileHandle, {fileInfo: {path: sourceFilePath, size: stat.size}});
 }

@@ -119,3 +119,16 @@ export interface ITokenizer {
    */
   close(): Promise<void>;
 }
+
+export type OnClose = () => Promise<void>;
+
+export interface ITokenizerOptions {
+  /**
+   * Pass additional file information to the tokenizer
+   */
+  fileInfo?: IFileInfo;
+  /**
+   * On tokenizer close handler
+   */
+  onClose?: OnClose;
+}
