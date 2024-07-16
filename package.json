@@ -11,7 +11,7 @@
     "url": "https://github.com/sponsors/Borewit"
   },
   "scripts": {
-    "clean": "del-cli lib/**/*.js lib/**/*.js.map lib/**/*.d.ts test/**/*.js test/**/*.js.map",
+    "clean": "del-cli 'lib/**/*.js' 'lib/**/*.js.map' 'lib/**/*.d.ts' 'test/**/*.js' 'test/**/*.js.map'",
     "compile-src": "tsc -p lib",
     "compile-test": "tsc -p test",
     "compile": "npm run compile-src && npm run compile-test",
