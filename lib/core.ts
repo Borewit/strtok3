@@ -6,8 +6,9 @@ import type { ReadableStream } from 'node:stream/web';
 import type { Readable } from 'node:stream';
 
 export { EndOfStreamError } from 'peek-readable';
-export type { ITokenizer, IFileInfo, ITokenizerOptions, OnClose } from './types.js';
+export type { ITokenizer, IFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
 export type { IToken, IGetToken } from '@tokenizer/token';
+export { AbstractTokenizer } from './AbstractTokenizer.js';
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
