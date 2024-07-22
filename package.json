@@ -70,7 +70,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-unicorn": "^54.0.0",
     "global": "^4.4.0",
-    "mocha": "^10.6.0",
+    "mocha": "^10.7.0",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.0",
     "token-types": "^6.0.0",
