@@ -1,4 +1,4 @@
-import { IGetToken } from '@tokenizer/token';
+import type { IGetToken } from '@tokenizer/token';
 
 export interface IFileInfo {
   /**
