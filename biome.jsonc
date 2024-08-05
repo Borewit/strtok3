@@ -37,6 +37,7 @@
 		"ignore": [
 			"./coverage",
 			"./yarn",
+			"./.pnp.*",
 			"./lib/**/*.d.ts",
 			"./lib/**/*.js",
 			"./test/**/*.d.ts",
