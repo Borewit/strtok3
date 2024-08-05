@@ -1,4 +1,4 @@
-import { ITokenizerOptions, IReadChunkOptions } from './types.js';
+import type { ITokenizerOptions, IReadChunkOptions } from './types.js';
 import { EndOfStreamError } from 'peek-readable';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 
@@ -22,7 +22,7 @@ export class BufferTokenizer extends AbstractTokenizer {
    */
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
-    if (options && options.position) {
+    if (options?.position) {
       if (options.position < this.position) {
         throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
       }
@@ -47,10 +47,9 @@ export class BufferTokenizer extends AbstractTokenizer {
     const bytes2read = Math.min(this.uint8Array.length - normOptions.position, normOptions.length);
     if ((!normOptions.mayBeLess) && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
-    } else {
-      uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read), normOptions.offset);
-      return bytes2read;
     }
+    uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read), normOptions.offset);
+    return bytes2read;
   }
 
   public close(): Promise<void> {

@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import * as fs from 'node:fs/promises';
 import { ReadableStream } from 'node:stream/web';
 
 export async function makeReadableByteFileStream(filename: string): Promise<{ stream: ReadableStream<Uint8Array>, closeFile: () => Promise<void> }> {

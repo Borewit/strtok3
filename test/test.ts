@@ -1,18 +1,19 @@
-import * as Token from 'token-types';
-import { assert } from 'chai';
-import { fromStream, fromWebStream, fromFile, fromBuffer, ITokenizer } from '../lib/index.js';
-import Path from 'node:path';
-import { FileTokenizer } from '../lib/FileTokenizer.js';
-import { EndOfStreamError } from 'peek-readable';
 import { PassThrough } from 'node:stream';
 import * as fs from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import * as Token from 'token-types';
+import { assert } from 'chai';
+import { fromStream, fromWebStream, fromFile, fromBuffer, type ITokenizer } from '../lib/index.js';
+import Path from 'node:path';
+import { FileTokenizer } from '../lib/FileTokenizer.js';
+import { EndOfStreamError } from 'peek-readable';
 
 import mocha from 'mocha';
 import { stringToUint8Array } from 'uint8array-extras';
 
-import { dirname } from 'path';
-import { fileURLToPath } from 'url';
 import { makeReadableByteFileStream } from './util.js';
 
 const __dirname = dirname(fileURLToPath(import .meta.url));
@@ -554,11 +555,12 @@ describe('Matrix tests', () => {
           let expected = 0;
 
           try {
+            let v: number;
             do {
-              const v = await rst.readNumber(Token.UINT8);
-              assert.strictEqual(v, expected % 255, 'offset=' + expected);
+              v = await rst.readNumber(Token.UINT8);
+              assert.strictEqual(v, expected % 255, `offset=${expected}`);
               ++expected;
-            } while (true);
+            } while (v>0);
           } catch (err) {
             assert.instanceOf(err, EndOfStreamError);
             assert.strictEqual(expected, size, 'total number of parsed bytes');
@@ -891,7 +893,7 @@ describe('fromStream with mayBeLess flag', () => {
   });
 
   it('mayBeLess=false', async () => {
-    let tokenizer;
+    let tokenizer: ITokenizer | undefined;
     try {
       // Initialize empty stream
       const stream = new PassThrough();

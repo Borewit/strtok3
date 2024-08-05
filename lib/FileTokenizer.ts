@@ -1,7 +1,7 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
 import type { IReadChunkOptions, ITokenizerOptions } from './types.js';
-import { FileHandle, open as fsOpen } from 'node:fs/promises';
+import { type FileHandle, open as fsOpen } from 'node:fs/promises';
 
 export class FileTokenizer extends AbstractTokenizer {
 
