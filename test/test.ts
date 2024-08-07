@@ -778,6 +778,14 @@ describe('Matrix tests', () => {
             }
           });
 
+          it('should handle zero byte read', async () => {
+
+            const rst = await getTokenizerWithData('\x00\x00\x00', tokenizerType);
+            const uint8Array = await rst.readToken(new Token.Uint8ArrayType(0));
+            assert.strictEqual(uint8Array.length, 0);
+            await rst.close();
+          });
+
           it('should not throw an Error if we read exactly until the end of the file', async () => {
 
             const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
@@ -804,7 +812,7 @@ describe('Matrix tests', () => {
             const buffer = new Uint8Array(4);
 
             return getTokenizerWithData('\x89\x54\x40', tokenizerType).then(rst => {
-              return rst.readBuffer(buffer).then(len => {
+              return rst.readBuffer(buffer).then(() => {
                 assert.fail('It should throw EndOfFile Error');
               }).catch(err => {
                 assert.instanceOf(err, EndOfStreamError);
