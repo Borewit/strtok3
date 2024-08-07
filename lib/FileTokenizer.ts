@@ -18,7 +18,7 @@ export class FileTokenizer extends AbstractTokenizer {
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(uint8Array, options);
     this.position = normOptions.position;
-    if (!normOptions.length) return 0;
+    if (normOptions.length === 0) return 0;
     const res = await this.fileHandle.read(uint8Array, normOptions.offset, normOptions.length, normOptions.position);
     this.position += res.bytesRead;
     if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
