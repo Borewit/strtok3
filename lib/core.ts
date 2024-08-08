@@ -2,13 +2,15 @@ import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
 import { StreamReader, WebStreamReader } from 'peek-readable';
 import type { ITokenizerOptions } from './types.js';
-import type { ReadableStream } from 'node:stream/web';
+import type { ReadableStream as NodeReadableStream, ReadableStream } from 'node:stream/web';
 import type { Readable } from 'node:stream';
 
 export { EndOfStreamError } from 'peek-readable';
 export type { ITokenizer, IFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
 export type { IToken, IGetToken } from '@tokenizer/token';
 export { AbstractTokenizer } from './AbstractTokenizer.js';
+
+export type AnyWebByteStream = NodeReadableStream<Uint8Array> | ReadableStream<Uint8Array>;
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
@@ -24,11 +26,11 @@ export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadS
 /**
  * Construct ReadStreamTokenizer from given ReadableStream (WebStream API).
  * Will set fileSize, if provided given Stream has set the .path property/
- * @param webStream - Read from Node.js Stream.Readable
+ * @param webStream - Read from Node.js Stream.Readable (must be a byte stream)
  * @param options - Tokenizer options
  * @returns ReadStreamTokenizer
  */
-export function fromWebStream(webStream: ReadableStream<Uint8Array>, options?: ITokenizerOptions): ReadStreamTokenizer {
+export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer {
   return new ReadStreamTokenizer(new WebStreamReader(webStream), options);
 }
 
