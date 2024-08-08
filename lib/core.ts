@@ -1,16 +1,15 @@
+import type { Readable } from 'node:stream';
+import { StreamReader, WebStreamReader } from 'peek-readable';
+
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
-import { StreamReader, WebStreamReader } from 'peek-readable';
 import type { ITokenizerOptions } from './types.js';
-import type { ReadableStream as NodeReadableStream, ReadableStream } from 'node:stream/web';
-import type { Readable } from 'node:stream';
+import type { AnyWebByteStream } from './core.js';
 
-export { EndOfStreamError } from 'peek-readable';
+export { EndOfStreamError, type AnyWebByteStream } from 'peek-readable';
 export type { ITokenizer, IFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
 export type { IToken, IGetToken } from '@tokenizer/token';
 export { AbstractTokenizer } from './AbstractTokenizer.js';
-
-export type AnyWebByteStream = NodeReadableStream<Uint8Array> | ReadableStream<Uint8Array>;
 
 /**
  * Construct ReadStreamTokenizer from given Stream.

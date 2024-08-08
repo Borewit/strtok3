@@ -4,8 +4,7 @@ import { stat as fsStat } from 'node:fs/promises';
 import { type ITokenizerOptions, fromStream as coreFromStream } from './core.js';
 
 export { fromFile } from './FileTokenizer.js';
-export { EndOfStreamError, fromBuffer, fromWebStream, AbstractTokenizer} from './core.js';
-export type { ITokenizer, IFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose, AnyWebByteStream} from './core.js';
+export * from './core.js';
 export type { IToken, IGetToken } from '@tokenizer/token';
 
 interface StreamWithFile extends Readable {
