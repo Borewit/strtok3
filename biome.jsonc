@@ -9,6 +9,9 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
+			"correctness": {
+				"noUnusedImports": "error"
+			},
 			"recommended": true,
 			"complexity": {
 				"noForEach": "off"
