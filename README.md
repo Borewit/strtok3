@@ -8,20 +8,20 @@
 # strtok3
 
 A promise based streaming [*tokenizer*](#tokenizer) for [Node.js](http://nodejs.org) and browsers.
-This node module is a successor of [strtok2](https://github.com/Borewit/strtok2).
 
-The `strtok3` contains a few methods to turn different input into a [*tokenizer*](#tokenizer). Designed to
-* Support a streaming environment
-* Decoding of binary data, strings and numbers in mind
+The `strtok3` module provides several methods for creating a [*tokenizer*](#tokenizer) from various input sources. 
+It is designed to:
+* Support streaming environments.
+* Efficiently decode binary data, strings, and numbers.
 * Read [predefined](https://github.com/Borewit/token-types) or custom tokens.
-* Optimized [*tokenizers*](#tokenizer) for reading from [file](#method-strtok3fromfile), [stream](#method-strtok3fromstream) or [buffer](#method-strtok3frombuffer).
+* Provide [*tokenizers*](#tokenizer) for reading from [files](#method-strtok3fromfile), [streams](#method-strtok3fromstream) or [Uint8Arrays](#method-strtok3frombuffer).
 
-It can read from:
-* A file (taking a file path as an input)
+`strtok3` can read from:
+* A file, using a file path as an input.
 * A Node.js [stream](https://nodejs.org/api/stream.html).
-* A [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array)
+* A [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array).
 * HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
-* Chunked [Amazon S3](https://aws.amazon.com/s3) access provided by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
+* Chunked [Amazon S3](https://aws.amazon.com/s3) access, enabled by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
 
 ## Installation
 
@@ -31,9 +31,11 @@ npm install strtok3
 
 ### Compatibility
 
-Module: version 7 migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
-JavaScript is compliant with [ECMAScript 2020 (11th Edition)](https://en.wikipedia.org/wiki/ECMAScript_version_history#11th_Edition_%E2%80%93_ECMAScript_2020).
-Requires [Node.js ≥ 16](https://nodejs.org/en/about/previous-releases) engine, but can also be used with a module bundler in a browser.
+Starting with version 7, the module has migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
+The distributed JavaScript codebase is compliant with the [ECMAScript 2020 (11th Edition)](https://en.wikipedia.org/wiki/ECMAScript_version_history#11th_Edition_%E2%80%93_ECMAScript_2020) standard.
+
+This module requires a [Node.js ≥ 16](https://nodejs.org/en/about/previous-releases) engine.
+It can also be used in a browser environment when bundled with a module bundler.
 
 ## API
 
