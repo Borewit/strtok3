@@ -1,10 +1,9 @@
 import type { Readable } from 'node:stream';
-import { StreamReader, WebStreamReader } from 'peek-readable';
+import { StreamReader, WebStreamReader, type AnyWebByteStream } from 'peek-readable';
 
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
 import type { ITokenizerOptions } from './types.js';
-import type { AnyWebByteStream } from './core.js';
 
 export { EndOfStreamError, type AnyWebByteStream } from 'peek-readable';
 export type { ITokenizer, IFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
