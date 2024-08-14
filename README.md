@@ -32,8 +32,8 @@ npm install strtok3
 ### Compatibility
 
 Module: version 7 migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
-JavaScript is compliant with [ECMAScript 2019 (ES10)](https://en.wikipedia.org/wiki/ECMAScript#10th_Edition_%E2%80%93_ECMAScript_2019).
-Requires Node.js ≥ 16 engine.
+JavaScript is compliant with [ECMAScript 2020 (11th Edition)](https://en.wikipedia.org/wiki/ECMAScript_version_history#11th_Edition_%E2%80%93_ECMAScript_2020).
+Requires [Node.js ≥ 16](https://nodejs.org/en/about/previous-releases) engine, but can also be used with a module bundler in a browser.
 
 ## API
 
