@@ -98,4 +98,8 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     }
     return totBytesRead;
   }
+
+  public abort(): Promise<void> {
+    return this.streamReader.abort();
+  }
 }

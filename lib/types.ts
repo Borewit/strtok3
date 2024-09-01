@@ -118,6 +118,11 @@ export interface ITokenizer {
    * It does not close the stream for StreamReader, but is does close the file-descriptor.
    */
   close(): Promise<void>;
+
+  /**
+   * Abort pending asynchronous operations
+   */
+  abort(): Promise<void>;
 }
 
 export type OnClose = () => Promise<void>;
@@ -127,8 +132,15 @@ export interface ITokenizerOptions {
    * Pass additional file information to the tokenizer
    */
   fileInfo?: IFileInfo;
+
   /**
    * On tokenizer close handler
    */
   onClose?: OnClose;
+
+  /**
+   * Pass `AbortSignal` which can stop active async operations
+   * Ref: https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal
+   */
+  abortSignal?: AbortSignal;
 }
