@@ -12,10 +12,6 @@ updates:
     target-branch: "master"
     labels:
       - dependencies
-      - ESM
-    ignore:
-      - dependency-name: "peek-readable"
-        versions: ["4.x"]
     groups:
       remark:
         dependency-type: "development"
