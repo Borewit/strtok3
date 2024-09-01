@@ -5,7 +5,8 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import * as Token from 'token-types';
-import { assert } from 'chai';
+import { assert, expect, use } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { fromStream, fromWebStream, fromFile, fromBuffer, type ITokenizer } from '../lib/index.js';
 import Path from 'node:path';
 import { FileTokenizer } from '../lib/FileTokenizer.js';
@@ -14,7 +15,9 @@ import { EndOfStreamError } from 'peek-readable';
 import mocha from 'mocha';
 import { stringToUint8Array } from 'uint8array-extras';
 
-import { makeReadableByteFileStream } from './util.js';
+import { DelayedStream, makeReadableByteFileStream } from './util.js';
+
+use(chaiAsPromised);
 
 const __dirname = dirname(fileURLToPath(import .meta.url));
 
@@ -22,18 +25,19 @@ const {describe, it} = mocha;
 
 interface ITokenizerTest {
   name: string;
-  loadTokenizer: (testFile: string) => Promise<ITokenizer>;
+  loadTokenizer: (testFile: string, delay?: number, abortSignal?: AbortSignal) => Promise<ITokenizer>;
   hasFileInfo: boolean;
+  abortable: boolean;
 }
 
 function getResourcePath(testFile: string) {
   return Path.join(__dirname, 'resources', testFile);
 }
 
-async function getTokenizerWithData(testData: string, test: ITokenizerTest): Promise<ITokenizer> {
+async function getTokenizerWithData(testData: string, test: ITokenizerTest, delay?: number, abortSignal?: AbortSignal): Promise<ITokenizer> {
   const testPath = getResourcePath('tmp.dat');
   await fs.writeFile(testPath, testData, {encoding: 'latin1'});
-  return test.loadTokenizer('tmp.dat');
+  return test.loadTokenizer('tmp.dat', delay, abortSignal);
 }
 
 describe('Matrix tests', () => {
@@ -41,24 +45,28 @@ describe('Matrix tests', () => {
   const tokenizerTests: ITokenizerTest[] = [
     {
       name: 'fromStream()',
-      loadTokenizer: async testFile => {
+      loadTokenizer: async (testFile, delay, abortSignal?: AbortSignal) => {
         const stream = createReadStream(getResourcePath(testFile));
-        return fromStream(stream);
+        const delayedStream = new DelayedStream(stream, delay);
+        return fromStream(delayedStream, {abortSignal});
       },
-      hasFileInfo: true
+      hasFileInfo: true,
+      abortable: true
     }, {
       name: 'fromWebStream()',
-      loadTokenizer: async testFile => {
-        const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', testFile));
-        return fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile()});
+      loadTokenizer: async (testFile, delay, abortSignal?: AbortSignal) => {
+        const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', testFile), delay);
+        return fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile(), abortSignal});
       },
-      hasFileInfo: false
+      hasFileInfo: false,
+      abortable: true
     }, {
       name: 'fromFile()',
       loadTokenizer: async testFile => {
         return fromFile(Path.join(__dirname, 'resources', testFile));
       },
-      hasFileInfo: true
+      hasFileInfo: true,
+      abortable: false
     }, {
       name: 'fromBuffer()',
       loadTokenizer: async testFile => {
@@ -66,7 +74,8 @@ describe('Matrix tests', () => {
           return fromBuffer(data);
         });
       },
-      hasFileInfo: true
+      hasFileInfo: true,
+      abortable: false
     }
   ];
 
@@ -114,6 +123,7 @@ describe('Matrix tests', () => {
             assert.deepEqual(buffer, Uint8Array.from([0x02, 0x03, 0x04, 0x05, 0x06]));
             await rst.close();
           });
+
         });
 
         describe('tokenizer peek options', () => {
@@ -560,7 +570,7 @@ describe('Matrix tests', () => {
               v = await rst.readNumber(Token.UINT8);
               assert.strictEqual(v, expected % 255, `offset=${expected}`);
               ++expected;
-            } while (v>0);
+            } while (v > 0);
           } catch (err) {
             assert.instanceOf(err, EndOfStreamError);
             assert.strictEqual(expected, size, 'total number of parsed bytes');
@@ -881,6 +891,35 @@ describe('Matrix tests', () => {
           await tokenizer.close();
         });
 
+        if (tokenizerType.abortable) {
+
+          describe('Abort delayed read', () => {
+
+            it('without aborting', async () => {
+              const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500);
+              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+              assert.strictEqual(await promise, '123');
+            });
+
+            it('abort async operation using `abort()`', async () => {
+              const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500);
+              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+              await fileReadStream.abort();
+              await expect(promise).to.be.rejectedWith(Error);
+            });
+
+
+            it('abort async operation using `AbortController`', async () => {
+              const abortController = new AbortController();
+              const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500, abortController.signal);
+              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+              abortController.abort();
+              await expect(promise).to.be.rejectedWith(Error);
+            });
+          });
+
+        }
+
       }); // End of test "Tokenizer-types"
     });
 });
@@ -919,7 +958,7 @@ describe('fromStream with mayBeLess flag', () => {
       }
       return;
     } finally {
-      if(tokenizer) {
+      if (tokenizer) {
         await tokenizer.close();
       }
     }

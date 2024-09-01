@@ -26,6 +26,11 @@ export abstract class AbstractTokenizer implements ITokenizer {
   protected constructor(options?: ITokenizerOptions) {
     this.fileInfo = options?.fileInfo ?? {};
     this.onClose = options?.onClose;
+    if (options?.abortSignal) {
+      options.abortSignal.addEventListener('abort', () => {
+        this.abort();
+      })
+    }
   }
 
   /**
@@ -145,5 +150,9 @@ export abstract class AbstractTokenizer implements ITokenizer {
       length: uint8Array.length,
       position: this.position
     };
+  }
+
+  public abort(): Promise<void> {
+    return Promise.resolve(); // Ignore abort signal
   }
 }
