@@ -7,21 +7,22 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/59dd6795e61949fb97066ca52e6097ef)](https://www.codacy.com/app/Borewit/strtok3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Borewit/strtok3&amp;utm_campaign=Badge_Grade)
 # strtok3
 
-A promise based streaming [*tokenizer*](#tokenizer) for [Node.js](http://nodejs.org) and browsers.
+A promise based streaming [*tokenizer*](#tokenizer-object) for [Node.js](http://nodejs.org) and browsers.
 
-The `strtok3` module provides several methods for creating a [*tokenizer*](#tokenizer) from various input sources. 
-It is designed to:
-* Support streaming environments.
+The `strtok3` module provides several methods for creating a [*tokenizer*](#tokenizer-object) from various input sources. 
+Designed for:
+* Seamless support in streaming environments.
 * Efficiently decode binary data, strings, and numbers.
-* Read [predefined](https://github.com/Borewit/token-types) or custom tokens.
-* Provide [*tokenizers*](#tokenizer) for reading from [files](#method-strtok3fromfile), [streams](#method-strtok3fromstream) or [Uint8Arrays](#method-strtok3frombuffer).
+* Reading [predefined](https://github.com/Borewit/token-types) or custom tokens.
+* Offering [*tokenizers*](#tokenizer-object) for reading from [files](#method-strtok3fromfile), [streams](#fromstream-function) or [Uint8Arrays](#frombuffer-function).
 
+### Features
 `strtok3` can read from:
-* A file, using a file path as an input.
-* A Node.js [stream](https://nodejs.org/api/stream.html).
-* A [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array).
+* Files, using a file path as input.
+* Node.js [streams](https://nodejs.org/api/stream.html).
+* [Buffer](https://nodejs.org/api/buffer.html) or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array).
 * HTTP chunked transfer provided by [@tokenizer/http](https://github.com/Borewit/tokenizer-http).
-* Chunked [Amazon S3](https://aws.amazon.com/s3) access, enabled by [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
+* [Amazon S3](https://aws.amazon.com/s3) chunks with [@tokenizer/s3](https://github.com/Borewit/tokenizer-s3).
 
 ## Installation
 
@@ -34,31 +35,50 @@ npm install strtok3
 Starting with version 7, the module has migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 The distributed JavaScript codebase is compliant with the [ECMAScript 2020 (11th Edition)](https://en.wikipedia.org/wiki/ECMAScript_version_history#11th_Edition_%E2%80%93_ECMAScript_2020) standard.
 
-This module requires a [Node.js ≥ 16](https://nodejs.org/en/about/previous-releases) engine.
-It can also be used in a browser environment when bundled with a module bundler.
+> [!NOTE]
+> This module requires a [Node.js ≥ 16](https://nodejs.org/en/about/previous-releases) engine.
+> It can also be used in a browser environment when bundled with a module bundler.
 
-## API
+## Support the Project
+If you find this project useful and would like to support its development, consider sponsoring or contributing:
 
-Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer):
-* [strtok3.fromFile](#method-strtok3fromfile)
-* [strtok3.fromStream](#method-strtok3fromstream)
-* [strtok3.fromWeb](#method-strtok3fromwebstream)
-* [strtok3.fromBuffer](#method-strtok3fromBuffer)
-* [strtok3.fromUint8Array](#method-strtok3fromUint8Array)
+- [Become a sponsor to Borewit](https://github.com/sponsors/Borewit)
+
+- Buy me a coffee:
+
+  <a href="https://www.buymeacoffee.com/borewit" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy me A coffee" height="41" width="174"></a>
+
+## API Documentation
 
 ### strtok3 methods
 
-All of the strtok3 methods return a [*tokenizer*](#tokenizer), either directly or via a promise.
+Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer-object):
+- [fromFile](#fromfile-function)[^1]
+- [fromStream](#fromstream-function)[^1]
+- [fromWebStream](#fromwebstream-function)
+- [fromBuffer](#frombuffer-function)
 
-#### Method `strtok3.fromFile()`
+[^1]: Only available when importing this module with Node.js
 
-| Parameter | Type                  | Description                |
-|-----------|-----------------------|----------------------------|
-| path      | Path to file (string) | Path to file to read from  |
+All methods return a [`Tokenizer`](#tokenizer-object), either directly or via a promise.
 
-> __Note__: that [file-information](#file-information) is automatically added.
+#### `fromFile` function
 
-Returns, via a promise, a [*tokenizer*](#tokenizer) which can be used to parse a file.
+Creates a [*tokenizer*](#tokenizer-object) from a local file.
+
+```ts
+function fromFile(sourceFilePath: string): Promise<FileTokenizer>
+```  
+
+| Parameter      | Type     | Description                |
+|----------------|----------|----------------------------|
+| sourceFilePath | `string` | Path to file to read from  |
+
+> [!NOTE]
+> - Only available for Node.js engines
+> - `fromFile` automatically embeds [file-information](#file-information)
+
+Returns, via a promise, a [*tokenizer*](#tokenizer-object) which can be used to parse a file.
 
 ```js
 import * as strtok3 from 'strtok3';
@@ -74,30 +94,40 @@ import * as Token from 'token-types';
     tokenizer.close(); // Close the file
   }
 })();
-
 ```
 
-#### Method `strtok3.fromStream()`
+#### `fromStream` function
 
-Create [*tokenizer*](#tokenizer) from a Node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
+Creates a [*tokenizer*](#tokenizer-object) from a Node.js [readable stream](https://nodejs.org/api/stream.html#stream_class_stream_readable).
 
-| Parameter |  Optional | Type                                                                        | Description              |
-|-----------|-----------|-----------------------------------------------------------------------------|--------------------------|
-| stream    | no        | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable) | Stream to read from      |
-| fileInfo  | yes       | [IFileInfo](#IFileInfo)                                                     | Provide file information |
+```ts
+function fromStream(stream: Readable, options?: ITokenizerOptions): Promise<ReadStreamTokenizer>
+```
 
-Returns a Promise providing a [*tokenizer*](#tokenizer).
+| Parameter |  Optional | Type                                                                                 | Description              |
+|-----------|-----------|-------------------------|--------------------------|
+| stream    | no        | [Readable](https://nodejs.org/api/stream.html#stream_class_stream_readable)         | Stream to read from      |
+| fileInfo  | yes       | [IFileInfo](#IFileInfo) | Provide file information |
 
-#### Method `strtok3.fromWebStream()`
+Returns a Promise providing a [*tokenizer*](#tokenizer-object).
 
-Create [*tokenizer*](#tokenizer) from a [WHATWG ReadableStream](https://nodejs.org/api/webstreams.html#web-streams-api).
+> [!NOTE]
+> - Only available for Node.js engines
+
+#### `fromWebStream` function
+
+Creates [*tokenizer*](#tokenizer-object) from a [WHATWG ReadableStream](https://nodejs.org/api/webstreams.html#web-streams-api).
+
+```ts
+function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer
+```
 
 | Parameter      |  Optional | Type                                                                     | Description                        |
 |----------------|-----------|--------------------------------------------------------------------------|------------------------------------|
 | readableStream | no        | [ReadableStream](https://nodejs.org/api/webstreams.html#web-streams-api) | WHATWG ReadableStream to read from |
 | fileInfo       | yes       | [IFileInfo](#IFileInfo)                                                  | Provide file information           |
 
-Returns a Promise providing a [*tokenizer*](#tokenizer)
+Returns a Promise providing a [*tokenizer*](#tokenizer-object)
 
 ```js
 import strtok3 from 'strtok3';
@@ -110,14 +140,20 @@ strtok3.fromWebStream(readableStream).then(tokenizer => {
 });
 ```
 
-#### Method `strtok3.fromBuffer()`
+#### `fromBuffer()` function
+
+Create a tokenizer from memory ([Uint8Array](https://nodejs.org/api/buffer.html)).
+
+```ts
+function fromBuffer(uint8Array: Uint8Array, options?: ITokenizerOptions): BufferTokenizer
+```
 
 | Parameter  | Optional | Type                                             | Description                            |
 |------------|----------|--------------------------------------------------|----------------------------------------|
 | uint8Array | no       | [Uint8Array](https://nodejs.org/api/buffer.html) | Uint8Array or Buffer to read from      |
 | fileInfo   | yes      | [IFileInfo](#IFileInfo)                          | Provide file information               |
 
-Returns a Promise providing a [*tokenizer*](#tokenizer).
+Returns a Promise providing a [*tokenizer*](#tokenizer-object).
 
 ```js
 import * as strtok3 from 'strtok3';
@@ -129,47 +165,48 @@ tokenizer.readToken(Token.UINT8).then(myUint8Number => {
 });
 ```
 
-## Tokenizer
-The tokenizer allows us to *read* or *peek* from the *tokenizer-stream*. The *tokenizer-stream* is an abstraction of a [stream](https://nodejs.org/api/stream.html), file or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array).
+### `Tokenizer` object
+The *tokenizer* is an abstraction of a [stream](https://nodejs.org/api/stream.html), file or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array), allowing _reading_ or _peeking_ from the stream.
 It can also be translated in chunked reads, as done in [@tokenizer/http](https://github.com/Borewit/tokenizer-http);
 
-What is the difference with Nodejs.js stream?
-* The *tokenizer-stream* supports jumping / seeking in a the *tokenizer-stream* using [`tokenizer.ignore()`](#method-tokenizerignore)
-* In addition to *read* methods, it has *peek* methods, to read a ahead and check what is coming.
+#### Key Features:
 
-The [tokenizer.position](#attribute-tokenizerposition) keeps tracks of the read position.
+- Supports seeking within the stream using `tokenizer.ignore()`.
+- Offers `peek` methods to preview data without advancing the read pointer.
+- Maintains the read position via tokenizer.position.
 
-### strtok3 attributes
+#### Tokenizer functions
 
-#### Attribute `tokenizer.fileInfo`
-Optional attribute describing the file information, see [IFileInfo](#IFileInfo)
+_Read_ methods advance the stream pointer, while _peek_ methods do not.
 
-#### Attribute `tokenizer.position`
-Pointer to the current position in the [*tokenizer*](#tokenizer) stream.
-If a *position* is provided to a *read* or *peek* method, is should be, at least, equal or greater than this value.
-
-### Tokenizer methods
-
-There are two kind of methods:
-1. *read* methods: used to read a *token* of [Buffer](https://nodejs.org/api/buffer.html) from the [*tokenizer*](#tokenizer). The position of the *tokenizer-stream* will advance with the size of the token.
+There are two kind of functions:
+1. *read* methods: used to read a *token* of [Buffer](https://nodejs.org/api/buffer.html) from the [*tokenizer*](#tokenizer-object). The position of the *tokenizer-stream* will advance with the size of the token.
 2. *peek* methods: same as the read, but it will *not* advance the pointer. It allows to read (peek) ahead.
 
-#### Method `tokenizer.readBuffer()`
+#### `readBuffer` function
 
-Read buffer from stream.
+Read data from the _tokenizer_ into provided "buffer" (`Uint8Array`).
 `readBuffer(buffer, options?)`
+
+```ts
+readBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
+```
 
 | Parameter  | Type                                                           | Description                                                                                                                                                                                                                            |
 |------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | buffer     | [Buffer](https://nodejs.org/api/buffer.html) &#124; Uint8Array | Target buffer to write the data read to                                                                                                                                                                                                |
 | options    | [IReadChunkOptions](#ireadchunkoptions)                        | An integer specifying the number of bytes to read                                                                                                                                                                                      |
 
-Return value `Promise<number>` Promise with number of bytes read. The number of bytes read maybe if less, *mayBeLess* flag was set.
+Return promise with number of bytes read.
+The number of bytes read maybe if less, *mayBeLess* flag was set.
 
-#### Method `tokenizer.peekBuffer()`
+#### `peekBuffer` function
 
-Peek (read ahead) buffer from [*tokenizer*](#tokenizer)
-`peekBuffer(buffer,  options?)`
+Peek (read ahead), from [*tokenizer*](#tokenizer-object), into the buffer without advancing the stream pointer.
+
+```ts
+peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number>;
+```
 
 | Parameter  | Type                                    | Description                                         |
 |------------|-----------------------------------------|-----------------------------------------------------|
@@ -178,10 +215,13 @@ Peek (read ahead) buffer from [*tokenizer*](#tokenizer)
 
 Return value `Promise<number>` Promise with number of bytes read. The number of bytes read maybe if less, *mayBeLess* flag was set.
 
-#### Method `tokenizer.readToken()`
+#### `readToken` function
 
 Read a *token* from the tokenizer-stream.
-`readToken(token, position?)`
+
+```ts
+readToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value>
+```  
 
 | Parameter  | Type                    | Description                                                                                                           |
 |------------|-------------------------|---------------------------------------------------------------------------------------------------------------------- |
@@ -190,44 +230,64 @@ Read a *token* from the tokenizer-stream.
 
 Return value `Promise<number>`. Promise with number of bytes read. The number of bytes read maybe if less, *mayBeLess* flag was set.
 
-#### Method `tokenizer.peekToken()`
+#### `peek` function
 
-Peek a *token* from the [*tokenizer*](#tokenizer).
-`peekToken(token, position?)`
+Peek a *token* from the [*tokenizer*](#tokenizer-object).
+
+```ts
+peekToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value>
+```
 
 | Parameter  | Type                       | Description                                                                                                             |
 |------------|----------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | token      | [IGetToken<T>](#IGetToken) | Token to read from the tokenizer-stream.                                                                                |
 | position?  | number                     | Offset where to begin reading within the file. If position is null, data will be read from the current file position.   |
 
-Return value `Promise<T>` Promise with token value peeked from the [*tokenizer*](#tokenizer).
+Return a promise with the token value peeked from the [*tokenizer*](#tokenizer-object).
 
-#### Method `tokenizer.readNumber()`
+#### `readNumber` function
 
-Peek a numeric [*token*](#token) from the [*tokenizer*](#tokenizer).
-`readNumber(token)`
+Peek a numeric [*token*](#token) from the [*tokenizer*](#tokenizer-object).
+
+```ts
+readNumber(token: IToken<number>): Promise<number>
+```
 
 | Parameter  | Type                            | Description                                        |
 |------------|---------------------------------|----------------------------------------------------|
 | token      | [IGetToken<number>](#IGetToken) | Numeric token to read from the tokenizer-stream.   |
 
-Return value `Promise<number>` Promise with number peeked from the *tokenizer-stream*.
+Returns a promise with the decoded numeric value from the *tokenizer-stream*.
 
-#### Method `tokenizer.ignore()`
+#### `ignore` function
 
-Advance the offset pointer with the number of bytes provided.
-`ignore(length)`
+Advance the offset pointer with the token number of bytes provided.
+
+```ts
+ignore(length: number): Promise<number>
+```
 
 | Parameter  | Type   | Description                                                          |
 |------------|--------|----------------------------------------------------------------------|
 | ignore     | number | Numeric of bytes to ignore. Will advance the `tokenizer.position`    |
 
-Return value `Promise<number>` Promise with number peeked from the *tokenizer-stream*.
+Returns a promise with the decoded numeric value from the *tokenizer-stream*.
 
-#### Method `tokenizer.close()`
+#### `close` function
 Clean up resources, such as closing a file pointer if applicable.
 
-### IReadChunkOptions
+#### `Tokenizer` attributes
+
+- `fileInfo`
+
+  Optional attribute describing the file information, see [IFileInfo](#IFileInfo)
+
+- `position`
+
+  Pointer to the current position in the [*tokenizer*](#tokenizer-object) stream.
+  If a *position* is provided to a _read_ or _peek_ method, is should be, at least, equal or greater than this value.
+
+### `IReadChunkOptions` interface
 
 Each attribute is optional:
 
@@ -238,14 +298,14 @@ Each attribute is optional:
 | position  | number  | Position where to peek from the file. If position is null, data will be read from the [current file position](#attribute-tokenizerposition). Position may not be less then [tokenizer.position](#attribute-tokenizerposition) |
 | mayBeLess | boolean | If and only if set, will not throw an EOF error if less then the requested *mayBeLess* could be read.                                                                                                                         |
 
-Example:
+Example usage:
 ```js
   tokenizer.peekBuffer(buffer, {mayBeLess: true});
 ```
 
-## IFileInfo
+### `IFileInfo` interface
 
-File information interface which describes the underlying file, each attribute is optional.
+Provides optional metadata about the file being tokenized.
 
 | Attribute | Type    | Description                                                                                       |
 |-----------|---------|---------------------------------------------------------------------------------------------------|
@@ -254,9 +314,9 @@ File information interface which describes the underlying file, each attribute i
 | path      | number  | File path                                                                                         |
 | url       | boolean | File URL                                                                                          |
 
-## Token
+### `Token` object
 
-The *token* is basically a description what to read form the [*tokenizer-stream*](#tokenizer).
+The *token* is basically a description what to read form the [*tokenizer-stream*](#tokenizer-object).
 A basic set of *token types* can be found here: [*token-types*](https://github.com/Borewit/token-types).
 
 A token is something which implements the following interface:
@@ -279,38 +339,40 @@ export interface IGetToken<T> {
 The *tokenizer* reads `token.len` bytes from the *tokenizer-stream* into a Buffer.
 The `token.get` will be called with the Buffer. `token.get` is responsible for conversion from the buffer to the desired output type.
 
-## Browser compatibility
-To exclude fs based dependencies, you can use a submodule-import from 'strtok3/lib/core'.
-
-| function              | 'strtok3'           | 'strtok3/lib/core'  |
-| ----------------------| --------------------|---------------------|
-| `parseBuffer`         | ✓                   | ✓                   |
-| `parseStream`         | ✓                   | ✓                   |
-| `fromFile`            | ✓                   |                     |
-
 ### Working with Web-API readable stream
 To convert a [Web-API readable stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStreamDefaultReader) into a [Node.js readable stream]((https://nodejs.org/api/stream.html#stream_readable_streams)), you can use [readable-web-to-node-stream](https://github.com/Borewit/readable-web-to-node-stream) to convert one in another.
 
-Example submodule-import:
 ```js
-import * as strtok3core from 'strtok3/core'; // Submodule-import to prevent Node.js specific dependencies
+import { fromWebStream } strtok3 from 'strtok3';
 import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 
 (async () => {
 
   const response = await fetch(url);
   const readableWebStream = response.body; // Web-API readable stream
-  const nodeStream = new ReadableWebToNodeStream(readableWebStream); // convert to Node.js readable stream
+  const webStream = new ReadableWebToNodeStream(readableWebStream); // convert to Node.js readable stream
 
-  const tokenizer = strtok3core.fromStream(nodeStream); // And we now have tokenizer in a web environment
+  const tokenizer = fromWebStream(webStream); // And we now have tokenizer in a web environment
 })();
 ```
+
+## Dependencies
+
+The diagram below illustrates the primary dependencies of `strtok3`:
+```mermaid
+graph TD;
+  S(strtok3)-->P(peek-readable)
+  S(strtok3)-->TO("@tokenizer/token")
+```
+- 
+- [peek-readable](https://github.com/Borewit/peek-readable): Manages reading operations with peeking capabilities, allowing data to be previewed without advancing the read pointer.
+- [@tokenizer/token](https://github.com/Borewit/tokenizer-token): Provides token definitions and utilities used by `strtok3` for interpreting binary data.
 
 ## Licence
 
 (The MIT License)
 
-Copyright (c) 2020 Borewit
+Copyright (c) 2024 Borewit
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
