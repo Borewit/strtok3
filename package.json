@@ -60,7 +60,7 @@
     "c8": "^10.1.2",
     "chai": "^5.1.1",
     "chai-as-promised": "^8.0.0",
-    "del-cli": "^5.1.0",
+    "del-cli": "^6.0.0",
     "mocha": "^10.7.3",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.0",
