@@ -126,6 +126,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   public async close(): Promise<void> {
+    await this.abort();
     await this.onClose?.();
   }
 
