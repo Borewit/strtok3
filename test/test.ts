@@ -908,6 +908,12 @@ describe('Matrix tests', () => {
               await expect(promise).to.be.rejectedWith(Error);
             });
 
+            it('abort async operation using `close()`', async () => {
+              const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500);
+              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+              await fileReadStream.close();
+              await expect(promise).to.be.rejectedWith(Error);
+            });
 
             it('abort async operation using `AbortController`', async () => {
               const abortController = new AbortController();
@@ -916,8 +922,8 @@ describe('Matrix tests', () => {
               abortController.abort();
               await expect(promise).to.be.rejectedWith(Error);
             });
-          });
 
+          });
         }
 
       }); // End of test "Tokenizer-types"
@@ -974,3 +980,18 @@ it('should determine the file size using a file stream', async () => {
   assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
   await tokenizer.close();
 });
+
+
+it('should release stream after close', async () => {
+
+  const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', 'test1.dat'), 0);
+  const stream = fileStream.stream;
+  assert.isFalse(stream.locked, 'stream is unlocked before initializing tokenizer');
+  const webStreamTokenizer = fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile()});
+  assert.isTrue(stream.locked, 'stream is locked after initializing tokenizer');
+  await webStreamTokenizer.close();
+  assert.isFalse(stream.locked, 'stream is unlocked after closing tokenizer');
+});
+
+
+

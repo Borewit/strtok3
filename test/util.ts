@@ -36,8 +36,8 @@ export async function makeReadableByteFileStream(filename: string, delay = 0): P
         }, delay);
       },
 
-      async cancel() {
-        await fileHandle.close();
+      cancel() {
+        return fileHandle.close();
       },
 
       autoAllocateChunkSize: 1024
