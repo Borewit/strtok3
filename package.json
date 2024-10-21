@@ -51,7 +51,7 @@
     "url": "https://github.com/Borewit/strtok3/issues"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.3",
+    "@biomejs/biome": "^1.9.4",
     "@types/chai": "^5.0.0",
     "@types/chai-as-promised": "^8.0.1",
     "@types/debug": "^4.1.12",
