@@ -1,8 +1,10 @@
-import type { ITokenizerOptions, IReadChunkOptions } from './types.js';
+import type {ITokenizerOptions, IReadChunkOptions, IRandomAccessFileInfo, IRandomAccessTokenizer} from './types.js';
 import { EndOfStreamError } from 'peek-readable';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 
-export class BufferTokenizer extends AbstractTokenizer {
+export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessTokenizer {
+
+  public fileInfo: IRandomAccessFileInfo;
 
   /**
    * Construct BufferTokenizer
@@ -11,7 +13,7 @@ export class BufferTokenizer extends AbstractTokenizer {
    */
   constructor(private uint8Array: Uint8Array, options?: ITokenizerOptions) {
     super(options);
-    this.fileInfo.size = this.fileInfo.size ? this.fileInfo.size : uint8Array.length;
+    this.fileInfo = {...options?.fileInfo ?? {}, ...{size: uint8Array.length}};
   }
 
   /**
@@ -54,5 +56,13 @@ export class BufferTokenizer extends AbstractTokenizer {
 
   public close(): Promise<void> {
     return super.close();
+  }
+
+  supportsRandomAccess(): boolean {
+    return true;
+  }
+
+  setPosition(position: number): void {
+    this.position = position;
   }
 }
