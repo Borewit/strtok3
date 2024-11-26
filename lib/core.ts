@@ -6,7 +6,7 @@ import { BufferTokenizer } from './BufferTokenizer.js';
 import type { ITokenizerOptions } from './types.js';
 
 export { EndOfStreamError, type AnyWebByteStream } from 'peek-readable';
-export type { ITokenizer, IRandomAccessTokenizer, IFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
+export type { ITokenizer, IRandomAccessTokenizer, IFileInfo, IRandomAccessFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
 export type { IToken, IGetToken } from '@tokenizer/token';
 export { AbstractTokenizer } from './AbstractTokenizer.js';
 
