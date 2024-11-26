@@ -21,6 +21,13 @@ export interface IFileInfo {
   url?: string;
 }
 
+export interface IRandomAccessFileInfo extends IFileInfo {
+  /**
+   * File size in bytes
+   */
+  size: number;
+}
+
 export interface IReadChunkOptions {
 
   /**
@@ -36,14 +43,28 @@ export interface IReadChunkOptions {
   /**
    * Position where to begin reading from the file.
    * Default it is `tokenizer.position`.
-   * Position may not be less then `tokenizer.position`.
+   * Position may not be less than `tokenizer.position`, unless `supportsRandomAccess()` returns `true`.
    */
   position?: number;
 
   /**
-   * If set, will not throw an EOF error if not all of the requested data could be read
+   * If set, will not throw an EOF error if not all off the requested data could be read
    */
   mayBeLess?: boolean;
+}
+
+export interface IRandomAccessTokenizer extends ITokenizer {
+
+  /**
+   * Provide access to information of the underlying information stream or file.
+   */
+  fileInfo: IRandomAccessFileInfo;
+
+  /**
+   * Change the position (offset) of the tokenizer
+   * @param position New position
+   */
+  setPosition(position: number): void;
 }
 
 /**
@@ -55,12 +76,12 @@ export interface ITokenizer {
   /**
    * Provide access to information of the underlying information stream or file.
    */
-  fileInfo: IFileInfo;
+  readonly fileInfo: IFileInfo;
 
   /**
    * Offset in bytes (= number of bytes read) since beginning of file or stream
    */
-  position: number;
+  readonly position: number;
 
   /**
    * Peek (read ahead) buffer from tokenizer
@@ -123,6 +144,11 @@ export interface ITokenizer {
    * Abort pending asynchronous operations
    */
   abort(): Promise<void>;
+
+  /**
+   * Returns true when the underlying file supports random access
+   */
+  supportsRandomAccess(): boolean;
 }
 
 export type OnClose = () => Promise<void>;

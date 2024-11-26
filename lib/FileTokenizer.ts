@@ -1,12 +1,32 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
-import type { IReadChunkOptions, ITokenizerOptions } from './types.js';
+import type {IRandomAccessTokenizer, IRandomAccessFileInfo, IReadChunkOptions, ITokenizerOptions} from './types.js';
 import { type FileHandle, open as fsOpen } from 'node:fs/promises';
 
-export class FileTokenizer extends AbstractTokenizer {
+interface IFileTokenizerOptions extends ITokenizerOptions {
+  /**
+   * Pass additional file information to the tokenizer
+   */
+  fileInfo: IRandomAccessFileInfo;
+}
 
-  public constructor(private fileHandle: FileHandle, options: ITokenizerOptions) {
+export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTokenizer {
+
+  public fileInfo: IRandomAccessFileInfo;
+
+  /**
+   * Create tokenizer from provided file path
+   * @param sourceFilePath File path
+   */
+  static async fromFile(sourceFilePath: string): Promise<FileTokenizer> {
+    const fileHandle = await fsOpen(sourceFilePath, 'r');
+    const stat = await fileHandle.stat();
+    return new FileTokenizer(fileHandle, {fileInfo: {path: sourceFilePath, size: stat.size}});
+  }
+
+  protected constructor(private fileHandle: FileHandle, options: IFileTokenizerOptions) {
     super(options);
+    this.fileInfo = options.fileInfo;
   }
 
   /**
@@ -48,10 +68,14 @@ export class FileTokenizer extends AbstractTokenizer {
     await this.fileHandle.close();
     return super.close();
   }
+
+  setPosition(position: number): void {
+    this.position = position;
+  }
+
+  supportsRandomAccess(): boolean {
+    return true;
+  }
 }
 
-export async function fromFile(sourceFilePath: string): Promise<FileTokenizer> {
-  const fileHandle = await fsOpen(sourceFilePath, 'r');
-  const stat = await fileHandle.stat();
-  return new FileTokenizer(fileHandle, {fileInfo: {path: sourceFilePath, size: stat.size}});
-}
+

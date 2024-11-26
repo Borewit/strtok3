@@ -9,7 +9,6 @@ import { assert, expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { fromStream, fromWebStream, fromFile, fromBuffer, type ITokenizer } from '../lib/index.js';
 import Path from 'node:path';
-import { FileTokenizer } from '../lib/FileTokenizer.js';
 import { EndOfStreamError } from 'peek-readable';
 
 import mocha from 'mocha';
@@ -617,7 +616,7 @@ describe('Matrix tests', () => {
 
           const rst = await tokenizerType.loadTokenizer('test1.dat');
 
-          if (rst instanceof FileTokenizer) {
+          if (rst.supportsRandomAccess()) {
             assert.strictEqual(rst.fileInfo.size, 16, 'check file size property');
           }
           await peekOnData(rst);
@@ -991,6 +990,28 @@ it('should release stream after close', async () => {
   assert.isTrue(stream.locked, 'stream is locked after initializing tokenizer');
   await webStreamTokenizer.close();
   assert.isFalse(stream.locked, 'stream is unlocked after closing tokenizer');
+});
+
+describe('Random-read-acccess', async () => {
+
+  it('Read ID3v1 header at the end of the file', async () => {
+
+    const tokenizer = await fromFile(getResourcePath('id3v1.mp3'));
+    try {
+      const id3HeaderSize = 128;
+      const id3Header = new Uint8Array(id3HeaderSize);
+      await tokenizer.readBuffer(id3Header,{position: tokenizer.fileInfo.size - id3HeaderSize});
+      const id3Tag = new TextDecoder('utf-8').decode(id3Header.subarray(0, 3));
+      assert.strictEqual(id3Tag, 'TAG');
+      assert.strictEqual(tokenizer.position, tokenizer.fileInfo.size, 'Tokenizer position should be at the end of the file');
+      tokenizer.setPosition(0);
+      assert.strictEqual(tokenizer.position, 0, 'Tokenizer position should be at the beginning of the file');
+    }
+    finally {
+      await tokenizer.close();
+    }
+  });
+
 });
 
 

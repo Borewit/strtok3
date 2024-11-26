@@ -14,9 +14,16 @@ interface INormalizedReadChunkOptions extends IReadChunkOptions {
  */
 export abstract class AbstractTokenizer implements ITokenizer {
 
-  public fileInfo: IFileInfo;
-
   private onClose?: OnClose;
+  private numBuffer = new Uint8Array(8);
+
+  public abstract fileInfo: IFileInfo;
+
+  /**
+   * Tokenizer-stream position
+   */
+  public position = 0;
+
 
   /**
    * Constructor
@@ -24,7 +31,6 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @protected
    */
   protected constructor(options?: ITokenizerOptions) {
-    this.fileInfo = options?.fileInfo ?? {};
     this.onClose = options?.onClose;
     if (options?.abortSignal) {
       options.abortSignal.addEventListener('abort', () => {
@@ -33,12 +39,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
     }
   }
 
-  /**
-   * Tokenizer-stream position
-   */
-  public position = 0;
-
-  private numBuffer = new Uint8Array(8);
+  abstract supportsRandomAccess(): boolean;
 
   /**
    * Read buffer from tokenizer
