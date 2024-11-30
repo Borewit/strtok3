@@ -132,22 +132,17 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): INormalizedReadChunkOptions {
 
-    if (options && options.position !== undefined && options.position < this.position) {
+    if (!this.supportsRandomAccess() && options && options.position !== undefined && options.position < this.position) {
       throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
     }
 
-    if (options) {
-      return {
-        mayBeLess: options.mayBeLess === true,
-        length: options.length ? options.length : uint8Array.length,
-        position: options.position ? options.position : this.position
-      };
-    }
-
     return {
-      mayBeLess: false,
-      length: uint8Array.length,
-      position: this.position
+      ...{
+        mayBeLess: false,
+        offset: 0,
+        length: uint8Array.length,
+        position: this.position
+      }, ...options
     };
   }
 
