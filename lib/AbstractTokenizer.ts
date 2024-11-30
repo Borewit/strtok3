@@ -3,7 +3,6 @@ import type { IGetToken, IToken } from '@tokenizer/token';
 import { EndOfStreamError } from 'peek-readable';
 
 interface INormalizedReadChunkOptions extends IReadChunkOptions {
-  offset: number;
   length: number;
   position: number;
   mayBeLess?: boolean;
@@ -140,15 +139,13 @@ export abstract class AbstractTokenizer implements ITokenizer {
     if (options) {
       return {
         mayBeLess: options.mayBeLess === true,
-        offset: options.offset ? options.offset : 0,
-        length: options.length ? options.length : (uint8Array.length - (options.offset ? options.offset : 0)),
+        length: options.length ? options.length : uint8Array.length,
         position: options.position ? options.position : this.position
       };
     }
 
     return {
       mayBeLess: false,
-      offset: 0,
       length: uint8Array.length,
       position: this.position
     };

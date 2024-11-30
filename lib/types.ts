@@ -31,11 +31,6 @@ export interface IRandomAccessFileInfo extends IFileInfo {
 export interface IReadChunkOptions {
 
   /**
-   * The offset in the buffer to start writing at; default is 0
-   */
-  offset?: number;
-
-  /**
    * Number of bytes to read.
    */
   length?: number;
