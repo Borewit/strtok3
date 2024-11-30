@@ -37,7 +37,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     if (normOptions.length === 0) {
       return 0;
     }
-    const bytesRead = await this.streamReader.read(uint8Array, normOptions.offset, normOptions.length);
+    const bytesRead = await this.streamReader.read(uint8Array, 0, normOptions.length);
     this.position += bytesRead;
     if ((!options || !options.mayBeLess) && bytesRead < normOptions.length) {
       throw new EndOfStreamError();
@@ -61,7 +61,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       if (skipBytes > 0) {
         const skipBuffer = new Uint8Array(normOptions.length + skipBytes);
         bytesRead = await this.peekBuffer(skipBuffer, {mayBeLess: normOptions.mayBeLess});
-        uint8Array.set(skipBuffer.subarray(skipBytes), normOptions.offset);
+        uint8Array.set(skipBuffer.subarray(skipBytes));
         return bytesRead - skipBytes;
       }
       if (skipBytes < 0) {
@@ -71,7 +71,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
     if (normOptions.length > 0) {
       try {
-        bytesRead = await this.streamReader.peek(uint8Array, normOptions.offset, normOptions.length);
+        bytesRead = await this.streamReader.peek(uint8Array, 0, normOptions.length);
       } catch (err) {
         if (options?.mayBeLess && err instanceof EndOfStreamError) {
           return 0;

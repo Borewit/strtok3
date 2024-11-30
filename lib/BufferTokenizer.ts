@@ -50,7 +50,7 @@ export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessT
     if ((!normOptions.mayBeLess) && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
     }
-    uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read), normOptions.offset);
+    uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read));
     return bytes2read;
   }
 

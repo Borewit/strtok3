@@ -293,7 +293,6 @@ Each attribute is optional:
 
 | Attribute | Type    | Description                                                                                                                                                                                                                   |
 |-----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| offset    | number  | The offset in the buffer to start writing at; if not provided, start at 0                                                                                                                                                     |
 | length    | number  | Requested number of bytes to read.                                                                                                                                                                                            |
 | position  | number  | Position where to peek from the file. If position is null, data will be read from the [current file position](#attribute-tokenizerposition). Position may not be less then [tokenizer.position](#attribute-tokenizerposition) |
 | mayBeLess | boolean | If and only if set, will not throw an EOF error if less then the requested *mayBeLess* could be read.                                                                                                                         |

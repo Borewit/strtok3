@@ -88,7 +88,7 @@ describe('Matrix tests', () => {
           it('option.offset', async () => {
             const buf = new Uint8Array(7);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.readBuffer(buf, {length: 6, offset: 1}), 6);
+            assert.strictEqual(await rst.readBuffer(buf.subarray(1), {length: 6}), 6);
             await rst.close();
           });
 
@@ -102,7 +102,7 @@ describe('Matrix tests', () => {
           it('default length', async () => {
             const buf = new Uint8Array(6);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.readBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
+            assert.strictEqual(await rst.readBuffer(buf.subarray(1)), 5, 'default length = buffer.length - option.offset');
             await rst.close();
           });
 
@@ -130,7 +130,7 @@ describe('Matrix tests', () => {
           it('option.offset', async () => {
             const buf = new Uint8Array(7);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.peekBuffer(buf, {length: 6, offset: 1}), 6);
+            assert.strictEqual(await rst.peekBuffer(buf.subarray(1), {length: 6}), 6);
             await rst.close();
           });
 
@@ -144,7 +144,7 @@ describe('Matrix tests', () => {
           it('default length', async () => {
             const buf = new Uint8Array(6);
             const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.peekBuffer(buf, {offset: 1}), 5, 'default length = buffer.length - option.offset');
+            assert.strictEqual(await rst.peekBuffer(buf.subarray(1)), 5, 'default length = buffer.length - option.offset');
             await rst.close();
           });
 

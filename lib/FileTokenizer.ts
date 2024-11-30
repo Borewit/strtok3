@@ -39,7 +39,7 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
     const normOptions = this.normalizeOptions(uint8Array, options);
     this.position = normOptions.position;
     if (normOptions.length === 0) return 0;
-    const res = await this.fileHandle.read(uint8Array, normOptions.offset, normOptions.length, normOptions.position);
+    const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
     this.position += res.bytesRead;
     if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
       throw new EndOfStreamError();
@@ -57,7 +57,7 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
 
     const normOptions = this.normalizeOptions(uint8Array, options);
 
-    const res = await this.fileHandle.read(uint8Array, normOptions.offset, normOptions.length, normOptions.position);
+    const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
     if ((!normOptions.mayBeLess) && res.bytesRead < normOptions.length) {
       throw new EndOfStreamError();
     }
