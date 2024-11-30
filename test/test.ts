@@ -1012,6 +1012,16 @@ describe('Random-read-acccess', async () => {
     }
   });
 
+  it('Be able to random read from position 0', async () => {
+    const tokenizer = await fromFile(getResourcePath('id3v1.mp3'));
+    // Advance tokenizer.position
+    await tokenizer.ignore(20);
+    const mpegSync = new Uint8Array(2);
+    await tokenizer.readBuffer(mpegSync,{position: 0});
+    assert.strictEqual(mpegSync[0], 255, 'First sync byte');
+    assert.strictEqual(mpegSync[1], 251, 'Second sync byte');
+  });
+
 });
 
 
