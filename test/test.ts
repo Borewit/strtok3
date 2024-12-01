@@ -7,7 +7,14 @@ import { fileURLToPath } from 'node:url';
 import * as Token from 'token-types';
 import { assert, expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import { fromStream, fromWebStream, fromFile, fromBuffer, type ITokenizer } from '../lib/index.js';
+import {
+  fromStream,
+  fromWebStream,
+  fromFile,
+  fromBuffer,
+  type ITokenizer,
+  type IRandomAccessTokenizer
+} from '../lib/index.js';
 import Path from 'node:path';
 import { EndOfStreamError } from 'peek-readable';
 
@@ -27,6 +34,7 @@ interface ITokenizerTest {
   loadTokenizer: (testFile: string, delay?: number, abortSignal?: AbortSignal) => Promise<ITokenizer>;
   hasFileInfo: boolean;
   abortable: boolean;
+  randomRead: boolean;
 }
 
 function getResourcePath(testFile: string) {
@@ -50,7 +58,8 @@ describe('Matrix tests', () => {
         return fromStream(delayedStream, {abortSignal});
       },
       hasFileInfo: true,
-      abortable: true
+      abortable: true,
+      randomRead: false
     }, {
       name: 'fromWebStream()',
       loadTokenizer: async (testFile, delay, abortSignal?: AbortSignal) => {
@@ -58,14 +67,16 @@ describe('Matrix tests', () => {
         return fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile(), abortSignal});
       },
       hasFileInfo: false,
-      abortable: true
+      abortable: true,
+      randomRead: false
     }, {
       name: 'fromFile()',
       loadTokenizer: async testFile => {
         return fromFile(Path.join(__dirname, 'resources', testFile));
       },
       hasFileInfo: true,
-      abortable: false
+      abortable: false,
+      randomRead: true
     }, {
       name: 'fromBuffer()',
       loadTokenizer: async testFile => {
@@ -74,7 +85,8 @@ describe('Matrix tests', () => {
         });
       },
       hasFileInfo: true,
-      abortable: false
+      abortable: false,
+      randomRead: true
     }
   ];
 
@@ -927,6 +939,40 @@ describe('Matrix tests', () => {
 
       }); // End of test "Tokenizer-types"
     });
+
+  describe('Random-read-access', async () => {
+
+    tokenizerTests
+      .filter(tokenizerType => tokenizerType.randomRead)
+      .forEach(tokenizerType => {
+        describe(tokenizerType.name, () => {
+
+          it('Read ID3v1 header at the end of the file', async () => {
+            const tokenizer = await tokenizerType.loadTokenizer('id3v1.mp3') as IRandomAccessTokenizer;
+            assert.isTrue(tokenizer.supportsRandomAccess(), 'Tokenizer should support random reads');
+            const id3HeaderSize = 128;
+            const id3Header = new Uint8Array(id3HeaderSize);
+            await tokenizer.readBuffer(id3Header,{position: tokenizer.fileInfo.size - id3HeaderSize});
+            const id3Tag = new TextDecoder('utf-8').decode(id3Header.subarray(0, 3));
+            assert.strictEqual(id3Tag, 'TAG');
+            assert.strictEqual(tokenizer.position, tokenizer.fileInfo.size, 'Tokenizer position should be at the end of the file');
+            tokenizer.setPosition(0);
+            assert.strictEqual(tokenizer.position, 0, 'Tokenizer position should be at the beginning of the file');
+          });
+
+          it('Be able to random read from position 0', async () => {
+            const tokenizer = await fromFile(getResourcePath('id3v1.mp3'));
+            // Advance tokenizer.position
+            await tokenizer.ignore(20);
+            const mpegSync = new Uint8Array(2);
+            await tokenizer.readBuffer(mpegSync,{position: 0});
+            assert.strictEqual(mpegSync[0], 255, 'First sync byte');
+            assert.strictEqual(mpegSync[1], 251, 'Second sync byte');
+          });
+        });
+      });
+
+  });
 });
 
 describe('fromStream with mayBeLess flag', () => {
@@ -991,38 +1037,3 @@ it('should release stream after close', async () => {
   await webStreamTokenizer.close();
   assert.isFalse(stream.locked, 'stream is unlocked after closing tokenizer');
 });
-
-describe('Random-read-acccess', async () => {
-
-  it('Read ID3v1 header at the end of the file', async () => {
-
-    const tokenizer = await fromFile(getResourcePath('id3v1.mp3'));
-    try {
-      const id3HeaderSize = 128;
-      const id3Header = new Uint8Array(id3HeaderSize);
-      await tokenizer.readBuffer(id3Header,{position: tokenizer.fileInfo.size - id3HeaderSize});
-      const id3Tag = new TextDecoder('utf-8').decode(id3Header.subarray(0, 3));
-      assert.strictEqual(id3Tag, 'TAG');
-      assert.strictEqual(tokenizer.position, tokenizer.fileInfo.size, 'Tokenizer position should be at the end of the file');
-      tokenizer.setPosition(0);
-      assert.strictEqual(tokenizer.position, 0, 'Tokenizer position should be at the beginning of the file');
-    }
-    finally {
-      await tokenizer.close();
-    }
-  });
-
-  it('Be able to random read from position 0', async () => {
-    const tokenizer = await fromFile(getResourcePath('id3v1.mp3'));
-    // Advance tokenizer.position
-    await tokenizer.ignore(20);
-    const mpegSync = new Uint8Array(2);
-    await tokenizer.readBuffer(mpegSync,{position: 0});
-    assert.strictEqual(mpegSync[0], 255, 'First sync byte');
-    assert.strictEqual(mpegSync[1], 251, 'Second sync byte');
-  });
-
-});
-
-
-
