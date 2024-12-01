@@ -25,9 +25,6 @@ export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessT
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
 
     if (options?.position) {
-      if (options.position < this.position) {
-        throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
-      }
       this.position = options.position;
     }
 
