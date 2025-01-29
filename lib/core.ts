@@ -1,5 +1,5 @@
 import type { Readable } from 'node:stream';
-import { StreamReader, WebStreamReader, type AnyWebByteStream } from 'peek-readable';
+import { StreamReader, makeWebStreamReader, type AnyWebByteStream } from 'peek-readable';
 
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
@@ -18,7 +18,16 @@ export { AbstractTokenizer } from './AbstractTokenizer.js';
  * @returns ReadStreamTokenizer
  */
 export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadStreamTokenizer {
-  return new ReadStreamTokenizer(new StreamReader(stream), options);
+  const streamReader= new StreamReader(stream);
+  const _options: ITokenizerOptions = options ?? {};
+  const chainedClose = _options.onClose;
+  _options.onClose = async () => {
+    await streamReader.close();
+    if(chainedClose) {
+      return chainedClose();
+    }
+  };
+  return new ReadStreamTokenizer(streamReader, _options);
 }
 
 /**
@@ -29,7 +38,16 @@ export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadS
  * @returns ReadStreamTokenizer
  */
 export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer {
-  return new ReadStreamTokenizer(new WebStreamReader(webStream), options);
+  const webStreamReader= makeWebStreamReader(webStream);
+  const _options: ITokenizerOptions = options ?? {};
+  const chainedClose = _options.onClose;
+  _options.onClose = async () => {
+    await webStreamReader.close();
+    if(chainedClose) {
+      return chainedClose();
+    }
+  };
+  return new ReadStreamTokenizer(webStreamReader, _options);
 }
 
 /**
