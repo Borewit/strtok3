@@ -106,6 +106,10 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     return this.streamReader.abort();
   }
 
+  public async close(): Promise<void> {
+    return this.streamReader.close();
+  }
+
   supportsRandomAccess(): boolean {
     return false;
   }
