@@ -557,7 +557,7 @@ describe('Matrix tests', () => {
 
         });
 
-        it('Transparency', async function () {
+        it('Transparency', async function() {
 
           this.timeout(5000);
 
@@ -897,8 +897,11 @@ describe('Matrix tests', () => {
         it('should be able to read 0 bytes from a file', async () => {
           const bufZero = new Uint8Array(0);
           const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
-          await tokenizer.readBuffer(bufZero);
-          await tokenizer.close();
+          try {
+            await tokenizer.readBuffer(bufZero);
+          } finally {
+            await tokenizer.close();
+          }
         });
 
         if (tokenizerType.abortable) {
@@ -907,15 +910,23 @@ describe('Matrix tests', () => {
 
             it('without aborting', async () => {
               const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500);
-              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
-              assert.strictEqual(await promise, '123');
+              try {
+                const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+                assert.strictEqual(await promise, '123');
+              } finally {
+                await fileReadStream.close();
+              }
             });
 
             it('abort async operation using `abort()`', async () => {
               const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500);
-              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
-              await fileReadStream.abort();
-              await expect(promise).to.be.rejectedWith(Error);
+              try {
+                const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+                await fileReadStream.abort();
+                await expect(promise).to.be.rejectedWith(Error);
+              } finally {
+                await fileReadStream.close();
+              }
             });
 
             it('abort async operation using `close()`', async () => {
@@ -928,9 +939,13 @@ describe('Matrix tests', () => {
             it('abort async operation using `AbortController`', async () => {
               const abortController = new AbortController();
               const fileReadStream = await getTokenizerWithData('123', tokenizerType, 500, abortController.signal);
-              const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
-              abortController.abort();
-              await expect(promise).to.be.rejectedWith(Error);
+              try {
+                const promise = fileReadStream.readToken(new Token.StringType(3, 'utf-8'), 0);
+                abortController.abort();
+                await expect(promise).to.be.rejectedWith(Error);
+              } finally {
+                await fileReadStream.close();
+              }
             });
 
           });
@@ -948,25 +963,34 @@ describe('Matrix tests', () => {
 
           it('Read ID3v1 header at the end of the file', async () => {
             const tokenizer = await tokenizerType.loadTokenizer('id3v1.mp3') as IRandomAccessTokenizer;
-            assert.isTrue(tokenizer.supportsRandomAccess(), 'Tokenizer should support random reads');
-            const id3HeaderSize = 128;
-            const id3Header = new Uint8Array(id3HeaderSize);
-            await tokenizer.readBuffer(id3Header,{position: tokenizer.fileInfo.size - id3HeaderSize});
-            const id3Tag = new TextDecoder('utf-8').decode(id3Header.subarray(0, 3));
-            assert.strictEqual(id3Tag, 'TAG');
-            assert.strictEqual(tokenizer.position, tokenizer.fileInfo.size, 'Tokenizer position should be at the end of the file');
-            tokenizer.setPosition(0);
-            assert.strictEqual(tokenizer.position, 0, 'Tokenizer position should be at the beginning of the file');
+            try {
+              assert.isTrue(tokenizer.supportsRandomAccess(), 'Tokenizer should support random reads');
+              const id3HeaderSize = 128;
+              const id3Header = new Uint8Array(id3HeaderSize);
+              await tokenizer.readBuffer(id3Header, {position: tokenizer.fileInfo.size - id3HeaderSize});
+              const id3Tag = new TextDecoder('utf-8').decode(id3Header.subarray(0, 3));
+              assert.strictEqual(id3Tag, 'TAG');
+              assert.strictEqual(tokenizer.position, tokenizer.fileInfo.size, 'Tokenizer position should be at the end of the file');
+              tokenizer.setPosition(0);
+              assert.strictEqual(tokenizer.position, 0, 'Tokenizer position should be at the beginning of the file');
+            } finally {
+              await tokenizer.close();
+            }
           });
 
           it('Be able to random read from position 0', async () => {
             const tokenizer = await fromFile(getResourcePath('id3v1.mp3'));
-            // Advance tokenizer.position
-            await tokenizer.ignore(20);
-            const mpegSync = new Uint8Array(2);
-            await tokenizer.readBuffer(mpegSync,{position: 0});
-            assert.strictEqual(mpegSync[0], 255, 'First sync byte');
-            assert.strictEqual(mpegSync[1], 251, 'Second sync byte');
+            try {
+              // Advance tokenizer.position
+              await tokenizer.ignore(20);
+              const mpegSync = new Uint8Array(2);
+              await tokenizer.readBuffer(mpegSync, {position: 0});
+              assert.strictEqual(mpegSync[0], 255, 'First sync byte');
+              assert.strictEqual(mpegSync[1], 251, 'Second sync byte');
+            } finally {
+              await tokenizer.close();
+            }
+
           });
         });
       });
@@ -980,21 +1004,23 @@ describe('fromStream with mayBeLess flag', () => {
     // Initialize empty stream
     const stream = new PassThrough();
     const tokenizer = await fromStream(stream);
-    stream.end();
+    try {
+      stream.end();
 
-    // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
-    const buffer = new Uint8Array(5);
-    const bytesRead = await tokenizer.peekBuffer(buffer, {mayBeLess: true});
-    assert.strictEqual(bytesRead, 0);
-    await tokenizer.close();
+      // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
+      const buffer = new Uint8Array(5);
+      const bytesRead = await tokenizer.peekBuffer(buffer, {mayBeLess: true});
+      assert.strictEqual(bytesRead, 0);
+    } finally {
+      await tokenizer.close();
+    }
   });
 
   it('mayBeLess=false', async () => {
-    let tokenizer: ITokenizer | undefined;
+    // Initialize empty stream
+    const stream = new PassThrough();
+    const tokenizer = await fromStream(stream);
     try {
-      // Initialize empty stream
-      const stream = new PassThrough();
-      tokenizer = await fromStream(stream);
       stream.end();
 
       // Try to read 5 bytes from empty stream, with mayBeLess flag enabled
@@ -1020,18 +1046,21 @@ describe('fromStream with mayBeLess flag', () => {
 it('should determine the file size using a file stream', async () => {
   const stream = createReadStream(Path.join(__dirname, 'resources', 'test1.dat'));
   const tokenizer = await fromStream(stream);
-  assert.isDefined(tokenizer.fileInfo, '`fileInfo` should be defined');
-  assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
-  await tokenizer.close();
+  try {
+    assert.isDefined(tokenizer.fileInfo, '`fileInfo` should be defined');
+    assert.strictEqual(tokenizer.fileInfo.size, 16, 'fileInfo.size');
+  } finally {
+    await tokenizer.close();
+  }
 });
-
 
 it('should release stream after close', async () => {
 
   const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', 'test1.dat'), 0);
   const stream = fileStream.stream;
   assert.isFalse(stream.locked, 'stream is unlocked before initializing tokenizer');
-  const webStreamTokenizer = fromWebStream(fileStream.stream, {onClose: () => {
+  const webStreamTokenizer = fromWebStream(fileStream.stream, {
+    onClose: () => {
       return fileStream.closeFile();
     }
   });
