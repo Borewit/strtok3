@@ -829,18 +829,17 @@ describe('Matrix tests', () => {
           });
 
           it('should throw an EOF if we read to buffer', async () => {
-
             const buffer = new Uint8Array(4);
 
-            return getTokenizerWithData('\x89\x54\x40', tokenizerType).then(rst => {
-              return rst.readBuffer(buffer).then(() => {
-                assert.fail('It should throw EndOfFile Error');
-              }).catch(err => {
-                assert.instanceOf(err, EndOfStreamError);
-              }).finally(() => {
-                return rst.close();
-              });
-            });
+            const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
+            try {
+              await rst.readBuffer(buffer);
+              assert.fail('It should throw EndOfFile Error');
+            } catch (err) {
+              assert.instanceOf(err, EndOfStreamError);
+            } finally {
+              await rst.close();
+            }
           });
 
           it('should throw an EOF if we peek to buffer', async () => {
@@ -1032,7 +1031,10 @@ it('should release stream after close', async () => {
   const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', 'test1.dat'), 0);
   const stream = fileStream.stream;
   assert.isFalse(stream.locked, 'stream is unlocked before initializing tokenizer');
-  const webStreamTokenizer = fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile()});
+  const webStreamTokenizer = fromWebStream(fileStream.stream, {onClose: () => {
+      return fileStream.closeFile();
+    }
+  });
   assert.isTrue(stream.locked, 'stream is locked after initializing tokenizer');
   await webStreamTokenizer.close();
   assert.isFalse(stream.locked, 'stream is unlocked after closing tokenizer');
