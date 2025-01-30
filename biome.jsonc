@@ -10,7 +10,8 @@
 		"enabled": true,
 		"rules": {
 			"correctness": {
-				"noUnusedImports": "error"
+				"noUnusedImports": "error",
+				"noNodejsModules": "error"
 			},
 			"recommended": true,
 			"complexity": {
@@ -47,5 +48,17 @@
 			"./test/**/*.d.ts",
 			"./test/**/*.js"
 		]
-	}
+	},
+	"overrides": [
+		{
+			"include": ["./test/**/*", "./lib/index.ts", "./lib/FileTokenizer.ts"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noNodejsModules": "off"
+					}
+				}
+			}
+		}
+	]
 }
