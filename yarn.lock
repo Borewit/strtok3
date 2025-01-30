@@ -2492,10 +2492,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"peek-readable@npm:^6.0.1":
-  version: 6.0.1
-  resolution: "peek-readable@npm:6.0.1"
-  checksum: 10c0/8db0a5daf41935e8717d2b327d8ce62f1b63e71dfed70243e80360f5ae86297b8d42251b5ebacfb893b29dc41224b82ecff5bc7b0ea85417f015814fa5ab5d15
+"peek-readable@npm:^6.0.2":
+  version: 6.0.2
+  resolution: "peek-readable@npm:6.0.2"
+  checksum: 10c0/1ea609773ce86371dbfe1aa969da5090e6c19ef997216633f8d0c4530647f4d518e40e7d9a1ca0d358af7df91343b96d1bc4daa0e792bb12a1dfcdd1e8774a24
   languageName: node
   linkType: hard
 
@@ -3136,7 +3136,7 @@ __metadata:
     chai-as-promised: "npm:^8.0.1"
     del-cli: "npm:^6.0.0"
     mocha: "npm:^11.1.0"
-    peek-readable: "npm:^6.0.1"
+    peek-readable: "npm:^6.0.2"
     remark-cli: "npm:^12.0.1"
     remark-preset-lint-recommended: "npm:^7.0.0"
     token-types: "npm:^6.0.0"
