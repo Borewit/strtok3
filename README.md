@@ -35,6 +35,8 @@ npm install strtok3
 Starting with version 7, the module has migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 The distributed JavaScript codebase is compliant with the [ECMAScript 2020 (11th Edition)](https://en.wikipedia.org/wiki/ECMAScript_version_history#11th_Edition_%E2%80%93_ECMAScript_2020) standard.
 
+Requires a modern browser or Node.js ≥ 18 engine.
+
 For TypeScript CommonJs backward compatibility, you can use [load-esm](https://github.com/Borewit/load-esm).
 
 > [!NOTE]
