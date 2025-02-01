@@ -1,4 +1,4 @@
-name: Node.js CI
+name: CI
 on:
   pull_request:
     branches: [ "master" ]
@@ -44,8 +44,8 @@ jobs:
             test/**/*.js
             test/**/*.js.map
 
-  test:
-    name: "Node.js version matrix test"
+  test-nodejs:
+    name: "Test with Node.js (V8)"
     runs-on: ubuntu-latest
     needs: build
 
@@ -61,7 +61,7 @@ jobs:
       - name: 'Checkout the repository'
         uses: actions/checkout@v4
 
-      - name: Test with Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
@@ -84,11 +84,56 @@ jobs:
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.github_token }}
-          flag-name: run-${{ matrix.test_number }}
+          flag-name: run-node-${{ matrix.test_number }}
+          parallel: true
+
+  test-bun:
+    name: "Test with Bun (JavaScriptCore)"
+    runs-on: ubuntu-latest
+    needs: build
+
+    strategy:
+      matrix:
+        bun-version: [1.2]
+
+    env:
+      YARN_IGNORE_NODE: 1
+
+    steps:
+
+      - name: 'Checkout the repository'
+        uses: actions/checkout@v4
+
+      - name: Setup Bun ${{ matrix.bun-version }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun-version }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Download build
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+
+      - name: Unit tests with Bun ${{ matrix.bun-version }}
+        run: yarn run test-coverage
+
+      - name: Coveralls Parallel
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.github_token }}
+          flag-name: run-bun-${{ matrix.test_number }}
           parallel: true
 
   finish:
-    needs: test
+    needs:
+      - test-nodejs
+      - test-bun
     runs-on: ubuntu-latest
     steps:
       - name: Coveralls Finished

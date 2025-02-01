@@ -1,4 +1,4 @@
-[![Node.js CI](https://github.com/Borewit/strtok3/actions/workflows/nodejs-ci.yml/badge.svg?branch=master)](https://github.com/Borewit/strtok3/actions/workflows/nodejs-ci.yml?query=branch%3Amaster)
+[![Node.js CI](https://github.com/Borewit/strtok3/actions/workflows/ci.yml/badge.svg)](https://github.com/Borewit/strtok3/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/Borewit/strtok3/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/Borewit/strtok3/actions/workflows/codeql.yml)
 [![NPM version](https://badge.fury.io/js/strtok3.svg)](https://npmjs.org/package/strtok3)
 [![npm downloads](http://img.shields.io/npm/dm/strtok3.svg)](https://npmcharts.com/compare/strtok3,token-types?start=1200&interval=30)
@@ -35,7 +35,7 @@ npm install strtok3
 Starting with version 7, the module has migrated from [CommonJS](https://en.wikipedia.org/wiki/CommonJS) to [pure ECMAScript Module (ESM)](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c).
 The distributed JavaScript codebase is compliant with the [ECMAScript 2020 (11th Edition)](https://en.wikipedia.org/wiki/ECMAScript_version_history#11th_Edition_%E2%80%93_ECMAScript_2020) standard.
 
-Requires a modern browser or Node.js ≥ 18 engine.
+Requires a modern browser, Node.js (V8) ≥ 18 engine or Bun (JavaScriptCore) ≥ 1.2.
 
 For TypeScript CommonJs backward compatibility, you can use [load-esm](https://github.com/Borewit/load-esm).
 
