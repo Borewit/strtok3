@@ -121,14 +121,7 @@ jobs:
           name: build
 
       - name: Unit tests with Bun ${{ matrix.bun-version }}
-        run: yarn run test-coverage
-
-      - name: Coveralls Parallel
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.github_token }}
-          flag-name: run-bun-${{ matrix.test_number }}
-          parallel: true
+        run: bun run bun:test
 
   finish:
     needs:

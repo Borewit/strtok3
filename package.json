@@ -22,6 +22,7 @@
     "lint": "yarn run lint-md && yarn run lint-ts",
     "fix": "yarn run biome lint --write",
     "test": "mocha",
+    "bun:test": "bun run --bun test",
     "test-coverage": "c8 yarn run test",
     "send-codacy": "c8 report --reporter=text-lcov | codacy-coverage",
     "start": "yarn run compile && yarn run lint && yarn run cover-test"
