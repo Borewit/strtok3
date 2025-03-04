@@ -57,12 +57,12 @@ If you find this project useful and would like to support its development, consi
 ### strtok3 methods
 
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer-object):
-- [fromFile](#fromfile-function)[^1]
-- [fromStream](#fromstream-function)[^1]
+- [fromFile](#fromfile-function)*
+- [fromStream](#fromstream-function)*
 - [fromWebStream](#fromwebstream-function)
 - [fromBuffer](#frombuffer-function)
 
-[^1]: Only available when importing this module with Node.js
+> **_NOTE:_**  * `fromFile` and `fromStream`  only available when importing this module with Node.js
 
 All methods return a [`Tokenizer`](#tokenizer-object), either directly or via a promise.
 
