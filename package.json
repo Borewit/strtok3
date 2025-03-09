@@ -67,6 +67,7 @@
     "chai-as-promised": "^8.0.1",
     "del-cli": "^6.0.0",
     "mocha": "^11.1.0",
+    "node-readable-to-web-readable-stream": "^0.4.2",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.1",
     "token-types": "^6.0.0",

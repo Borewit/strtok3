@@ -21,7 +21,7 @@ import { EndOfStreamError } from 'peek-readable';
 import mocha from 'mocha';
 import { stringToUint8Array } from 'uint8array-extras';
 
-import { DelayedStream, makeReadableByteFileStream } from './util.js';
+import { DelayedStream, makeByteReadableStreamFromFile } from './util.js';
 import process from 'node:process';
 
 use(chaiAsPromised);
@@ -64,8 +64,8 @@ describe('Matrix tests', () => {
     }, {
       name: 'fromWebStream()',
       loadTokenizer: async (testFile, delay, abortSignal?: AbortSignal) => {
-        const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', testFile), delay);
-        return fromWebStream(fileStream.stream, {onClose: () => fileStream.closeFile(), abortSignal});
+        const fileStream = makeByteReadableStreamFromFile(Path.join(__dirname, 'resources', testFile), delay);
+        return fromWebStream(fileStream, {abortSignal});
       },
       hasFileInfo: false,
       abortable: true,
@@ -1068,15 +1068,10 @@ it('should determine the file size using a file stream', async () => {
 
 it('should release stream after close', async () => {
 
-  const fileStream = await makeReadableByteFileStream(Path.join(__dirname, 'resources', 'test1.dat'), 0);
-  const stream = fileStream.stream;
-  assert.isFalse(stream.locked, 'stream is unlocked before initializing tokenizer');
-  const webStreamTokenizer = fromWebStream(fileStream.stream, {
-    onClose: () => {
-      return fileStream.closeFile();
-    }
-  });
-  assert.isTrue(stream.locked, 'stream is locked after initializing tokenizer');
+  const fileStream = makeByteReadableStreamFromFile(Path.join(__dirname, 'resources', 'test1.dat'), 0);
+  assert.isFalse(fileStream.locked, 'stream is unlocked before initializing tokenizer');
+  const webStreamTokenizer = fromWebStream(fileStream);
+  assert.isTrue(fileStream.locked, 'stream is locked after initializing tokenizer');
   await webStreamTokenizer.close();
-  assert.isFalse(stream.locked, 'stream is unlocked after closing tokenizer');
+  assert.isFalse(fileStream.locked, 'stream is unlocked after closing tokenizer');
 });

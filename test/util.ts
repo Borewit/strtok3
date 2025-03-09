@@ -1,51 +1,23 @@
-import * as fs from 'node:fs/promises';
-import { ReadableStream } from 'node:stream/web';
-import { Readable } from 'node:stream';
+import { createReadStream } from  'node:fs';
+import { Transform, Readable } from 'node:stream';
+import { makeByteReadableStreamFromNodeReadable } from 'node-readable-to-web-readable-stream';
 
-export async function makeReadableByteFileStream(filename: string, delay = 0): Promise<{ stream: ReadableStream<Uint8Array>, closeFile: () => Promise<void> }> {
+export function makeByteReadableStreamFromFile(filename: string, delay = 0): ReadableStream<Uint8Array> {
 
-  let position = 0;
-  const fileHandle = await fs.open(filename, 'r');
+  // Create a Node.js Readable stream
+  const nodeReadable = createReadStream(filename);
 
-  return {
-    stream: new ReadableStream({
-      type: 'bytes',
-
-      async pull(controller) {
-
-        // @ts-ignore
-        const view = controller.byobRequest.view;
-
-        setTimeout(async () => {
-          try {
-            const {bytesRead} = await fileHandle.read(view, 0, view.byteLength, position);
-            if (bytesRead === 0) {
-              await fileHandle.close();
-              controller.close();
-              // @ts-ignore
-              controller.byobRequest.respond(0);
-            } else {
-              position += bytesRead;
-              // @ts-ignore
-              controller.byobRequest.respond(bytesRead);
-            }
-          } catch (err) {
-            controller.error(err);
-            await fileHandle.close();
-          }
-        }, delay);
-      },
-
-      cancel() {
-        return fileHandle.close();
-      },
-
-      autoAllocateChunkSize: 1024
-    }),
-    closeFile: () => {
-      return fileHandle.close();
+  // Create a Transform stream to introduce delay
+  const delayTransform = new Transform({
+    transform(chunk, encoding, callback) {
+      setTimeout(() => callback(null, chunk), delay);
     }
-  };
+  });
+
+  // Pipe through the delay transform
+  const delayedNodeStream = nodeReadable.pipe(delayTransform);
+
+  return makeByteReadableStreamFromNodeReadable(delayedNodeStream);
 }
 
 export class DelayedStream extends Readable {
