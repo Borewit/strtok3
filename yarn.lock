@@ -2359,6 +2359,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-readable-to-web-readable-stream@npm:^0.4.2":
+  version: 0.4.2
+  resolution: "node-readable-to-web-readable-stream@npm:0.4.2"
+  checksum: 10c0/8c3d09cac51c5f886e1636fa2a5404d664245c8bdc9a65e102552894963ed1b27207d5b94de59e37045d81cb9e8970cf79e561006df7ee8821cb761e728b3a80
+  languageName: node
+  linkType: hard
+
 "nopt@npm:^7.0.0, nopt@npm:^7.2.1":
   version: 7.2.1
   resolution: "nopt@npm:7.2.1"
@@ -3136,6 +3143,7 @@ __metadata:
     chai-as-promised: "npm:^8.0.1"
     del-cli: "npm:^6.0.0"
     mocha: "npm:^11.1.0"
+    node-readable-to-web-readable-stream: "npm:^0.4.2"
     peek-readable: "npm:^7.0.0"
     remark-cli: "npm:^12.0.1"
     remark-preset-lint-recommended: "npm:^7.0.1"
