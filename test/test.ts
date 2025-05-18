@@ -8,6 +8,7 @@ import * as Token from 'token-types';
 import { assert, expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import {
+  fromBlob,
   fromBuffer,
   fromFile,
   fromStream,
@@ -30,6 +31,8 @@ use(chaiAsPromised);
 const __dirname = dirname(fileURLToPath(import .meta.url));
 
 const {describe, it} = mocha;
+
+const [nodeMajorVersion] = process.versions.node.split('.').map(Number);
 
 interface ITokenizerTest {
   name: string;
@@ -99,10 +102,22 @@ describe('Matrix tests', () => {
       abortable: false,
       randomRead: true
     }, {
-      name: 'fromBuffer()',
+      abortable: false,
+      hasFileInfo: true,
       loadTokenizer: async testFile => {
         const data = await fs.readFile(Path.join(__dirname, 'resources', testFile));
         return fromBuffer(data);
+      },
+      name: 'fromBuffer()',
+      randomRead: true
+    }, {
+      name: 'fromBlob()',
+      loadTokenizer: async testFile => {
+        const path = Path.join(__dirname, 'resources', testFile);
+        const blob = nodeMajorVersion >= 20 ?
+          await (await import('node:fs')).openAsBlob(path) :
+          new Blob([await fs.readFile(path)]);
+        return fromBlob(blob);
       },
       hasFileInfo: true,
       abortable: false,
