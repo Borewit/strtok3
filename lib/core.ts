@@ -4,6 +4,7 @@ import { StreamReader, makeWebStreamReader, type AnyWebByteStream } from './stre
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
 import type { ITokenizerOptions } from './types.js';
+import { BlobTokenizer } from './BlobTokenizer.js';
 
 export { EndOfStreamError, AbortError, type AnyWebByteStream } from './stream/index.js';
 export type { ITokenizer, IRandomAccessTokenizer, IFileInfo, IRandomAccessFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
@@ -58,4 +59,14 @@ export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerO
  */
 export function fromBuffer(uint8Array: Uint8Array, options?: ITokenizerOptions): BufferTokenizer {
   return new BufferTokenizer(uint8Array, options);
+}
+
+/**
+ * Construct ReadStreamTokenizer from given Blob.
+ * @param blob - Uint8Array to tokenize
+ * @param options - Tokenizer options
+ * @returns BufferTokenizer
+ */
+export function fromBlob(blob: Blob, options?: ITokenizerOptions): BlobTokenizer {
+  return new BlobTokenizer(blob, options);
 }
