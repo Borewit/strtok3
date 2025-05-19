@@ -8,10 +8,10 @@ import * as Token from 'token-types';
 import { assert, expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import {
+  fromBuffer,
+  fromFile,
   fromStream,
   fromWebStream,
-  fromFile,
-  fromBuffer,
   type ITokenizer,
   type IRandomAccessTokenizer
 } from '../lib/index.js';
@@ -81,9 +81,8 @@ describe('Matrix tests', () => {
     }, {
       name: 'fromBuffer()',
       loadTokenizer: async testFile => {
-        return fs.readFile(Path.join(__dirname, 'resources', testFile)).then(data => {
-          return fromBuffer(data);
-        });
+        const data = await fs.readFile(Path.join(__dirname, 'resources', testFile));
+        return fromBuffer(data);
       },
       hasFileInfo: true,
       abortable: false,
