@@ -1,5 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
-import { EndOfStreamError } from 'peek-readable';
+import { EndOfStreamError } from './stream/index.js';
 import type {IRandomAccessTokenizer, IRandomAccessFileInfo, IReadChunkOptions, ITokenizerOptions} from './types.js';
 import { type FileHandle, open as fsOpen } from 'node:fs/promises';
 

@@ -1,5 +1,5 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
-import { EndOfStreamError, type IStreamReader } from 'peek-readable';
+import { EndOfStreamError, type IStreamReader } from './stream/index.js';
 import type {IFileInfo, IReadChunkOptions, ITokenizerOptions} from './types.js';
 
 const maxBufferSize = 256000;

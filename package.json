@@ -52,8 +52,7 @@
     "url": "https://github.com/Borewit/strtok3/issues"
   },
   "dependencies": {
-    "@tokenizer/token": "^0.3.0",
-    "peek-readable": "^7.0.0"
+    "@tokenizer/token": "^0.3.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
