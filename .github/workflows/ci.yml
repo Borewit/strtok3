@@ -45,7 +45,7 @@ jobs:
             test/**/*.js.map
 
   test-nodejs:
-    name: "Test with Node.js (V8)"
+    name: "Test with Node.js"
     runs-on: ubuntu-latest
     needs: build
 
@@ -54,7 +54,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.x, 20.x, 22.x, 24.x]
 
     steps:
 
@@ -88,7 +88,7 @@ jobs:
           parallel: true
 
   test-bun:
-    name: "Test with Bun (JavaScriptCore)"
+    name: "Test with Bun"
     runs-on: ubuntu-latest
     needs: build
 
