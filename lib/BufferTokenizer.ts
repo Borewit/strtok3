@@ -1,5 +1,5 @@
 import type {ITokenizerOptions, IReadChunkOptions, IRandomAccessFileInfo, IRandomAccessTokenizer} from './types.js';
-import { EndOfStreamError } from 'peek-readable';
+import { EndOfStreamError } from './stream/index.js';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 
 export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessTokenizer {

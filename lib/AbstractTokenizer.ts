@@ -1,6 +1,6 @@
 import type { ITokenizer, IFileInfo, IReadChunkOptions, OnClose, ITokenizerOptions } from './types.js';
 import type { IGetToken, IToken } from '@tokenizer/token';
-import { EndOfStreamError } from 'peek-readable';
+import { EndOfStreamError } from './stream/index.js';
 
 interface INormalizedReadChunkOptions extends IReadChunkOptions {
   length: number;
