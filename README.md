@@ -361,15 +361,7 @@ import { ReadableWebToNodeStream } from 'readable-web-to-node-stream';
 
 ## Dependencies
 
-The diagram below illustrates the primary dependencies of `strtok3`:
-
-```mermaid
-graph TD;
-  S(strtok3)-->P(peek-readable)
-  S(strtok3)-->TO("@tokenizer/token")
-```
- 
-- [peek-readable](https://github.com/Borewit/peek-readable): Manages reading operations with peeking capabilities, allowing data to be previewed without advancing the read pointer.
+Dependencies:
 - [@tokenizer/token](https://github.com/Borewit/tokenizer-token): Provides token definitions and utilities used by `strtok3` for interpreting binary data.
 
 ## Licence
