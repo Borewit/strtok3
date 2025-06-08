@@ -1110,8 +1110,15 @@ describe('fromStream with mayBeLess flag', () => {
             const streamReader = factory.fromString('abcdefg');
 
             const buf = new Uint8Array(0);
-            const bytesRead = await streamReader.read(buf.subarray(0, 0));
+            const bytesRead = await streamReader.read(buf);
             assert.strictEqual(bytesRead, 0, 'Should return');
+          });
+
+          it('should not throw an end-of-stream-error when mayBeLess=true', async () => {
+            const streamReader = factory.fromString('');
+            const buf = new Uint8Array(1);
+            const bytesRead = await streamReader.read(buf, true);
+            assert.strictEqual(bytesRead, 0, 'Expect 0 byte read');
           });
 
           it('read from a streamed data chunk', async () => {

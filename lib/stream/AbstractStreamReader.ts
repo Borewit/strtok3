@@ -55,7 +55,7 @@ export abstract class AbstractStreamReader implements IStreamReader {
     if (!this.endOfStream) {
       bytesRead += await this.readRemainderFromStream(buffer.subarray(bytesRead), mayBeLess);
     }
-    if (bytesRead === 0) {
+    if (bytesRead === 0 && !mayBeLess) {
       throw new EndOfStreamError();
     }
     return bytesRead;

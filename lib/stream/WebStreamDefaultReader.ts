@@ -55,7 +55,7 @@ export class WebStreamDefaultReader extends AbstractStreamReader {
       }
     }
 
-    if (totalBytesRead === 0 && this.endOfStream) {
+    if (!mayBeLess && totalBytesRead === 0 && this.endOfStream) {
       throw new EndOfStreamError();
     }
 
