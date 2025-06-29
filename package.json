@@ -55,7 +55,7 @@
     "@tokenizer/token": "^0.3.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "2.0.6",
     "@types/chai": "^5.2.2",
     "@types/chai-as-promised": "^8.0.2",
     "@types/debug": "^4.1.12",
