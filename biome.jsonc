@@ -1,8 +1,6 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.3/schema.json",
-	"organizeImports": {
-		"enabled": false
-	},
+	"$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "off" } } },
 	"formatter": {
 		"enabled": false
 	},
@@ -21,7 +19,21 @@
 				"noEmptyBlockStatements": "error",
 				"useErrorMessage": "error"
 			},
-			"nursery":{
+			"nursery": {},
+			"style": {
+				"useConsistentBuiltinInstantiation": "error",
+				"useThrowNewError": "error",
+				"useThrowOnlyError": "error",
+				"noParameterAssign": "error",
+				"useAsConstAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error",
 				"noRestrictedImports": {
 					"level": "error",
 					"options": {
@@ -29,29 +41,26 @@
 							"node:buffer": "Use Uint8Array instead of Buffer"
 						}
 					}
-				}},
-			"style":{
-				"useConsistentBuiltinInstantiation": "error",
-				"useThrowNewError": "error",
-				"useThrowOnlyError": "error"
+				}
 			}
 		}
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"ignore": [
-			"./coverage",
-			"./yarn",
-			"./.pnp.*",
-			"./lib/**/*.d.ts",
-			"./lib/**/*.js",
-			"./test/**/*.d.ts",
-			"./test/**/*.js"
+		"includes": [
+			"**",
+			"!coverage",
+			"!yarn",
+			"!.pnp.*",
+			"!lib/**/*.d.ts",
+			"!lib/**/*.js",
+			"!test/**/*.d.ts",
+			"!test/**/*.js"
 		]
 	},
 	"overrides": [
 		{
-			"include": ["./test/**/*", "./lib/index.ts", "./lib/FileTokenizer.ts"],
+			"includes": ["test/**/*", "lib/index.ts", "lib/FileTokenizer.ts"],
 			"linter": {
 				"rules": {
 					"correctness": {

@@ -9,7 +9,7 @@ export function makeByteReadableStreamFromFile(filename: string, delay = 0): Rea
 
   // Create a Transform stream to introduce delay
   const delayTransform = new Transform({
-    transform(chunk, encoding, callback) {
+    transform(chunk, _encoding, callback) {
       setTimeout(() => callback(null, chunk), delay);
     }
   });
