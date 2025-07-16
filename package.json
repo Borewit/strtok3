@@ -16,6 +16,7 @@
     "compile-test": "tsc -p test",
     "compile": "yarn run compile-src && yarn run compile-test",
     "build": "yarn run clean && yarn run compile",
+    "prepublishOnly": "yarn run build",
     "eslint": "eslint lib test",
     "lint:md": "remark -u preset-lint-recommended .",
     "lint:ts": "biome check",
