@@ -3146,7 +3146,7 @@ __metadata:
     node-readable-to-web-readable-stream: "npm:^0.4.2"
     remark-cli: "npm:^12.0.1"
     remark-preset-lint-recommended: "npm:^7.0.1"
-    token-types: "npm:^6.0.3"
+    token-types: "npm:^6.0.4"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^5.8.3"
     uint8array-extras: "npm:^1.4.0"
@@ -3228,13 +3228,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"token-types@npm:^6.0.3":
-  version: 6.0.3
-  resolution: "token-types@npm:6.0.3"
+"token-types@npm:^6.0.4":
+  version: 6.0.4
+  resolution: "token-types@npm:6.0.4"
   dependencies:
     "@tokenizer/token": "npm:^0.3.0"
     ieee754: "npm:^1.2.1"
-  checksum: 10c0/9fbd60754329cef6a793a81e62cb81880a52619b05c3ee96bb8b0f698e8f515c0e3d3159fc3b9cdec55271b6b839cba63cd6d387be4b4f63c1e4f222eb34a858
+  checksum: 10c0/09bac2346a48d5172201e87e967753c7df25ee0f762401932476fe2930f028212dbdc8a17507f03901e148a9f8d9a060001d15ce88bef75ad66c33f9bf3d0310
   languageName: node
   linkType: hard
 
