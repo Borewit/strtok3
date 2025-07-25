@@ -12,7 +12,7 @@
   },
   "scripts": {
     "clean": "del-cli 'lib/**/*.js' 'lib/**/*.js.map' 'lib/**/*.d.ts' 'test/**/*.js' 'test/**/*.js.map'",
-    "compile-src": "tsc -p lib",
+    "compile-src": "tsc -p lib  --sourceMap false",
     "compile-test": "tsc -p test",
     "compile": "yarn run compile-src && yarn run compile-test",
     "build": "yarn run clean && yarn run compile",
