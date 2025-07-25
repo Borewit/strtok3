@@ -75,7 +75,7 @@ export class SourceStream extends Readable {
 
   private readonly buf: Uint8Array;
 
-  constructor(private str = '', private delay = 0) {
+  constructor(str = '', private delay = 0) {
     super();
 
     this.buf = new TextEncoder().encode(str);
