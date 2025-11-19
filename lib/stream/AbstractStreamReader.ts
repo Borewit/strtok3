@@ -1,3 +1,4 @@
+import type { OnClose } from '../types.js';
 import { AbortError, EndOfStreamError } from './Errors.js';
 
 export interface IStreamReader {
@@ -29,8 +30,11 @@ export interface IStreamReader {
 }
 
 export abstract class AbstractStreamReader implements IStreamReader {
+  protected closed = false;
   protected endOfStream = false;
   protected interrupted = false;
+
+  public constructor(protected options: { onClose?: OnClose } = {}) {}
 
   /**
    * Store peeked data
@@ -116,7 +120,16 @@ export abstract class AbstractStreamReader implements IStreamReader {
   /**
    * abort synchronous operations
    */
-  public abstract close(): Promise<void>;
+  public async close(): Promise<void> {
+    if (this.closed) {
+      return;
+    }
+    this.closed = true;
+
+    if (this.options.onClose) {
+      await this.options.onClose();
+    }
+  }
 
   /**
    * Abort any active asynchronous operation are active, abort those before they may have completed.

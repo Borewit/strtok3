@@ -1,3 +1,4 @@
+import type { OnClose } from '../types.js';
 import { AbstractStreamReader } from './AbstractStreamReader.js';
 
 interface WebStreamByteReader {
@@ -10,8 +11,11 @@ interface WebStreamByteReader {
 }
 
 export abstract class WebStreamReader extends AbstractStreamReader {
-  public constructor(protected reader: WebStreamByteReader) {
-    super();
+  public constructor(
+    protected reader: WebStreamByteReader,
+    options?: { onClose?: OnClose }
+  ) {
+    super(options);
   }
 
   /**
@@ -27,6 +31,9 @@ export abstract class WebStreamReader extends AbstractStreamReader {
   }
 
   public async close(): Promise<void> {
-    this.reader.releaseLock();
+    if (!this.closed) {
+      this.reader.releaseLock();
+    }
+    return super.close();
   }
 }
