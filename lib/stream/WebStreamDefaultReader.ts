@@ -1,11 +1,15 @@
+import type { OnClose } from '../types.js';
 import { AbstractStreamReader } from './AbstractStreamReader.js';
 import { EndOfStreamError } from './Errors.js';
 
 export class WebStreamDefaultReader extends AbstractStreamReader {
   private buffer: Uint8Array | null = null; // Internal buffer to store excess data
 
-  public constructor(private reader: ReadableStreamDefaultReader<Uint8Array>) {
-    super();
+  public constructor(
+    private reader: ReadableStreamDefaultReader<Uint8Array>,
+    options?: { onClose?: OnClose }
+  ) {
+    super(options);
   }
 
   /**
@@ -68,7 +72,7 @@ export class WebStreamDefaultReader extends AbstractStreamReader {
     return this.reader.cancel();
   }
 
-  public async close(): Promise<void> {
+  protected async closeResource(): Promise<void> {
     try {
       await this.abort();
     } finally {
