@@ -1,9 +1,10 @@
 import { AbstractStreamReader } from "./AbstractStreamReader.js";
+import type { OnClose } from "../types.js";
 
 export abstract class WebStreamReader extends AbstractStreamReader {
 
-  public constructor(protected reader: ReadableStreamDefaultReader | ReadableStreamBYOBReader) {
-    super();
+  public constructor(protected reader: ReadableStreamDefaultReader | ReadableStreamBYOBReader, options?: { onClose?: OnClose }) {
+    super(options);
   }
 
   /**
@@ -19,6 +20,9 @@ export abstract class WebStreamReader extends AbstractStreamReader {
   }
 
   public async close(): Promise<void> {
-    this.reader.releaseLock();
+    if(!this.closed) {
+      this.reader.releaseLock();
+    }
+    return super.close();
   }
 }

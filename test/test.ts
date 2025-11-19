@@ -1510,3 +1510,24 @@ it('should release stream after close', async () => {
   await webStreamTokenizer.close();
   assert.isFalse(fileStream.locked, 'stream is unlocked after closing tokenizer');
 });
+
+it('should call onClose handler for WebStreamReader', async () => {
+  let closed = false;
+
+  const onClose = async () => {
+    closed = true;
+  };
+
+  const readableStream = stringToReadableStream('abc', true);
+  assert.isFalse(readableStream.locked, 'stream is unlocked before initializing tokenizer');
+
+  const webStreamReader = makeWebStreamReader(readableStream, { onClose });
+
+  assert.isTrue(readableStream.locked, 'stream is locked after initializing the reader');
+  assert.isFalse(closed, 'onClose should not yet have been called');
+
+  await webStreamReader.close();
+
+  assert.isTrue(closed, 'onClose handler should be called when closing reader');
+  assert.isFalse(readableStream.locked, 'stream should be unlocked after onClose');
+});

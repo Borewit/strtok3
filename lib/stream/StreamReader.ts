@@ -2,6 +2,7 @@ import type { Readable } from 'node:stream';
 import { AbortError, } from './Errors.js';
 import { Deferred } from './Deferred.js';
 import { AbstractStreamReader } from "./AbstractStreamReader.js";
+import type { OnClose } from "../types.js";
 
 interface IReadRequest {
   buffer: Uint8Array,
@@ -20,8 +21,8 @@ export class StreamReader extends AbstractStreamReader {
    */
   private deferred: Deferred<number> | null = null;
 
-  public constructor(private s: Readable) {
-    super();
+  public constructor(private s: Readable, options?: { onClose?: OnClose }) {
+    super(options);
     if (!s.read || !s.once) {
       throw new Error('Expected an instance of stream.Readable');
     }
@@ -94,6 +95,9 @@ export class StreamReader extends AbstractStreamReader {
   }
 
   async close(): Promise<void> {
-    return this.abort();
+    if(!this.closed) {
+      await this.abort();
+      return super.close();
+    }
   }
 }
