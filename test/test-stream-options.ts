@@ -13,6 +13,7 @@ import {
   type ITokenizerOptions
 } from '../lib/core.js';
 import { fromFile } from '../lib/index.js';
+import { type IStreamReader, makeWebStreamReader, StreamReader } from '../lib/stream/index.js';
 
 const factories: { name: string; make: (options: ITokenizerOptions) => ITokenizer }[] = [
   {
@@ -48,11 +49,28 @@ const factories: { name: string; make: (options: ITokenizerOptions) => ITokenize
   }
 ];
 
-describe('Single-shot tokenizer close', () => {
+describe('Single-shot tokenizer and reader close', () => {
   const closeFactories: {
     name: string;
-    make: (options: ITokenizerOptions) => ITokenizer | Promise<ITokenizer>;
+    make: (options: ITokenizerOptions) => ITokenizer | IStreamReader | Promise<ITokenizer>;
   }[] = [
+    {
+      name: 'Node reader',
+      make: options =>
+        new StreamReader(
+          new Readable({
+            read() {
+              /* Keep the source open until explicit cleanup. */
+            }
+          }),
+          options
+        )
+    },
+    { name: 'default web reader', make: options => makeWebStreamReader(new ReadableStream<Uint8Array>(), options) },
+    {
+      name: 'BYOB web reader',
+      make: options => makeWebStreamReader(new ReadableStream<Uint8Array>({ type: 'bytes' }), options)
+    },
     { name: 'buffer', make: options => fromBuffer(Uint8Array.of(42), options) },
     { name: 'Blob', make: options => fromBlob(new Blob([Uint8Array.of(42)]), options) },
     { name: 'file', make: options => fromFile(fileURLToPath(new URL('resources/test3.dat', import.meta.url)), options) }
@@ -107,6 +125,7 @@ describe('Single-shot tokenizer close', () => {
         });
         const first = tokenizer.close();
         const second = tokenizer.close();
+        assert.strictEqual(first, second);
         try {
           await entered;
           // Let any duplicate callback invocation enter before releasing the first.
@@ -118,6 +137,18 @@ describe('Single-shot tokenizer close', () => {
           await tokenizer.close();
         }
         assert.strictEqual(calls, 1);
+      });
+
+      it('allows a callback to observe the same close promise without starting cleanup again', async () => {
+        let observed: Promise<void> | undefined;
+        const tokenizer = await factory.make({
+          onClose: async () => {
+            observed = tokenizer.close();
+          }
+        });
+        const first = tokenizer.close();
+        await first;
+        assert.strictEqual(observed, first);
       });
 
       for (const synchronous of [false, true]) {

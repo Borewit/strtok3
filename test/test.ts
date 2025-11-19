@@ -2034,8 +2034,17 @@ describe('fromStream with mayBeLess flag', () => {
           throw error;
         }
       });
-      const tokenizer = fromWebStream(stream);
-      await nodeAssert.rejects(tokenizer.close(), error);
+      let callbacks = 0;
+      const reader = makeWebStreamReader(stream, {
+        onClose: async () => {
+          callbacks++;
+        }
+      });
+      const first = reader.close();
+      assert.strictEqual(first, reader.close());
+      await nodeAssert.rejects(first, caught => caught === error);
+      await nodeAssert.rejects(reader.close(), caught => caught === error);
+      assert.strictEqual(callbacks, 0, 'failed cleanup does not invoke the callback');
       assert.strictEqual(stream.locked, false);
     });
 

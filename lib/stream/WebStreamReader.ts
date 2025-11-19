@@ -1,3 +1,4 @@
+import type { OnClose } from '../types.js';
 import { AbstractStreamReader } from './AbstractStreamReader.js';
 
 interface WebStreamByteReader {
@@ -10,8 +11,11 @@ interface WebStreamByteReader {
 }
 
 export abstract class WebStreamReader extends AbstractStreamReader {
-  public constructor(protected reader: WebStreamByteReader) {
-    super();
+  public constructor(
+    protected reader: WebStreamByteReader,
+    options?: { onClose?: OnClose }
+  ) {
+    super(options);
   }
 
   /**
@@ -22,11 +26,12 @@ export abstract class WebStreamReader extends AbstractStreamReader {
    */
   protected abstract readFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number>;
 
-  public async abort(): Promise<void> {
-    return this.close();
-  }
+  private released = false;
 
-  public async close(): Promise<void> {
-    this.reader.releaseLock();
+  public async abort(): Promise<void> {
+    if (!this.released) {
+      this.reader.releaseLock();
+      this.released = true;
+    }
   }
 }

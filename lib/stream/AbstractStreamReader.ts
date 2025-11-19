@@ -1,3 +1,4 @@
+import type { OnClose } from '../types.js';
 import { AbortError, EndOfStreamError } from './Errors.js';
 
 export interface IStreamReader {
@@ -31,8 +32,14 @@ export interface IStreamReader {
 }
 
 export abstract class AbstractStreamReader implements IStreamReader {
+  private closePromise?: Promise<void>;
+  private readonly onCloseCallback?: OnClose;
   protected endOfStream = false;
   protected interrupted = false;
+
+  public constructor(options?: { onClose?: OnClose }) {
+    this.onCloseCallback = options?.onClose;
+  }
 
   /**
    * Store peeked data
@@ -115,10 +122,19 @@ export abstract class AbstractStreamReader implements IStreamReader {
    */
   protected abstract readFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number>;
 
-  /**
-   * abort synchronous operations
-   */
-  public abstract close(): Promise<void>;
+  /** Share resource cleanup, callback completion and failures across close calls. */
+  public close(): Promise<void> {
+    this.closePromise ??= Promise.resolve().then(async () => {
+      await this.closeResource();
+      await this.onCloseCallback?.();
+    });
+    return this.closePromise;
+  }
+
+  /** Backend cleanup completes before the optional close callback. */
+  protected closeResource(): Promise<void> {
+    return this.abort();
+  }
 
   /**
    * Abort any active asynchronous operation are active, abort those before they may have completed.
