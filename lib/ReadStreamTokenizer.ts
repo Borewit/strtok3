@@ -86,8 +86,13 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     return bytesRead;
   }
 
+  /**
+   * @param length Number of bytes to ignore. Must be ≥ 0.
+   */
   public async ignore(length: number): Promise<number> {
-    // debug(`ignore ${this.position}...${this.position + length - 1}`);
+    if (length < 0) {
+      throw new RangeError('ignore length must be ≥ 0 bytes');
+    }
     const bufSize = Math.min(maxBufferSize, length);
     const buf = new Uint8Array(bufSize);
     let totBytesRead = 0;

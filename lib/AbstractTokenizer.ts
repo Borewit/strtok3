@@ -110,10 +110,13 @@ export abstract class AbstractTokenizer implements ITokenizer {
 
   /**
    * Ignore number of bytes, advances the pointer in under tokenizer-stream.
-   * @param length - Number of bytes to ignore
+   * @param length - Number of bytes to ignore.  Must be ≥ 0.
    * @return resolves the number of bytes ignored, equals length if this available, otherwise the number of bytes available
    */
   public async ignore(length: number): Promise<number> {
+    if (length < 0) {
+      throw new RangeError('ignore length must be ≥ 0 bytes');
+    }
     if (this.fileInfo.size !== undefined) {
       const bytesLeft = this.fileInfo.size - this.position;
       if (length > bytesLeft) {

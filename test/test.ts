@@ -804,6 +804,16 @@ describe('Matrix tests', () => {
           await tokenizer.close();
         });
 
+        it('should reject negative ignore length', async () => {
+          const tokenizer = await tokenizerType.loadTokenizer('test1.dat');
+          try {
+            await expect(tokenizer.ignore(-1)).to.be.rejectedWith(RangeError, 'ignore length must be ≥ 0 bytes');
+            assert.strictEqual(tokenizer.position, 0, 'position should remain unchanged');
+          } finally {
+            await tokenizer.close();
+          }
+        });
+
         describe('End-Of-File exception behaviour', () => {
 
           it('should not throw an Error if we read exactly until the end of the file', async () => {
