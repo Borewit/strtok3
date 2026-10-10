@@ -147,6 +147,14 @@ export type OnClose = () => Promise<void>;
 
 export interface ITokenizerOptions {
   /**
+   * Maximum bytes in a dynamically sized tokenizer buffer or stream lookahead span.
+   * Set once when creating the tokenizer; applies to subsequent reads and peeks.
+   * Disabled by default (Infinity). Must be a positive safe integer or Infinity.
+   * Does not limit total process memory, caller-owned buffers, or decoded token values.
+   */
+  maxBufferSize?: number;
+
+  /**
    * Pass additional file information to the tokenizer
    */
   fileInfo?: IFileInfo;

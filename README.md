@@ -141,12 +141,13 @@ parse();
 Creates a [*tokenizer*](#tokenizer-object) from a local file.
 
 ```ts
-function fromFile(sourceFilePath: string): Promise<FileTokenizer>
+function fromFile(sourceFilePath: string, options?: ITokenizerOptions): Promise<FileTokenizer>
 ```  
 
 | Parameter      | Type     | Description                |
 |----------------|----------|----------------------------|
 | sourceFilePath | `string` | Path to file to read from  |
+| options | [ITokenizerOptions](#itokenizeroptions-interface) | Optional tokenizer options |
 
 > [!NOTE]
 > - Only available for Node.js engines
@@ -316,13 +317,13 @@ Returns a `Promise<Value>` resolving to the decoded token value. Rejects with `E
 Peek a *token* from the [*tokenizer*](#tokenizer-object).
 
 ```ts
-peekToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value>
+peekToken<Value>(token: IGetToken<Value>, position: number | null = this.position): Promise<Value>
 ```
 
 | Parameter  | Type                       | Description                                                                                                             |
 |------------|----------------------------|-------------------------------------------------------------------------------------------------------------------------|
 | token      | [IGetToken](#token-object) | Token to peek from the tokenizer-stream. |
-| position?  | number | Offset where to begin peeking. Defaults to `tokenizer.position` when omitted. |
+| position?  | number &#124; null | Offset where to begin peeking. Defaults to `tokenizer.position` when omitted or `null`. |
 
 Return a promise with the token value peeked from the [*tokenizer*](#tokenizer-object).
 
@@ -418,13 +419,47 @@ Sets the current byte offset without reading data.
 
 ### `ITokenizerOptions` interface
 
-Each attribute is optional:
+Set these options once when creating a tokenizer. The configured limit applies to subsequent
+reads and peeks for that tokenizer; no per-read limit is needed. Each attribute is optional:
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
+| maxBufferSize | number | Maximum bytes in a dynamically sized tokenizer buffer or stream lookahead span. Disabled by default (`Infinity`). Must be a positive safe integer or `Infinity`. |
 | fileInfo | [IFileInfo](#ifileinfo-interface) | Additional metadata about the input |
 | onClose | `() => Promise<void>` | Asynchronous callback invoked when a buffer, blob, or file tokenizer is closed |
 | abortSignal | [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) | Signal used to abort asynchronous stream operations |
+
+When `maxBufferSize` is configured, `readToken()` and `peekToken()` reject oversized buffers with `BufferSizeError`
+before allocating or consuming input. The error exposes `requestedSize` and `maxBufferSize`.
+Token lengths and positions must be non-negative safe integers. When the input size is known,
+a token extending beyond the input rejects with `EndOfStreamError` before allocation.
+
+For streams, the lookahead limit includes bytes between the current position and the requested
+peek position. `mayBeLess: true` does not bypass this limit. With a finite cap, reads into
+caller-provided buffers, Blob reads and `ignore()` use bounded chunks where internal buffers
+are needed, so their total requested length may exceed `maxBufferSize`.
+
+This limit does not cap total process memory, caller-owned input/output buffers, or allocations
+inside a token's `get()` method. Stream sources may also supply chunks larger than this limit.
+The cap is opt-in to preserve existing buffer sizes. Applications parsing untrusted input should
+set a finite limit, for example 64 MiB. Omit the option or set it to `Infinity` to disable the cap.
+
+```js
+import { BufferSizeError, fromFile } from 'strtok3';
+
+const tokenizer = await fromFile('somefile.bin', { maxBufferSize: 64 * 1024 * 1024 });
+try {
+  // Read or peek tokens here.
+} catch (error) {
+  if (error instanceof BufferSizeError) {
+    console.error(`Requested ${error.requestedSize} bytes; limit is ${error.maxBufferSize}`);
+  } else {
+    throw error;
+  }
+} finally {
+  await tokenizer.close();
+}
+```
 
 ### `IReadChunkOptions` interface
 

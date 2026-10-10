@@ -25,12 +25,9 @@ export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @returns {Promise<number>}
    */
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-    if (options?.position) {
-      this.position = options.position;
-    }
-
-    const bytesRead = await this.peekBuffer(uint8Array, options);
-    this.position += bytesRead;
+    const normOptions = this.normalizeOptions(uint8Array, options);
+    const bytesRead = await this.peekBuffer(uint8Array, normOptions);
+    this.position = normOptions.position + bytesRead;
     return bytesRead;
   }
 
@@ -43,12 +40,17 @@ export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTok
   public async peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(buffer, options);
 
-    const bytes2read = Math.min(this.blob.size - normOptions.position, normOptions.length);
+    const bytes2read = Math.max(0, Math.min(this.blob.size - normOptions.position, normOptions.length));
     if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
     }
-    const arrayBuffer = await this.blob.slice(normOptions.position, normOptions.position + bytes2read).arrayBuffer();
-    buffer.set(new Uint8Array(arrayBuffer));
+    for (let offset = 0; offset < bytes2read; ) {
+      const chunkLength = Math.min(this.maxBufferSize, bytes2read - offset);
+      const position = normOptions.position + offset;
+      const arrayBuffer = await this.blob.slice(position, position + chunkLength).arrayBuffer();
+      buffer.set(new Uint8Array(arrayBuffer), offset);
+      offset += chunkLength;
+    }
     return bytes2read;
   }
 
