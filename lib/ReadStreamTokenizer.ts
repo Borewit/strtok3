@@ -2,7 +2,7 @@ import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError, type IStreamReader } from './stream/index.js';
 import type { IFileInfo, IReadChunkOptions, ITokenizerOptions } from './types.js';
 
-const maxBufferSize = 256000;
+const ignoreChunkSize = 256000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
   public fileInfo: IFileInfo;
@@ -39,9 +39,20 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     if (normOptions.length === 0) {
       return 0;
     }
-    const bytesRead = await this.streamReader.read(uint8Array.subarray(0, normOptions.length), normOptions.mayBeLess);
-    this.position += bytesRead;
-    if ((!options || !options.mayBeLess) && bytesRead < normOptions.length) {
+    let bytesRead = 0;
+    while (bytesRead < normOptions.length) {
+      const chunkLength = Math.min(this.maxBufferSize, normOptions.length - bytesRead);
+      const count = await this.streamReader.read(
+        uint8Array.subarray(bytesRead, bytesRead + chunkLength),
+        normOptions.mayBeLess
+      );
+      bytesRead += count;
+      this.position += count;
+      if (count < chunkLength) {
+        break;
+      }
+    }
+    if (!normOptions.mayBeLess && bytesRead < normOptions.length) {
       throw new EndOfStreamError();
     }
     return bytesRead;
@@ -55,6 +66,11 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(uint8Array, options);
+    if (normOptions.length === 0) {
+      return 0;
+    }
+    const lookaheadSize = normOptions.length + normOptions.position - this.position;
+    this.validateBufferSize(lookaheadSize);
     let bytesRead = 0;
 
     if (normOptions.position) {
@@ -62,8 +78,9 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       if (skipBytes > 0) {
         const skipBuffer = new Uint8Array(normOptions.length + skipBytes);
         bytesRead = await this.peekBuffer(skipBuffer, { mayBeLess: normOptions.mayBeLess });
-        uint8Array.set(skipBuffer.subarray(skipBytes));
-        return bytesRead - skipBytes;
+        const bytesPeeked = Math.max(0, bytesRead - skipBytes);
+        uint8Array.set(skipBuffer.subarray(skipBytes, skipBytes + bytesPeeked));
+        return bytesPeeked;
       }
       if (skipBytes < 0) {
         throw new Error('Cannot peek from a negative offset in a stream');
@@ -94,7 +111,9 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     if (length < 0) {
       throw new RangeError('ignore length must be ≥ 0 bytes');
     }
-    const bufSize = Math.min(maxBufferSize, length);
+    this.validateLength(length, 'ignore length');
+    this.validateLength(this.position + length, 'end position');
+    const bufSize = Math.min(ignoreChunkSize, this.maxBufferSize, length);
     const buf = new Uint8Array(bufSize);
     let totBytesRead = 0;
     while (totBytesRead < length) {

@@ -25,12 +25,9 @@ export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessT
    * @returns {Promise<number>}
    */
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-    if (options?.position) {
-      this.position = options.position;
-    }
-
-    const bytesRead = await this.peekBuffer(uint8Array, options);
-    this.position += bytesRead;
+    const normOptions = this.normalizeOptions(uint8Array, options);
+    const bytesRead = await this.peekBuffer(uint8Array, normOptions);
+    this.position = normOptions.position + bytesRead;
     return bytesRead;
   }
 

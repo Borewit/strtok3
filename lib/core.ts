@@ -1,5 +1,6 @@
 import type { Readable } from 'node:stream';
 import { BlobTokenizer } from './BlobTokenizer.js';
+import { getMaxBufferSize } from './BufferSizeError.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
 import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { type AnyWebByteStream, makeWebStreamReader, StreamReader } from './stream/index.js';
@@ -7,6 +8,7 @@ import type { ITokenizerOptions } from './types.js';
 
 export type { IGetToken, IToken } from '@tokenizer/token';
 export { AbstractTokenizer } from './AbstractTokenizer.js';
+export { BufferSizeError } from './BufferSizeError.js';
 export { AbortError, type AnyWebByteStream, EndOfStreamError } from './stream/index.js';
 export type {
   IFileInfo,
@@ -26,6 +28,7 @@ export type {
  * @returns ReadStreamTokenizer
  */
 export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadStreamTokenizer {
+  getMaxBufferSize(options);
   const streamReader = new StreamReader(stream);
   const _options: ITokenizerOptions = options ?? {};
   const chainedClose = _options.onClose;
@@ -46,6 +49,7 @@ export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadS
  * @returns ReadStreamTokenizer
  */
 export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer {
+  getMaxBufferSize(options);
   const webStreamReader = makeWebStreamReader(webStream);
   const _options: ITokenizerOptions = options ?? {};
   const chainedClose = _options.onClose;

@@ -1,4 +1,5 @@
 import type { IGetToken, IToken } from '@tokenizer/token';
+import { BufferSizeError, getMaxBufferSize } from './BufferSizeError.js';
 import { EndOfStreamError } from './stream/index.js';
 import type { IFileInfo, IReadChunkOptions, ITokenizer, ITokenizerOptions, OnClose } from './types.js';
 
@@ -14,6 +15,7 @@ interface INormalizedReadChunkOptions extends IReadChunkOptions {
 export abstract class AbstractTokenizer implements ITokenizer {
   private onClose?: OnClose;
   private numBuffer = new Uint8Array(8);
+  protected readonly maxBufferSize: number;
 
   public abstract fileInfo: IFileInfo;
 
@@ -28,6 +30,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @protected
    */
   protected constructor(options?: ITokenizerOptions) {
+    this.maxBufferSize = getMaxBufferSize(options);
     this.onClose = options?.onClose;
     if (options?.abortSignal) {
       options.abortSignal.addEventListener('abort', () => {
@@ -61,6 +64,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @returns Promise with token data
    */
   public async readToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value> {
+    this.validateTokenRead(token.len, position);
     const uint8Array = new Uint8Array(token.len);
     const len = await this.readBuffer(uint8Array, { position });
     if (len < token.len) {
@@ -75,9 +79,11 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
    * @returns Promise with token data
    */
-  public async peekToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value> {
+  public async peekToken<Value>(token: IGetToken<Value>, position: number | null = this.position): Promise<Value> {
+    const peekPosition = position ?? this.position;
+    this.validateTokenRead(token.len, peekPosition, true);
     const uint8Array = new Uint8Array(token.len);
-    const len = await this.peekBuffer(uint8Array, { position });
+    const len = await this.peekBuffer(uint8Array, { position: peekPosition });
     if (len < token.len) {
       throw new EndOfStreamError();
     }
@@ -119,6 +125,8 @@ export abstract class AbstractTokenizer implements ITokenizer {
     if (length < 0) {
       throw new RangeError('ignore length must be ≥ 0 bytes');
     }
+    this.validateLength(length, 'ignore length');
+    this.validateLength(this.position + length, 'end position');
     if (this.fileInfo.size !== undefined) {
       const bytesLeft = this.fileInfo.size - this.position;
       if (length > bytesLeft) {
@@ -135,20 +143,77 @@ export abstract class AbstractTokenizer implements ITokenizer {
     await this.onClose?.();
   }
 
-  protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): INormalizedReadChunkOptions {
-    if (!this.supportsRandomAccess() && options && options.position !== undefined && options.position < this.position) {
+  /**
+   * Validate a byte length or position before using it in buffer calculations.
+   * @param value - Value that must be a non-negative safe integer
+   * @param name - Label used in the validation error
+   * @throws RangeError if the value is negative or not a safe integer
+   */
+  protected validateLength(value: number, name: string): void {
+    if (!Number.isSafeInteger(value) || value < 0) {
+      throw new RangeError(`${name} must be a non-negative safe integer`);
+    }
+  }
+
+  /**
+   * Validate a requested buffer size against the configured allocation limit.
+   * @param length - Requested buffer size in bytes
+   * @throws RangeError if the length is negative or not a safe integer
+   * @throws BufferSizeError if the length exceeds maxBufferSize
+   */
+  protected validateBufferSize(length: number): void {
+    this.validateLength(length, 'buffer length');
+    if (length > this.maxBufferSize) {
+      throw new BufferSizeError(length, this.maxBufferSize);
+    }
+  }
+
+  /**
+   * Validate a token request before allocating a buffer or consuming input.
+   * @param length - Token length in bytes
+   * @param position - Byte offset where the token starts
+   * @param peek - Whether to include skipped stream bytes in the lookahead limit
+   * @throws RangeError if a length or position is negative or not a safe integer
+   * @throws BufferSizeError if the token buffer or stream lookahead exceeds maxBufferSize
+   * @throws Error if a stream request starts before the current position
+   * @throws EndOfStreamError if the token extends beyond the known input size
+   */
+  private validateTokenRead(length: number, position: number, peek = false): void {
+    this.validateBufferSize(length);
+    this.validateLength(position, 'position');
+    this.validateLength(position + length, 'end position');
+    if (!this.supportsRandomAccess() && position < this.position) {
       throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
     }
+    if (peek && !this.supportsRandomAccess()) {
+      this.validateBufferSize(length + position - this.position);
+    }
+    if (this.fileInfo.size !== undefined && length > this.fileInfo.size - position) {
+      throw new EndOfStreamError();
+    }
+  }
 
-    return {
-      ...{
-        mayBeLess: false,
-        offset: 0,
-        length: uint8Array.length,
-        position: this.position
-      },
-      ...options
-    };
+  /**
+   * Apply defaults and validate buffer read or peek options.
+   * @param uint8Array - Target buffer whose length is the default read length
+   * @param options - Requested length, position and partial-read behavior
+   * @returns Validated options with an explicit length, position and mayBeLess flag
+   * @throws RangeError if a length or position is invalid, or the length exceeds the target buffer
+   * @throws Error if a stream request starts before the current position
+   */
+  protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): INormalizedReadChunkOptions {
+    const length = options?.length ?? uint8Array.length;
+    const position = options?.position ?? this.position;
+    this.validateLength(length, 'length');
+    this.validateLength(position, 'position');
+    this.validateLength(position + length, 'end position');
+    if (length > uint8Array.length) {
+      throw new RangeError('length must not exceed the target buffer length');
+    }
+    if (!this.supportsRandomAccess() && position < this.position) {
+      throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
+    }
+    return { length, position, mayBeLess: options?.mayBeLess ?? false };
   }
 
   public abort(): Promise<void> {

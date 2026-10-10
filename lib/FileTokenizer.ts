@@ -1,5 +1,6 @@
 import { type FileHandle, open as fsOpen } from 'node:fs/promises';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
+import { getMaxBufferSize } from './BufferSizeError.js';
 import { EndOfStreamError } from './stream/index.js';
 import type { IRandomAccessFileInfo, IRandomAccessTokenizer, IReadChunkOptions, ITokenizerOptions } from './types.js';
 
@@ -16,11 +17,21 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
   /**
    * Create tokenizer from provided file path
    * @param sourceFilePath File path
+   * @param options Tokenizer options
    */
-  static async fromFile(sourceFilePath: string): Promise<FileTokenizer> {
+  static async fromFile(sourceFilePath: string, options?: ITokenizerOptions): Promise<FileTokenizer> {
+    getMaxBufferSize(options);
     const fileHandle = await fsOpen(sourceFilePath, 'r');
-    const stat = await fileHandle.stat();
-    return new FileTokenizer(fileHandle, { fileInfo: { path: sourceFilePath, size: stat.size } });
+    try {
+      const stat = await fileHandle.stat();
+      return new FileTokenizer(fileHandle, {
+        ...options,
+        fileInfo: { ...options?.fileInfo, path: sourceFilePath, size: stat.size }
+      });
+    } catch (error) {
+      await fileHandle.close();
+      throw error;
+    }
   }
 
   protected constructor(
