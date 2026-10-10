@@ -1,50 +1,63 @@
-# Release Drafter template
-# Ref: https://github.com/marketplace/actions/release-drafter
+# Release Drafter v7 configuration
+# Ref: https://github.com/release-drafter/release-drafter/tree/v7#configuration
 
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
+tag-prefix: v
 categories:
-  - title: 💥 API Changes
-    labels:
-      - API change
-  - title: 🚀 Enhancements
-    labels:
-      - enhancement
-  - title: 🎨 Improvements
-    labels:
-      - improvement
+  # Infrastructure and development-only updates stay out of release notes.
+  - type: pre-exclude
+    when:
+      labels:
+        - DevOps
+        - dev-dependencies
+  - title: ⚠️ API Changes
+    exclusive: true
+    semver-increment: major
+    when:
+      label: API change
+  - title: ✨ Enhancements
+    exclusive: true
+    semver-increment: minor
+    when:
+      label: enhancement
+  - title: 🚀 Improvements
+    exclusive: true
+    when:
+      label: improvement
+  - title: 🔒 Security
+    exclusive: true
+    when:
+      labels:
+        - security
+        - vulnerability
   - title: 🐛 Bug Fixes
-    labels:
-      - bug
-  - title: 🔧 Under the hood
-    labels:
-      - debt
-  - title: ⬆️ Dependencies
-    labels:
-      - dependencies
-  - title: 📝 Documentation
-    labels:
-      - documentation
-exclude-labels:
-  - 'DevOps'
-  - dev-dependencies
+    exclusive: true
+    when:
+      label: bug
+  - title: 📚 Documentation
+    exclusive: true
+    when:
+      label: documentation
+  - title: 📦 Dependencies
+    exclusive: true
+    when:
+      label: dependencies
+  - title: 🛠️ Under the hood
+    exclusive: true
+    when:
+      label: technical debt
+  # Unlabeled changes still receive a patch version.
+  - type: version-resolver
+    semver-increment: patch
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
-change-title-escapes: '\<*_&' # You can add # and @ to disable mentions, and add ` to disable code blocks.
-version-resolver:
-  major:
-    labels:
-      - 'major'
-  minor:
-    labels:
-      - 'minor'
-  patch:
-    labels:
-      - 'patch'
-  default: patch
+change-title-escapes: '\<*_&'
 template: |
   ## Changes
 
   $CHANGES
+
+  [Full Changelog](https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...$RESOLVED_TAG)
 
   ## 📦 NPM release
   NPM release: [$REPOSITORY@$RESOLVED_VERSION](https://www.npmjs.com/package/$REPOSITORY/v/$RESOLVED_VERSION)

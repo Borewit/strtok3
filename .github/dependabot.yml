@@ -1,7 +1,7 @@
 version: 2
 updates:
 
-  # ECMAScript Module (ESM)
+  # npm/Yarn dependencies
   - package-ecosystem: npm
     directory: "/"
     schedule:
@@ -21,3 +21,14 @@ updates:
         dependency-type: "development"
         patterns:
           - "@types/*"
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      time: "06:00"
+    open-pull-requests-limit: 10
+    target-branch: "master"
+    labels:
+      - DevOps
