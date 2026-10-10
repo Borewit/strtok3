@@ -62,7 +62,7 @@
     "@types/chai-as-promised": "^8.0.2",
     "@types/debug": "^4.1.12",
     "@types/mocha": "^10.0.10",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.19.1",
     "c8": "^11.0.0",
     "chai": "^5.2.1",
     "chai-as-promised": "^8.0.2",
@@ -72,8 +72,8 @@
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.1",
     "token-types": "^6.1.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
     "uint8array-extras": "^1.4.0"
   },
   "keywords": [
@@ -90,5 +90,5 @@
     "stream",
     "streaming"
   ],
-  "packageManager": "yarn@4.9.2"
+  "packageManager": "yarn@4.18.1"
 }

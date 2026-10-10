@@ -40,8 +40,10 @@ Requires a modern browser, Node.js (V8) ≥ 18 engine or Bun (JavaScriptCore) �
 For TypeScript CommonJs backward compatibility, you can use [load-esm](https://github.com/Borewit/load-esm).
 
 > [!NOTE]
-> This module requires a [Node.js ≥ 16](https://nodejs.org/en/about/previous-releases) engine.
+> This module requires a [Node.js ≥ 18](https://nodejs.org/en/about/previous-releases) engine.
 > It can also be used in a browser environment when bundled with a module bundler.
+
+Running the TypeScript tests with `tsx` requires Node.js 18.19+ (18.x) or Node.js ≥ 20.6.0.
 
 ## Support the Project
 If you find this project useful and would like to support its development, consider sponsoring or contributing:
