@@ -65,7 +65,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["test/**/*", "lib/index.ts", "lib/FileTokenizer.ts"],
+			"includes": ["test/**/*", ".github/scripts/**/*", "lib/index.ts", "lib/FileTokenizer.ts"],
 			"linter": {
 				"rules": {
 					"correctness": {
