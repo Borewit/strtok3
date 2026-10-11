@@ -29,7 +29,6 @@ export interface IRandomAccessFileInfo extends IFileInfo {
 }
 
 export interface IReadChunkOptions {
-
   /**
    * Number of bytes to read.
    */
@@ -49,7 +48,6 @@ export interface IReadChunkOptions {
 }
 
 export interface IRandomAccessTokenizer extends ITokenizer {
-
   /**
    * Provide access to information of the underlying information stream or file.
    */
@@ -67,7 +65,6 @@ export interface IRandomAccessTokenizer extends ITokenizer {
  * The tokenizer-stream is an abstraction of a stream, file or Buffer.
  */
 export interface ITokenizer {
-
   /**
    * Provide access to information of the underlying information stream or file.
    */

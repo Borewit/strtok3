@@ -1,15 +1,22 @@
 import type { Readable } from 'node:stream';
-import { StreamReader, makeWebStreamReader, type AnyWebByteStream } from './stream/index.js';
-
-import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
-import { BufferTokenizer } from './BufferTokenizer.js';
-import type { ITokenizerOptions } from './types.js';
 import { BlobTokenizer } from './BlobTokenizer.js';
+import { BufferTokenizer } from './BufferTokenizer.js';
+import { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
+import { type AnyWebByteStream, makeWebStreamReader, StreamReader } from './stream/index.js';
+import type { ITokenizerOptions } from './types.js';
 
-export { EndOfStreamError, AbortError, type AnyWebByteStream } from './stream/index.js';
-export type { ITokenizer, IRandomAccessTokenizer, IFileInfo, IRandomAccessFileInfo, ITokenizerOptions, IReadChunkOptions, OnClose } from './types.js';
-export type { IToken, IGetToken } from '@tokenizer/token';
+export type { IGetToken, IToken } from '@tokenizer/token';
 export { AbstractTokenizer } from './AbstractTokenizer.js';
+export { AbortError, type AnyWebByteStream, EndOfStreamError } from './stream/index.js';
+export type {
+  IFileInfo,
+  IRandomAccessFileInfo,
+  IRandomAccessTokenizer,
+  IReadChunkOptions,
+  ITokenizer,
+  ITokenizerOptions,
+  OnClose
+} from './types.js';
 
 /**
  * Construct ReadStreamTokenizer from given Stream.
@@ -19,12 +26,12 @@ export { AbstractTokenizer } from './AbstractTokenizer.js';
  * @returns ReadStreamTokenizer
  */
 export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadStreamTokenizer {
-  const streamReader= new StreamReader(stream);
+  const streamReader = new StreamReader(stream);
   const _options: ITokenizerOptions = options ?? {};
   const chainedClose = _options.onClose;
   _options.onClose = async () => {
     await streamReader.close();
-    if(chainedClose) {
+    if (chainedClose) {
       return chainedClose();
     }
   };
@@ -39,12 +46,12 @@ export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadS
  * @returns ReadStreamTokenizer
  */
 export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer {
-  const webStreamReader= makeWebStreamReader(webStream);
+  const webStreamReader = makeWebStreamReader(webStream);
   const _options: ITokenizerOptions = options ?? {};
   const chainedClose = _options.onClose;
   _options.onClose = async () => {
     await webStreamReader.close();
-    if(chainedClose) {
+    if (chainedClose) {
       return chainedClose();
     }
   };

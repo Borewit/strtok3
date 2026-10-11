@@ -1,6 +1,6 @@
-import type { ITokenizer, IFileInfo, IReadChunkOptions, OnClose, ITokenizerOptions } from './types.js';
 import type { IGetToken, IToken } from '@tokenizer/token';
 import { EndOfStreamError } from './stream/index.js';
+import type { IFileInfo, IReadChunkOptions, ITokenizer, ITokenizerOptions, OnClose } from './types.js';
 
 interface INormalizedReadChunkOptions extends IReadChunkOptions {
   length: number;
@@ -12,7 +12,6 @@ interface INormalizedReadChunkOptions extends IReadChunkOptions {
  * Core tokenizer
  */
 export abstract class AbstractTokenizer implements ITokenizer {
-
   private onClose?: OnClose;
   private numBuffer = new Uint8Array(8);
 
@@ -22,7 +21,6 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * Tokenizer-stream position
    */
   public position = 0;
-
 
   /**
    * Constructor
@@ -34,7 +32,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
     if (options?.abortSignal) {
       options.abortSignal.addEventListener('abort', () => {
         this.abort();
-      })
+      });
     }
   }
 
@@ -64,9 +62,10 @@ export abstract class AbstractTokenizer implements ITokenizer {
    */
   public async readToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value> {
     const uint8Array = new Uint8Array(token.len);
-    const len = await this.readBuffer(uint8Array, {position});
-    if (len < token.len)
+    const len = await this.readBuffer(uint8Array, { position });
+    if (len < token.len) {
       throw new EndOfStreamError();
+    }
     return token.get(uint8Array, 0);
   }
 
@@ -78,9 +77,10 @@ export abstract class AbstractTokenizer implements ITokenizer {
    */
   public async peekToken<Value>(token: IGetToken<Value>, position: number = this.position): Promise<Value> {
     const uint8Array = new Uint8Array(token.len);
-    const len = await this.peekBuffer(uint8Array, {position});
-    if (len < token.len)
+    const len = await this.peekBuffer(uint8Array, { position });
+    if (len < token.len) {
       throw new EndOfStreamError();
+    }
     return token.get(uint8Array, 0);
   }
 
@@ -90,9 +90,10 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @returns Promise with number
    */
   public async readNumber(token: IToken<number>): Promise<number> {
-    const len = await this.readBuffer(this.numBuffer, {length: token.len});
-    if (len < token.len)
+    const len = await this.readBuffer(this.numBuffer, { length: token.len });
+    if (len < token.len) {
       throw new EndOfStreamError();
+    }
     return token.get(this.numBuffer, 0);
   }
 
@@ -102,9 +103,10 @@ export abstract class AbstractTokenizer implements ITokenizer {
    * @returns Promise with number
    */
   public async peekNumber(token: IToken<number>): Promise<number> {
-    const len = await this.peekBuffer(this.numBuffer, {length: token.len});
-    if (len < token.len)
+    const len = await this.peekBuffer(this.numBuffer, { length: token.len });
+    if (len < token.len) {
       throw new EndOfStreamError();
+    }
     return token.get(this.numBuffer, 0);
   }
 
@@ -134,7 +136,6 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   protected normalizeOptions(uint8Array: Uint8Array, options?: IReadChunkOptions): INormalizedReadChunkOptions {
-
     if (!this.supportsRandomAccess() && options && options.position !== undefined && options.position < this.position) {
       throw new Error('`options.position` must be equal or greater than `tokenizer.position`');
     }
@@ -145,7 +146,8 @@ export abstract class AbstractTokenizer implements ITokenizer {
         offset: 0,
         length: uint8Array.length,
         position: this.position
-      }, ...options
+      },
+      ...options
     };
   }
 

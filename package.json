@@ -21,13 +21,14 @@
     "lint:md": "remark -u preset-lint-recommended .",
     "lint:ts": "biome check",
     "lint": "yarn run lint:md && yarn run lint:ts",
-    "fix": "yarn run biome lint --write",
+    "fix": "yarn run lint:ts:fix",
     "test": "mocha",
     "bun:test": "bun run --bun test",
     "test-coverage": "c8 yarn run test",
     "send-codacy": "c8 report --reporter=text-lcov | codacy-coverage",
     "start": "yarn run compile && yarn run lint && yarn run cover-test",
-    "update-biome": "yarn add -D --exact @biomejs/biome && npx @biomejs/biome migrate --write"
+    "update-biome": "yarn add -D --exact @biomejs/biome && npx @biomejs/biome migrate --write",
+    "lint:ts:fix": "biome check --write"
   },
   "engines": {
     "node": ">=18"
@@ -57,7 +58,7 @@
     "@tokenizer/token": "^0.3.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.8",
+    "@biomejs/biome": "2.5.15",
     "@types/chai": "^5.2.2",
     "@types/chai-as-promised": "^8.0.2",
     "@types/debug": "^4.1.12",

@@ -1,5 +1,5 @@
+import { AbstractStreamReader } from './AbstractStreamReader.js';
 import { EndOfStreamError } from './Errors.js';
-import { AbstractStreamReader } from "./AbstractStreamReader.js";
 
 export class WebStreamDefaultReader extends AbstractStreamReader {
   private buffer: Uint8Array | null = null; // Internal buffer to store excess data
@@ -31,8 +31,9 @@ export class WebStreamDefaultReader extends AbstractStreamReader {
    * @protected Bytes read
    */
   protected async readFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number> {
-
-    if (buffer.length === 0) return 0;
+    if (buffer.length === 0) {
+      return 0;
+    }
 
     let totalBytesRead = 0;
 

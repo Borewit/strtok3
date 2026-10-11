@@ -23,7 +23,10 @@ function graph(manifest, lock) {
     if (!entries.has(source)) {
       continue;
     }
-    for (const [from, to] of [[source, descriptor], [descriptor, source]]) {
+    for (const [from, to] of [
+      [source, descriptor],
+      [descriptor, source]
+    ]) {
       if (!companions.has(from)) {
         companions.set(from, []);
       }
@@ -66,16 +69,16 @@ function graph(manifest, lock) {
     for (const name of Object.keys(roots)) {
       walk(name, root.dependencies?.[name]);
     }
-    return {seen, names};
+    return { seen, names };
   }
-  const runtime = visit({...manifest.dependencies, ...manifest.optionalDependencies});
+  const runtime = visit({ ...manifest.dependencies, ...manifest.optionalDependencies });
   for (const name of Object.keys(manifest.peerDependencies || {})) {
     runtime.names.add(name);
   }
-  return {entries, runtime, development: visit(manifest.devDependencies || {})};
+  return { entries, runtime, development: visit(manifest.devDependencies || {}) };
 }
 
-function classify({base, head, dependencyNames, files}) {
+function classify({ base, head, dependencyNames, files }) {
   if (!dependencyNames.length || files.some(file => !['package.json', 'yarn.lock'].includes(file))) {
     return 'dependencies';
   }
@@ -88,8 +91,11 @@ function classify({base, head, dependencyNames, files}) {
     }
   }
   for (const name of dependencyNames) {
-    if (before.runtime.names.has(name) || after.runtime.names.has(name) ||
-        !(before.development.names.has(name) || after.development.names.has(name))) {
+    if (
+      before.runtime.names.has(name) ||
+      after.runtime.names.has(name) ||
+      !(before.development.names.has(name) || after.development.names.has(name))
+    ) {
       return 'dependencies';
     }
   }
@@ -104,7 +110,10 @@ function classify({base, head, dependencyNames, files}) {
     if (JSON.stringify(previous) === JSON.stringify(next)) {
       continue;
     }
-    for (const [snapshot, entry] of [[before, previous], [after, next]]) {
+    for (const [snapshot, entry] of [
+      [before, previous],
+      [after, next]
+    ]) {
       if (entry && (snapshot.runtime.seen.has(entry) || !snapshot.development.seen.has(entry))) {
         return 'dependencies';
       }
@@ -113,4 +122,4 @@ function classify({base, head, dependencyNames, files}) {
   return 'dev-dependencies';
 }
 
-module.exports = {classify};
+module.exports = { classify };

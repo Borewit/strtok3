@@ -1,5 +1,4 @@
-import { EndOfStreamError, AbortError } from "./Errors.js";
-
+import { AbortError, EndOfStreamError } from './Errors.js';
 
 export interface IStreamReader {
   /**
@@ -30,7 +29,6 @@ export interface IStreamReader {
 }
 
 export abstract class AbstractStreamReader implements IStreamReader {
-
   protected endOfStream = false;
   protected interrupted = false;
 
@@ -67,13 +65,14 @@ export abstract class AbstractStreamReader implements IStreamReader {
    * @returns Number of bytes read
    */
   protected readFromPeekBuffer(buffer: Uint8Array): number {
-
     let remaining = buffer.length;
     let bytesRead = 0;
     // consume peeked data first
     while (this.peekQueue.length > 0 && remaining > 0) {
       const peekData = this.peekQueue.pop(); // Front of queue
-      if (!peekData) throw new Error('peekData should be defined');
+      if (!peekData) {
+        throw new Error('peekData should be defined');
+      }
       const lenCopy = Math.min(peekData.length, remaining);
       buffer.set(peekData.subarray(0, lenCopy), bytesRead);
       bytesRead += lenCopy;
@@ -87,17 +86,17 @@ export abstract class AbstractStreamReader implements IStreamReader {
   }
 
   public async readRemainderFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number> {
-
     let bytesRead = 0;
     // Continue reading from stream if required
     while (bytesRead < buffer.length && !this.endOfStream) {
-      if(this.interrupted) {
+      if (this.interrupted) {
         throw new AbortError();
       }
 
       const chunkLen = await this.readFromStream(buffer.subarray(bytesRead), mayBeLess);
-      if (chunkLen === 0)
+      if (chunkLen === 0) {
         break;
+      }
       bytesRead += chunkLen;
     }
     if (!mayBeLess && bytesRead < buffer.length) {
@@ -112,7 +111,7 @@ export abstract class AbstractStreamReader implements IStreamReader {
    * @param mayBeLess - If true, may fill the buffer partially
    * @protected Bytes read
    */
-  protected abstract readFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number>
+  protected abstract readFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number>;
 
   /**
    * abort synchronous operations

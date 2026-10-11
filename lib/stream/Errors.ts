@@ -6,13 +6,13 @@ export const defaultMessages = 'End-Of-Stream';
 export class EndOfStreamError extends Error {
   constructor() {
     super(defaultMessages);
-    this.name = "EndOfStreamError";
+    this.name = 'EndOfStreamError';
   }
 }
 
 export class AbortError extends Error {
-  constructor(message = "The operation was aborted") {
+  constructor(message = 'The operation was aborted') {
     super(message);
-    this.name = "AbortError";
+    this.name = 'AbortError';
   }
 }

@@ -1,12 +1,12 @@
-import type { Readable } from 'node:stream';
-import type { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 import { stat as fsStat } from 'node:fs/promises';
-import { type ITokenizerOptions, fromStream as coreFromStream } from './core.js';
-import {FileTokenizer} from "./FileTokenizer.js";
+import type { Readable } from 'node:stream';
+import { fromStream as coreFromStream, type ITokenizerOptions } from './core.js';
+import { FileTokenizer } from './FileTokenizer.js';
+import type { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 
-export { FileTokenizer } from './FileTokenizer.js';
+export type { IGetToken, IToken } from '@tokenizer/token';
 export * from './core.js';
-export type { IToken, IGetToken } from '@tokenizer/token';
+export { FileTokenizer } from './FileTokenizer.js';
 
 interface StreamWithFile extends Readable {
   /**

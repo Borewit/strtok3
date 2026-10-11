@@ -1,9 +1,8 @@
-import { createReadStream } from  'node:fs';
-import { Transform, Readable } from 'node:stream';
+import { createReadStream } from 'node:fs';
+import { Readable, Transform } from 'node:stream';
 import { makeByteReadableStreamFromNodeReadable } from 'node-readable-to-web-readable-stream';
 
 export function makeByteReadableStreamFromFile(filename: string, delay = 0): ReadableStream<Uint8Array> {
-
   // Create a Node.js Readable stream
   const nodeReadable = createReadStream(filename);
 
@@ -21,18 +20,20 @@ export function makeByteReadableStreamFromFile(filename: string, delay = 0): Rea
 }
 
 export class DelayedStream extends Readable {
-
   private buffer: (Uint8Array | null)[];
   private isReading: boolean;
   private path: string | undefined;
 
-  constructor(private sourceStream: Readable, private delay = 0) {
+  constructor(
+    private sourceStream: Readable,
+    private delay = 0
+  ) {
     super();
-    this.path = (sourceStream as unknown as {path: string}).path;
+    this.path = (sourceStream as unknown as { path: string }).path;
     this.buffer = [];
     this.isReading = false;
 
-    this.sourceStream.on('data', (chunk) => {
+    this.sourceStream.on('data', chunk => {
       this.buffer.push(chunk);
       this.emitDelayed();
     });
@@ -50,7 +51,9 @@ export class DelayedStream extends Readable {
   }
 
   emitDelayed() {
-    if (this.isReading) return;
+    if (this.isReading) {
+      return;
+    }
 
     if (this.buffer.length > 0) {
       this.isReading = true;
@@ -72,10 +75,12 @@ export class DelayedStream extends Readable {
  * A mock Node.js readable-stream, using string to read from
  */
 export class SourceStream extends Readable {
-
   private readonly buf: Uint8Array;
 
-  constructor(str = '', private delay = 0) {
+  constructor(
+    str = '',
+    private delay = 0
+  ) {
     super();
 
     this.buf = new TextEncoder().encode(str);
@@ -97,7 +102,11 @@ function stringReadableStream(inputString: string, delay = 0): ReadableStream<Ui
   return makeByteReadableStreamFromNodeReadable(nodeReadable) as ReadableStream<Uint8Array>;
 }
 
-export function stringToReadableStream(inputString: string, forceDefault: boolean, delay?: number): ReadableStream<Uint8Array> {
+export function stringToReadableStream(
+  inputString: string,
+  forceDefault: boolean,
+  delay?: number
+): ReadableStream<Uint8Array> {
   const stream = stringReadableStream(inputString, delay);
   const _getReader = stream.getReader.bind(stream);
 

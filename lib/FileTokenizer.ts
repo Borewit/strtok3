@@ -1,7 +1,7 @@
+import { type FileHandle, open as fsOpen } from 'node:fs/promises';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError } from './stream/index.js';
-import type {IRandomAccessTokenizer, IRandomAccessFileInfo, IReadChunkOptions, ITokenizerOptions} from './types.js';
-import { type FileHandle, open as fsOpen } from 'node:fs/promises';
+import type { IRandomAccessFileInfo, IRandomAccessTokenizer, IReadChunkOptions, ITokenizerOptions } from './types.js';
 
 interface IFileTokenizerOptions extends ITokenizerOptions {
   /**
@@ -11,7 +11,6 @@ interface IFileTokenizerOptions extends ITokenizerOptions {
 }
 
 export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTokenizer {
-
   public fileInfo: IRandomAccessFileInfo;
 
   /**
@@ -21,10 +20,13 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
   static async fromFile(sourceFilePath: string): Promise<FileTokenizer> {
     const fileHandle = await fsOpen(sourceFilePath, 'r');
     const stat = await fileHandle.stat();
-    return new FileTokenizer(fileHandle, {fileInfo: {path: sourceFilePath, size: stat.size}});
+    return new FileTokenizer(fileHandle, { fileInfo: { path: sourceFilePath, size: stat.size } });
   }
 
-  protected constructor(private fileHandle: FileHandle, options: IFileTokenizerOptions) {
+  protected constructor(
+    private fileHandle: FileHandle,
+    options: IFileTokenizerOptions
+  ) {
     super(options);
     this.fileInfo = options.fileInfo;
   }
@@ -38,7 +40,9 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(uint8Array, options);
     this.position = normOptions.position;
-    if (normOptions.length === 0) return 0;
+    if (normOptions.length === 0) {
+      return 0;
+    }
     const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
     this.position += res.bytesRead;
     if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
@@ -54,11 +58,10 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @returns Promise number of bytes read
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-
     const normOptions = this.normalizeOptions(uint8Array, options);
 
     const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
-    if ((!normOptions.mayBeLess) && res.bytesRead < normOptions.length) {
+    if (!normOptions.mayBeLess && res.bytesRead < normOptions.length) {
       throw new EndOfStreamError();
     }
     return res.bytesRead;
@@ -77,5 +80,3 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
     return true;
   }
 }
-
-
