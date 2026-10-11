@@ -42,7 +42,12 @@ It can also be used in a browser environment when bundled with a module bundler.
 
 For TypeScript CommonJS backward compatibility, you can use [load-esm](https://github.com/Borewit/load-esm).
 
-Running the TypeScript tests with `tsx` requires Node.js 18.19+ (18.x) or Node.js ≥ 20.6.0.
+Use Node.js 24 LTS to build the project and install development dependencies.
+This build requirement is separate from the Node.js ≥ 18 runtime requirement in `package.json`.
+CI builds once with Node.js 24, then runs the compiled JavaScript unit tests across the Node.js compatibility matrix and Bun 1.2.x, 1.3.x, and 1.4.x.
+Coverage is collected in a separate Node.js 24 job.
+
+For local development, running the TypeScript tests with `tsx` requires Node.js 18.19+ (18.x) or Node.js ≥ 20.6.0.
 
 ## Support the Project
 If you find this project useful and would like to support its development, consider sponsoring or contributing:
