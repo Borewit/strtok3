@@ -69,7 +69,10 @@ export class WebStreamDefaultReader extends AbstractStreamReader {
   }
 
   public async close(): Promise<void> {
-    await this.abort();
-    this.reader.releaseLock();
+    try {
+      await this.abort();
+    } finally {
+      this.reader.releaseLock();
+    }
   }
 }

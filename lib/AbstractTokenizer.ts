@@ -34,7 +34,9 @@ export abstract class AbstractTokenizer implements ITokenizer {
     this.onClose = options?.onClose;
     if (options?.abortSignal) {
       options.abortSignal.addEventListener('abort', () => {
-        this.abort();
+        void this.abort().catch(() => {
+          // Signal events cannot propagate cancellation errors; explicit abort/close calls still reject.
+        });
       });
     }
   }

@@ -1,3 +1,5 @@
+import nodeAssert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { createReadStream, type ReadStream } from 'node:fs';
 import * as fs from 'node:fs/promises';
@@ -1397,6 +1399,66 @@ describe('fromStream with mayBeLess flag', () => {
           await closeNodeStream(fileReadStream);
         }
       });
+    });
+  });
+
+  describe('Web stream cancellation', () => {
+    const sourceTests = import.meta.url.endsWith('.ts');
+    const coreUrl = new URL(sourceTests ? '../lib/core.ts' : '../lib/core.js', import.meta.url).href;
+
+    it('does not crash the process when an abort signal cancels an errored stream', () => {
+      const result = spawnSync(
+        process.execPath,
+        [
+          '--unhandled-rejections=strict',
+          '--input-type=module',
+          ...(sourceTests ? ['--import', 'tsx'] : []),
+          '--eval',
+          `
+            import nodeAssert from 'node:assert/strict';
+            import { fromWebStream } from ${JSON.stringify(coreUrl)};
+            let source;
+            const stream = new ReadableStream({ start(controller) { source = controller; } });
+            const controller = new AbortController();
+            const tokenizer = fromWebStream(stream, { abortSignal: controller.signal });
+            const error = new Error('remote disconnect');
+            source.error(error);
+            await nodeAssert.rejects(tokenizer.readBuffer(new Uint8Array(1)), error);
+            controller.abort();
+            await new Promise(resolve => setImmediate(resolve));
+            await nodeAssert.rejects(tokenizer.close(), error);
+            nodeAssert.equal(stream.locked, false);
+          `
+        ],
+        { encoding: 'utf8', timeout: 5000 }
+      );
+      assert.strictEqual(result.error, undefined, result.error?.message);
+      assert.strictEqual(result.status, 0, result.stderr);
+    });
+
+    it('releases the stream lock even when the underlying cancel operation rejects', async () => {
+      const error = new Error('cancel failed');
+      const stream = new ReadableStream<Uint8Array>({
+        cancel() {
+          throw error;
+        }
+      });
+      const tokenizer = fromWebStream(stream);
+      await nodeAssert.rejects(tokenizer.close(), error);
+      assert.strictEqual(stream.locked, false);
+    });
+
+    it('preserves cancellation errors for callers explicitly awaiting abort', async () => {
+      const error = new Error('cancel failed');
+      const stream = new ReadableStream<Uint8Array>({
+        cancel() {
+          throw error;
+        }
+      });
+      const tokenizer = fromWebStream(stream);
+      await nodeAssert.rejects(tokenizer.abort(), error);
+      await tokenizer.close();
+      assert.strictEqual(stream.locked, false);
     });
 
     describe('abort() should release stream-lock', () => {
