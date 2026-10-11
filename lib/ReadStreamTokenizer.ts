@@ -128,10 +128,12 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
   }
 
   public abort(): Promise<void> {
+    this.removeAbortListener();
     return this.streamReader.abort();
   }
 
   public async close(): Promise<void> {
+    this.removeAbortListener();
     return this.streamReader.close();
   }
 

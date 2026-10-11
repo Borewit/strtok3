@@ -1,4 +1,5 @@
 import type { Readable } from 'node:stream';
+import { throwIfAborted } from './AbortSignal.js';
 import { BlobTokenizer } from './BlobTokenizer.js';
 import { getMaxBufferSize } from './BufferSizeError.js';
 import { BufferTokenizer } from './BufferTokenizer.js';
@@ -29,6 +30,7 @@ export type {
  */
 export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadStreamTokenizer {
   getMaxBufferSize(options);
+  throwIfAborted(options?.abortSignal);
   const streamReader = new StreamReader(stream);
   const _options: ITokenizerOptions = options ?? {};
   const chainedClose = _options.onClose;
@@ -50,6 +52,7 @@ export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadS
  */
 export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer {
   getMaxBufferSize(options);
+  throwIfAborted(options?.abortSignal);
   const webStreamReader = makeWebStreamReader(webStream);
   const _options: ITokenizerOptions = options ?? {};
   const chainedClose = _options.onClose;

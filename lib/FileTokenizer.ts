@@ -1,4 +1,5 @@
 import { type FileHandle, open as fsOpen } from 'node:fs/promises';
+import { throwIfAborted } from './AbortSignal.js';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { getMaxBufferSize } from './BufferSizeError.js';
 import { EndOfStreamError } from './stream/index.js';
@@ -21,6 +22,7 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
    */
   static async fromFile(sourceFilePath: string, options?: ITokenizerOptions): Promise<FileTokenizer> {
     getMaxBufferSize(options);
+    throwIfAborted(options?.abortSignal);
     const fileHandle = await fsOpen(sourceFilePath, 'r');
     try {
       const stat = await fileHandle.stat();
@@ -79,6 +81,7 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
   }
 
   public async close(): Promise<void> {
+    this.removeAbortListener();
     await this.fileHandle.close();
     return super.close();
   }

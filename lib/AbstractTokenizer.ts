@@ -1,4 +1,5 @@
 import type { IGetToken, IToken } from '@tokenizer/token';
+import { throwIfAborted } from './AbortSignal.js';
 import { BufferSizeError, getMaxBufferSize } from './BufferSizeError.js';
 import { EndOfStreamError } from './stream/index.js';
 import type { IFileInfo, IReadChunkOptions, ITokenizer, ITokenizerOptions, OnClose } from './types.js';
@@ -14,6 +15,8 @@ interface INormalizedReadChunkOptions extends IReadChunkOptions {
  */
 export abstract class AbstractTokenizer implements ITokenizer {
   private onClose?: OnClose;
+  private abortSignal?: AbortSignal;
+  private abortListener?: () => void;
   private numBuffer = new Uint8Array(8);
   protected readonly maxBufferSize: number;
 
@@ -31,14 +34,29 @@ export abstract class AbstractTokenizer implements ITokenizer {
    */
   protected constructor(options?: ITokenizerOptions) {
     this.maxBufferSize = getMaxBufferSize(options);
+    throwIfAborted(options?.abortSignal);
     this.onClose = options?.onClose;
     if (options?.abortSignal) {
-      options.abortSignal.addEventListener('abort', () => {
+      this.addAbortListener(options.abortSignal, () => {
         void this.abort().catch(() => {
           // Signal events cannot propagate cancellation errors; explicit abort/close calls still reject.
         });
       });
     }
+  }
+
+  private addAbortListener(signal: AbortSignal, listener: () => void): void {
+    this.abortSignal = signal;
+    this.abortListener = listener;
+    signal.addEventListener('abort', listener, { once: true });
+  }
+
+  protected removeAbortListener(): void {
+    if (this.abortListener) {
+      this.abortSignal?.removeEventListener('abort', this.abortListener);
+    }
+    this.abortSignal = undefined;
+    this.abortListener = undefined;
   }
 
   abstract supportsRandomAccess(): boolean;
@@ -141,6 +159,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   public async close(): Promise<void> {
+    this.removeAbortListener();
     await this.abort();
     await this.onClose?.();
   }
@@ -219,6 +238,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   }
 
   public abort(): Promise<void> {
+    this.removeAbortListener();
     return Promise.resolve(); // Ignore abort signal
   }
 }

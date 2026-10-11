@@ -1,6 +1,6 @@
 import nodeAssert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { EventEmitter } from 'node:events';
+import { EventEmitter, getEventListeners } from 'node:events';
 import { createReadStream, type ReadStream } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import Path, { dirname } from 'node:path';
@@ -13,6 +13,7 @@ import chaiAsPromised from 'chai-as-promised';
 import mocha from 'mocha';
 import * as Token from 'token-types';
 import { stringToUint8Array } from 'uint8array-extras';
+import { fromStream as coreFromStream } from '../lib/core.js';
 import {
   AbortError,
   fromBlob,
@@ -102,8 +103,8 @@ describe('Matrix tests', () => {
     },
     {
       name: 'fromFile()',
-      loadTokenizer: async testFile => {
-        return fromFile(Path.join(__dirname, 'resources', testFile));
+      loadTokenizer: async (testFile, _delay, abortSignal) => {
+        return fromFile(Path.join(__dirname, 'resources', testFile), { abortSignal });
       },
       hasFileInfo: true,
       abortable: false,
@@ -112,22 +113,22 @@ describe('Matrix tests', () => {
     {
       abortable: false,
       hasFileInfo: true,
-      loadTokenizer: async testFile => {
+      loadTokenizer: async (testFile, _delay, abortSignal) => {
         const data = await fs.readFile(Path.join(__dirname, 'resources', testFile));
-        return fromBuffer(data);
+        return fromBuffer(data, { abortSignal });
       },
       name: 'fromBuffer()',
       randomRead: true
     },
     {
       name: 'fromBlob()',
-      loadTokenizer: async testFile => {
+      loadTokenizer: async (testFile, _delay, abortSignal) => {
         const path = Path.join(__dirname, 'resources', testFile);
         const blob =
           nodeMajorVersion >= 20
             ? await (await import('node:fs')).openAsBlob(path)
             : new Blob([await fs.readFile(path)]);
-        return fromBlob(blob);
+        return fromBlob(blob, { abortSignal });
       },
       hasFileInfo: true,
       abortable: false,
@@ -980,6 +981,127 @@ describe('Matrix tests', () => {
         }
       }); // End of test "Tokenizer-types"
     });
+
+  describe('AbortSignal lifecycle', () => {
+    const filePath = getResourcePath('test3.dat');
+
+    function webStream(byob: boolean): ReadableStream<Uint8Array> {
+      if (byob) {
+        return new ReadableStream<Uint8Array>({ type: 'bytes' });
+      }
+      return new ReadableStream<Uint8Array>();
+    }
+
+    it('rejects already-aborted signals before acquiring Node stream listeners', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      for (const factory of [coreFromStream, fromStream]) {
+        const stream = new PassThrough();
+        try {
+          await nodeAssert.rejects(async () => factory(stream, { abortSignal: controller.signal }), AbortError);
+          for (const event of ['readable', 'end', 'error', 'close']) {
+            assert.strictEqual(stream.listenerCount(event), 0, event);
+          }
+          assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 0);
+        } finally {
+          stream.destroy();
+        }
+      }
+    });
+
+    for (const byob of [false, true]) {
+      it(`rejects already-aborted signals before locking a ${byob ? 'BYOB' : 'default'} web stream`, () => {
+        const controller = new AbortController();
+        controller.abort();
+        const stream = webStream(byob);
+        assert.throws(() => fromWebStream(stream, { abortSignal: controller.signal }), AbortError);
+        assert.strictEqual(stream.locked, false);
+      });
+    }
+
+    it('rejects already-aborted signals for buffer, Blob and file factories', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const options = { abortSignal: controller.signal };
+      assert.throws(() => fromBuffer(new Uint8Array(1), options), AbortError);
+      assert.throws(() => fromBlob(new Blob(), options), AbortError);
+      await nodeAssert.rejects(fromFile(`${filePath}.missing`, options), AbortError);
+    });
+
+    for (const tokenizerType of tokenizerTests) {
+      it(`removes signal listeners when closing a ${tokenizerType.name} tokenizer`, async () => {
+        const controller = new AbortController();
+        let lateAborts = 0;
+        for (let index = 0; index < 5; ++index) {
+          const tokenizer = await tokenizerType.loadTokenizer('test3.dat', undefined, controller.signal);
+          try {
+            assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 1);
+          } finally {
+            await tokenizer.close();
+          }
+          if (tokenizerType.abortable) {
+            tokenizer.abort = async () => {
+              ++lateAborts;
+            };
+          }
+          assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 0);
+        }
+        controller.abort();
+        if (tokenizerType.abortable) {
+          assert.strictEqual(lateAborts, 0);
+        }
+      });
+    }
+
+    for (const method of ['abort', 'close'] as const) {
+      it(`removes signal listeners after a Node tokenizer ${method}`, async () => {
+        const stream = new PassThrough();
+        const controller = new AbortController();
+        const tokenizer = coreFromStream(stream, { abortSignal: controller.signal });
+        try {
+          await tokenizer[method]();
+          assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 0);
+        } finally {
+          await tokenizer.close();
+          stream.destroy();
+        }
+      });
+    }
+
+    for (const tokenizerType of tokenizerTests.filter(type => type.abortable)) {
+      it(`removes the signal listener after the signal fires for ${tokenizerType.name}`, async () => {
+        const controller = new AbortController();
+        const tokenizer = await tokenizerType.loadTokenizer('test3.dat', undefined, controller.signal);
+        try {
+          let aborts = 0;
+          tokenizer.abort = async () => {
+            ++aborts;
+          };
+          controller.abort();
+          assert.strictEqual(aborts, 1);
+          assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 0);
+        } finally {
+          await tokenizer.close();
+        }
+      });
+    }
+
+    it('removes the signal listener even when closing a stream fails', async () => {
+      const error = new Error('cancel failed');
+      const stream = new ReadableStream<Uint8Array>({
+        cancel() {
+          throw error;
+        }
+      });
+      const controller = new AbortController();
+      const tokenizer = fromWebStream(stream, { abortSignal: controller.signal });
+      await nodeAssert.rejects(tokenizer.close(), error);
+      assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 0);
+      if (stream.locked) {
+        await tokenizer.close();
+      }
+    });
+  });
 
   describe('Random-read-access', async () => {
     tokenizerTests

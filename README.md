@@ -429,6 +429,10 @@ reads and peeks for that tokenizer; no per-read limit is needed. Each attribute 
 | onClose | `() => Promise<void>` | Asynchronous callback invoked when a buffer, blob, or file tokenizer is closed |
 | abortSignal | [AbortSignal](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal) | Signal used to abort asynchronous stream operations |
 
+Creating a tokenizer with an already-aborted `abortSignal` throws or rejects with `AbortError`
+before acquiring file handles or stream readers. Signal listeners are removed when the signal
+fires or the tokenizer is closed, so closed tokenizers can be collected even when a signal is reused.
+
 When `maxBufferSize` is configured, `readToken()` and `peekToken()` reject oversized buffers with `BufferSizeError`
 before allocating or consuming input. The error exposes `requestedSize` and `maxBufferSize`.
 Token lengths and positions must be non-negative safe integers. When the input size is known,
