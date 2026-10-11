@@ -6,6 +6,7 @@ import * as fs from 'node:fs/promises';
 import Path, { dirname } from 'node:path';
 import process from 'node:process';
 import { PassThrough, Readable } from 'node:stream';
+import { setImmediate as waitForImmediate } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { assert, expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -1311,6 +1312,87 @@ describe('fromStream with mayBeLess flag', () => {
       expect(() => {
         new StreamReader(not_a_stream as unknown as Readable);
       }).to.throw('Expected an instance of stream.Readable');
+    });
+
+    describe('Pending read cleanup', () => {
+      for (const action of ['abort', 'close', 'error'] as const) {
+        it(`detaches pending reads and stops buffer writes after ${action}`, async () => {
+          const stream = new PassThrough();
+          const tokenizer = await fromStream(stream);
+          const output = Uint8Array.of(99);
+          const error = new Error('source error');
+          const rejected = nodeAssert.rejects(tokenizer.readBuffer(output), action === 'error' ? error : AbortError);
+          const callback = stream.listeners('readable')[0] as () => void;
+          try {
+            if (action === 'error') {
+              stream.emit('error', error);
+            } else {
+              await tokenizer[action]();
+            }
+            await rejected;
+            assert.strictEqual(stream.listenerCount('readable'), 0);
+            stream.write(Uint8Array.of(42));
+            // A listener captured by an ongoing event dispatch must also be inert.
+            callback();
+            await waitForImmediate();
+            assert.deepEqual(output, Uint8Array.of(99));
+            assert.strictEqual(stream.listenerCount('readable'), 0);
+            assert.deepEqual(new Uint8Array(stream.read()), Uint8Array.of(42));
+          } finally {
+            await tokenizer.close();
+            stream.destroy();
+          }
+        });
+      }
+
+      it('settles every pending read when cancellation occurs', async () => {
+        const stream = new PassThrough();
+        const reader = new StreamReader(stream);
+        const output = [Uint8Array.of(99), Uint8Array.of(98)];
+        const rejected = output.map(buffer => nodeAssert.rejects(reader.read(buffer), AbortError));
+        try {
+          await reader.abort();
+          await Promise.all(rejected);
+          assert.strictEqual(stream.listenerCount('readable'), 0);
+          stream.write(Uint8Array.of(42, 43));
+          await waitForImmediate();
+          assert.deepEqual(output, [Uint8Array.of(99), Uint8Array.of(98)]);
+        } finally {
+          stream.destroy();
+        }
+      });
+
+      it('detaches pending callbacks at end of stream', async () => {
+        const stream = new PassThrough();
+        const reader = new StreamReader(stream);
+        const rejected = nodeAssert.rejects(reader.read(new Uint8Array(1)), EndOfStreamError);
+        try {
+          stream.end();
+          await rejected;
+          assert.strictEqual(stream.listenerCount('readable'), 0);
+        } finally {
+          await reader.close();
+          stream.destroy();
+        }
+      });
+
+      it('removes completed requests without affecting later reads', async () => {
+        const stream = new PassThrough();
+        const reader = new StreamReader(stream);
+        try {
+          for (const value of [42, 43]) {
+            const output = new Uint8Array(1);
+            const read = reader.read(output);
+            stream.write(Uint8Array.of(value));
+            assert.strictEqual(await read, 1);
+            assert.deepEqual(output, Uint8Array.of(value));
+            assert.strictEqual(stream.listenerCount('readable'), 0);
+          }
+        } finally {
+          await reader.close();
+          stream.destroy();
+        }
+      });
     });
 
     describe('disjoint', () => {
