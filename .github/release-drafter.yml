@@ -1,5 +1,5 @@
-# Release Drafter v7 configuration
-# Ref: https://github.com/release-drafter/release-drafter/tree/v7#configuration
+# Release Drafter v7.10.0 configuration
+# Ref: https://github.com/release-drafter/release-drafter/tree/v7.10.0#configuration-options
 
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
