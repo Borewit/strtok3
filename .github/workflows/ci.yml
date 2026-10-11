@@ -7,7 +7,7 @@ on:
 jobs:
 
   build:
-    name: "Build module"
+    name: "Build module with Node.js 24"
     runs-on: ubuntu-latest
 
     steps:
@@ -16,13 +16,13 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20.x
+          node-version: 24.x
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Test dependency label assignment
         run: node --test .github/scripts/dependabot/classify.test.cjs
@@ -48,14 +48,12 @@ jobs:
             test/**/*.js.map
 
   test-nodejs:
-    name: "Test with Node.js"
+    name: "Test with Node.js ${{ matrix.node-version }}"
     runs-on: ubuntu-latest
     needs: build
 
-    env:
-      YARN_IGNORE_NODE: 1
-
     strategy:
+      fail-fast: false
       matrix:
         node-version: [18.x, 20.6.0, 20.x, 22.x, 24.x, 26.x]
 
@@ -64,48 +62,83 @@ jobs:
       - name: 'Checkout the repository'
         uses: actions/checkout@v7
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      # Install development tools with the build Node.js version.
+      - name: Setup Node.js 24 for dependencies
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24.x
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Download build
         uses: actions/download-artifact@v8
         with:
           name: build
 
-      - name: Test with Node.js ${{ matrix.node-version }}
-        run: yarn run test-coverage
+      - name: Setup runtime Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
 
-      - name: Coveralls Parallel
+      # Run the compiled build without Yarn, TypeScript or tsx on older runtimes.
+      - name: Test with Node.js ${{ matrix.node-version }}
+        run: node node_modules/mocha/bin/mocha.js --no-config 'test/*.js'
+
+  coverage:
+    name: "Coverage with Node.js 24"
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Download build
+        uses: actions/download-artifact@v8
+        with:
+          name: build
+
+      - name: Test with coverage
+        run: node node_modules/c8/bin/c8.js node node_modules/mocha/bin/mocha.js --no-config 'test/*.js'
+
+      - name: Coveralls
         uses: coverallsapp/github-action@v2
         with:
           github-token: ${{ secrets.github_token }}
-          flag-name: run-node-${{ matrix.test_number }}
-          parallel: true
 
   test-bun:
-    name: "Test with Bun"
+    name: "Test with Bun ${{ matrix.bun-version }}"
     runs-on: ubuntu-latest
     needs: build
 
     strategy:
+      fail-fast: false
       matrix:
-        bun-version: [1.2]
-
-    env:
-      YARN_IGNORE_NODE: 1
+        bun-version: ['1.2.x', '1.3.x', '1.4.x']
 
     steps:
 
       - name: 'Checkout the repository'
         uses: actions/checkout@v7
+
+      - name: Setup Node.js 24 for dependencies
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.x
 
       - name: Setup Bun ${{ matrix.bun-version }}
         uses: oven-sh/setup-bun@v2
@@ -116,7 +149,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --immutable
 
       - name: Download build
         uses: actions/download-artifact@v8
@@ -124,16 +157,4 @@ jobs:
           name: build
 
       - name: Unit tests with Bun ${{ matrix.bun-version }}
-        run: bun run bun:test
-
-  finish:
-    needs:
-      - test-nodejs
-      - test-bun
-    runs-on: ubuntu-latest
-    steps:
-      - name: Coveralls Finished
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.github_token }}
-          parallel-finished: true
+        run: bun run node_modules/mocha/bin/mocha.js --no-config 'test/*.js'
