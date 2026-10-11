@@ -1,12 +1,12 @@
 import type { Readable } from 'node:stream';
-import { AbortError, } from './Errors.js';
+import { AbstractStreamReader } from './AbstractStreamReader.js';
 import { Deferred } from './Deferred.js';
-import { AbstractStreamReader } from "./AbstractStreamReader.js";
+import { AbortError } from './Errors.js';
 
 interface IReadRequest {
-  buffer: Uint8Array,
-  mayBeLess: boolean,
-  deferred: Deferred<number>
+  buffer: Uint8Array;
+  mayBeLess: boolean;
+  deferred: Deferred<number>;
 }
 
 /**
@@ -14,7 +14,6 @@ interface IReadRequest {
  * Ref: https://nodejs.org/api/stream.html#readable-streams
  */
 export class StreamReader extends AbstractStreamReader {
-
   /**
    * Deferred used for postponed read request (as not data is yet available to read)
    */
@@ -42,8 +41,9 @@ export class StreamReader extends AbstractStreamReader {
    * @returns Number of bytes read
    */
   protected async readFromStream(buffer: Uint8Array, mayBeLess: boolean): Promise<number> {
-
-    if (buffer.length === 0) return 0;
+    if (buffer.length === 0) {
+      return 0;
+    }
 
     const readBuffer = this.s.read(buffer.length);
 

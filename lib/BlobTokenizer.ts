@@ -1,9 +1,8 @@
-import type {ITokenizerOptions, IReadChunkOptions, IRandomAccessFileInfo, IRandomAccessTokenizer} from './types.js';
-import { EndOfStreamError } from './stream/index.js';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
+import { EndOfStreamError } from './stream/index.js';
+import type { IRandomAccessFileInfo, IRandomAccessTokenizer, IReadChunkOptions, ITokenizerOptions } from './types.js';
 
 export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTokenizer {
-
   public fileInfo: IRandomAccessFileInfo;
 
   /**
@@ -11,9 +10,12 @@ export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @param blob - Uint8Array to tokenize
    * @param options Tokenizer options
    */
-  constructor(private blob: Blob, options?: ITokenizerOptions) {
+  constructor(
+    private blob: Blob,
+    options?: ITokenizerOptions
+  ) {
     super(options);
-    this.fileInfo = {...options?.fileInfo ?? {}, ...{size: blob.size, mimeType: blob.type}};
+    this.fileInfo = { ...(options?.fileInfo ?? {}), ...{ size: blob.size, mimeType: blob.type } };
   }
 
   /**
@@ -23,7 +25,6 @@ export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @returns {Promise<number>}
    */
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-
     if (options?.position) {
       this.position = options.position;
     }
@@ -40,11 +41,10 @@ export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @returns {Promise<number>}
    */
   public async peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-
     const normOptions = this.normalizeOptions(buffer, options);
 
     const bytes2read = Math.min(this.blob.size - normOptions.position, normOptions.length);
-    if ((!normOptions.mayBeLess) && bytes2read < normOptions.length) {
+    if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
     }
     const arrayBuffer = await this.blob.slice(normOptions.position, normOptions.position + bytes2read).arrayBuffer();

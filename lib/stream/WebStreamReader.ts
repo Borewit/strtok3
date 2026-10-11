@@ -1,7 +1,6 @@
-import { AbstractStreamReader } from "./AbstractStreamReader.js";
+import { AbstractStreamReader } from './AbstractStreamReader.js';
 
 export abstract class WebStreamReader extends AbstractStreamReader {
-
   public constructor(protected reader: ReadableStreamDefaultReader | ReadableStreamBYOBReader) {
     super();
   }

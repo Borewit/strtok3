@@ -502,6 +502,10 @@ import * as Token from 'token-types';
 Dependencies:
 - [@tokenizer/token](https://github.com/Borewit/tokenizer-token): Provides token definitions and utilities used by `strtok3` for interpreting binary data.
 
+## Contributing
+
+See [the contribution guide](CONTRIBUTING.md) for code style and development commands.
+
 ## Licence
 
 This project is licensed under the [MIT License](LICENSE.txt). Feel free to use, modify, and distribute as needed.

@@ -1,23 +1,30 @@
 const assert = require('node:assert/strict');
-const {test} = require('node:test');
-const {classify} = require('./classify.cjs');
+const { test } = require('node:test');
+const { classify } = require('./classify.cjs');
 const label = require('./label.cjs');
 
 function fixture() {
-  const manifest = {name: 'project', dependencies: {runtime: '^1'}, devDependencies: {'remark-cli': '^1', typescript: '^1'}};
-  const lock = {__metadata: {version: 8}};
+  const manifest = {
+    name: 'project',
+    dependencies: { runtime: '^1' },
+    devDependencies: { 'remark-cli': '^1', typescript: '^1' }
+  };
+  const lock = { __metadata: { version: 8 } };
   function entry(name, dependencies = {}) {
-    lock[`${name}@npm:^1`] = {version: '1.0.0', resolution: `${name}@npm:1.0.0`, dependencies};
+    lock[`${name}@npm:^1`] = { version: '1.0.0', resolution: `${name}@npm:1.0.0`, dependencies };
   }
-  lock['project@workspace:.'] = {resolution: 'project@workspace:.', dependencies: {runtime: 'npm:^1', 'remark-cli': 'npm:^1', typescript: 'npm:^1'}};
-  entry('runtime', {shared: 'npm:^1'});
+  lock['project@workspace:.'] = {
+    resolution: 'project@workspace:.',
+    dependencies: { runtime: 'npm:^1', 'remark-cli': 'npm:^1', typescript: 'npm:^1' }
+  };
+  entry('runtime', { shared: 'npm:^1' });
   entry('shared');
-  entry('remark-cli', {socks: 'npm:^1', shared: 'npm:^1'});
-  entry('socks', {'ip-address': 'npm:^1'});
+  entry('remark-cli', { socks: 'npm:^1', shared: 'npm:^1' });
+  entry('socks', { 'ip-address': 'npm:^1' });
   entry('ip-address');
   entry('typescript');
-  const base = {manifest, lock};
-  return {base, head: structuredClone(base), dependencyNames: ['ip-address'], files: ['yarn.lock']};
+  const base = { manifest, lock };
+  return { base, head: structuredClone(base), dependencyNames: ['ip-address'], files: ['yarn.lock'] };
 }
 
 function bump(input, name) {
@@ -93,7 +100,7 @@ test('unresolved graph edges fail classification instead of assuming development
 test('cycles and combined descriptors are supported', () => {
   const input = fixture();
   for (const snapshot of [input.base, input.head]) {
-    snapshot.lock['ip-address@npm:^1'].dependencies = {socks: 'npm:^1'};
+    snapshot.lock['ip-address@npm:^1'].dependencies = { socks: 'npm:^1' };
     snapshot.lock['shared@npm:^1, shared@npm:~1'] = snapshot.lock['shared@npm:^1'];
     delete snapshot.lock['shared@npm:^1'];
   }
@@ -105,7 +112,7 @@ test('optional runtime roots and consumer peer dependencies remain visible', () 
   for (const field of ['optionalDependencies', 'peerDependencies']) {
     const input = fixture();
     for (const snapshot of [input.base, input.head]) {
-      snapshot.manifest[field] = {'ip-address': '^1'};
+      snapshot.manifest[field] = { 'ip-address': '^1' };
       snapshot.lock['project@workspace:.'].dependencies['ip-address'] = 'npm:^1';
     }
     bump(input, 'ip-address');
@@ -119,30 +126,52 @@ test('runtime manifest changes remain visible even with unchanged lock resolutio
   assert.equal(classify(input), 'dependencies');
 });
 
-function mock(input, {readError = false, stale = false} = {}) {
+function mock(input, { readError = false, stale = false } = {}) {
   const changes = [];
   const github = {
-    paginate: async () => input.files.map(filename => ({filename})),
+    paginate: async () => input.files.map(filename => ({ filename })),
     rest: {
-      pulls: {listFiles: {}, get: async () => ({data: {head: {sha: stale ? 'new-head' : 'head'}}})},
-      repos: {compareCommits: async () => ({data: {merge_base_commit: {sha: 'base'}}}), getContent: async ({ref, path}) => {
-        if (readError) {
-          throw new Error('Unavailable lockfile');
+      pulls: { listFiles: {}, get: async () => ({ data: { head: { sha: stale ? 'new-head' : 'head' } } }) },
+      repos: {
+        compareCommits: async () => ({ data: { merge_base_commit: { sha: 'base' } } }),
+        getContent: async ({ ref, path }) => {
+          if (readError) {
+            throw new Error('Unavailable lockfile');
+          }
+          const data = path === 'package.json' ? input[ref].manifest : input[ref].lock;
+          return {
+            data: { type: 'file', encoding: 'base64', content: Buffer.from(JSON.stringify(data)).toString('base64') }
+          };
         }
-        const data = path === 'package.json' ? input[ref].manifest : input[ref].lock;
-        return {data: {type: 'file', encoding: 'base64', content: Buffer.from(JSON.stringify(data)).toString('base64')}};
-      }},
+      },
       issues: {
-        addLabels: async ({labels}) => changes.push(['add', ...labels]),
-        removeLabel: async ({name}) => changes.push(['remove', name])
+        addLabels: async ({ labels }) => changes.push(['add', ...labels]),
+        removeLabel: async ({ name }) => changes.push(['remove', name])
       }
     }
   };
-  return {changes, args: {
-    github,
-    context: {repo: {owner: 'owner', repo: 'repo'}, payload: {pull_request: {number: 1, changed_files: input.files.length, base: {sha: 'base'}, head: {sha: 'head'}}}},
-    core: {info() { /* Ignore test log output. */ }, warning() { /* Ignore test log output. */ }}, parseYaml: JSON.parse, dependencyNames: input.dependencyNames
-  }};
+  return {
+    changes,
+    args: {
+      github,
+      context: {
+        repo: { owner: 'owner', repo: 'repo' },
+        payload: {
+          pull_request: { number: 1, changed_files: input.files.length, base: { sha: 'base' }, head: { sha: 'head' } }
+        }
+      },
+      core: {
+        info() {
+          /* Ignore test log output. */
+        },
+        warning() {
+          /* Ignore test log output. */
+        }
+      },
+      parseYaml: JSON.parse,
+      dependencyNames: input.dependencyNames
+    }
+  };
 }
 
 test('label synchronization removes the opposite label in both directions', async () => {
@@ -150,22 +179,27 @@ test('label synchronization removes the opposite label in both directions', asyn
     const input = fixture();
     input.dependencyNames = [name];
     bump(input, name);
-    const {args, changes} = mock(input);
+    const { args, changes } = mock(input);
     await label(args);
     const expected = name === 'shared' ? ['dependencies', 'dev-dependencies'] : ['dev-dependencies', 'dependencies'];
-    assert.deepEqual(changes, [['add', expected[0]], ['remove', expected[1]]]);
+    assert.deepEqual(changes, [
+      ['add', expected[0]],
+      ['remove', expected[1]]
+    ]);
   }
 });
 
 test('API errors fall back to runtime labels and stale runs do not change labels', async () => {
-  const failed = mock(fixture(), {readError: true});
+  const failed = mock(fixture(), { readError: true });
   await label(failed.args);
-  assert.deepEqual(failed.changes, [['add', 'dependencies'], ['remove', 'dev-dependencies']]);
-  const stale = mock(fixture(), {stale: true});
+  assert.deepEqual(failed.changes, [
+    ['add', 'dependencies'],
+    ['remove', 'dev-dependencies']
+  ]);
+  const stale = mock(fixture(), { stale: true });
   await label(stale.args);
   assert.deepEqual(stale.changes, []);
 });
-
 
 test('Yarn built-in TypeScript patches inherit the underlying dependency scope', () => {
   for (const runtime of [false, true]) {
@@ -175,7 +209,8 @@ test('Yarn built-in TypeScript patches inherit the underlying dependency scope',
     for (const snapshot of [input.base, input.head]) {
       snapshot.lock[descriptor] = {
         version: '1.0.0',
-        resolution: 'typescript@patch:typescript@npm%3A1.0.0#optional!builtin<compat/typescript>::version=1.0.0&hash=abc'
+        resolution:
+          'typescript@patch:typescript@npm%3A1.0.0#optional!builtin<compat/typescript>::version=1.0.0&hash=abc'
       };
       if (runtime) {
         snapshot.manifest.dependencies.typescript = '^1';
@@ -191,9 +226,11 @@ test('Yarn built-in TypeScript patches inherit the underlying dependency scope',
 test('patch-only graph edges also associate their original lock entries', () => {
   const input = fixture();
   for (const snapshot of [input.base, input.head]) {
-    snapshot.lock['socks@npm:^1'].dependencies['ip-address'] = 'patch:ip-address@npm%3A^1#optional!builtin<compat/ip-address>';
+    snapshot.lock['socks@npm:^1'].dependencies['ip-address'] =
+      'patch:ip-address@npm%3A^1#optional!builtin<compat/ip-address>';
     snapshot.lock['ip-address@patch:ip-address@npm%3A^1#optional!builtin<compat/ip-address>'] = {
-      version: '1.0.0', resolution: 'ip-address@patch:ip-address@npm%3A1.0.0#optional!builtin<compat/ip-address>'
+      version: '1.0.0',
+      resolution: 'ip-address@patch:ip-address@npm%3A1.0.0#optional!builtin<compat/ip-address>'
     };
   }
   bump(input, 'ip-address');

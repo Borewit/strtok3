@@ -27,7 +27,7 @@ jobs:
       - name: Test dependency label assignment
         run: node --test .github/scripts/dependabot/classify.test.cjs
 
-      - name: Lint TypeScript
+      - name: Check code style (formatting, imports, and lint)
         run: yarn run lint:ts
 
       - name: Lint Markdown

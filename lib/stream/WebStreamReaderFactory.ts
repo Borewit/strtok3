@@ -6,13 +6,13 @@ export type AnyWebByteStream = NodeReadableStream<Uint8Array> | ReadableStream<U
 
 export function makeWebStreamReader(stream: AnyWebByteStream): WebStreamByobReader | WebStreamDefaultReader {
   try {
-    const reader = stream.getReader({mode: "byob"});
+    const reader = stream.getReader({ mode: 'byob' });
     if (reader instanceof ReadableStreamDefaultReader) {
       // Fallback to default reader in case `mode: byob` is ignored
       return new WebStreamDefaultReader(reader as ReadableStreamDefaultReader<Uint8Array>);
     }
     return new WebStreamByobReader(reader);
-  } catch(error) {
+  } catch (error) {
     if (error instanceof TypeError) {
       // Fallback to default reader in case `mode: byob` rejected by a `TypeError`
       return new WebStreamDefaultReader(stream.getReader());

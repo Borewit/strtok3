@@ -1,11 +1,10 @@
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { EndOfStreamError, type IStreamReader } from './stream/index.js';
-import type {IFileInfo, IReadChunkOptions, ITokenizerOptions} from './types.js';
+import type { IFileInfo, IReadChunkOptions, ITokenizerOptions } from './types.js';
 
 const maxBufferSize = 256000;
 
 export class ReadStreamTokenizer extends AbstractTokenizer {
-
   public fileInfo: IFileInfo;
 
   /**
@@ -13,7 +12,10 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @param streamReader stream-reader to read from
    * @param options Tokenizer options
    */
-  public constructor(private streamReader: IStreamReader, options?: ITokenizerOptions) {
+  public constructor(
+    private streamReader: IStreamReader,
+    options?: ITokenizerOptions
+  ) {
     super(options);
     this.fileInfo = options?.fileInfo ?? {};
   }
@@ -52,7 +54,6 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
    * @returns Promise with number of bytes peeked
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-
     const normOptions = this.normalizeOptions(uint8Array, options);
     let bytesRead = 0;
 
@@ -60,7 +61,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       const skipBytes = normOptions.position - this.position;
       if (skipBytes > 0) {
         const skipBuffer = new Uint8Array(normOptions.length + skipBytes);
-        bytesRead = await this.peekBuffer(skipBuffer, {mayBeLess: normOptions.mayBeLess});
+        bytesRead = await this.peekBuffer(skipBuffer, { mayBeLess: normOptions.mayBeLess });
         uint8Array.set(skipBuffer.subarray(skipBytes));
         return bytesRead - skipBytes;
       }
@@ -78,7 +79,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
         }
         throw err;
       }
-      if ((!normOptions.mayBeLess) && bytesRead < normOptions.length) {
+      if (!normOptions.mayBeLess && bytesRead < normOptions.length) {
         throw new EndOfStreamError();
       }
     }
@@ -98,7 +99,7 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     let totBytesRead = 0;
     while (totBytesRead < length) {
       const remaining = length - totBytesRead;
-      const bytesRead = await this.readBuffer(buf, {length: Math.min(bufSize, remaining)});
+      const bytesRead = await this.readBuffer(buf, { length: Math.min(bufSize, remaining) });
       if (bytesRead < 0) {
         return bytesRead;
       }
