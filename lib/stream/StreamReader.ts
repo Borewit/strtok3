@@ -7,6 +7,7 @@ interface IReadRequest {
   buffer: Uint8Array;
   mayBeLess: boolean;
   deferred: Deferred<number>;
+  onReadable: () => void;
 }
 
 /**
@@ -15,9 +16,9 @@ interface IReadRequest {
  */
 export class StreamReader extends AbstractStreamReader {
   /**
-   * Deferred used for postponed read request (as not data is yet available to read)
+   * Pending requests waiting for data, tracked until completion or cancellation
    */
-  private deferred: Deferred<number> | null = null;
+  private pendingRequests = new Set<IReadRequest>();
 
   public constructor(private s: Readable) {
     super();
@@ -26,8 +27,9 @@ export class StreamReader extends AbstractStreamReader {
     }
     this.s.once('end', () => {
       this.endOfStream = true;
-      if (this.deferred) {
-        this.deferred.resolve(0);
+      for (const request of this.pendingRequests) {
+        this.removeRequest(request);
+        request.deferred.resolve(0);
       }
     });
     this.s.once('error', err => this.reject(err));
@@ -52,15 +54,14 @@ export class StreamReader extends AbstractStreamReader {
       return readBuffer.length;
     }
 
-    const request = {
+    const request: IReadRequest = {
       buffer,
       mayBeLess,
-      deferred: new Deferred<number>()
+      deferred: new Deferred<number>(),
+      onReadable: () => this.readDeferred(request)
     };
-    this.deferred = request.deferred;
-    this.s.once('readable', () => {
-      this.readDeferred(request);
-    });
+    this.pendingRequests.add(request);
+    this.s.once('readable', request.onReadable);
     return request.deferred.promise;
   }
 
@@ -69,23 +70,38 @@ export class StreamReader extends AbstractStreamReader {
    * @param request Deferred read request
    */
   private readDeferred(request: IReadRequest) {
-    const readBuffer = this.s.read(request.buffer.length);
-    if (readBuffer) {
-      request.buffer.set(readBuffer);
-      request.deferred.resolve(readBuffer.length);
-      this.deferred = null;
-    } else {
-      this.s.once('readable', () => {
-        this.readDeferred(request);
-      });
+    if (this.interrupted || !this.pendingRequests.has(request)) {
+      return;
     }
+    try {
+      const readBuffer = this.s.read(request.buffer.length);
+      // Reading may synchronously emit an error or close event that cancels the request.
+      if (!this.pendingRequests.has(request)) {
+        return;
+      }
+      if (readBuffer) {
+        request.buffer.set(readBuffer);
+        this.removeRequest(request);
+        request.deferred.resolve(readBuffer.length);
+      } else {
+        this.s.once('readable', request.onReadable);
+      }
+    } catch (error) {
+      this.reject(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+
+  private removeRequest(request: IReadRequest): void {
+    this.s.removeListener('readable', request.onReadable);
+    this.pendingRequests.delete(request);
   }
 
   private reject(err: Error) {
     this.interrupted = true;
-    if (this.deferred) {
-      this.deferred.reject(err);
-      this.deferred = null;
+    this.peekQueue = [];
+    for (const request of this.pendingRequests) {
+      this.removeRequest(request);
+      request.deferred.reject(err);
     }
   }
 
