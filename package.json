@@ -75,7 +75,7 @@
     "token-types": "^6.1.2",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "uint8array-extras": "^1.4.0"
+    "uint8array-extras": "^1.6.0"
   },
   "keywords": [
     "tokenizer",

@@ -3572,7 +3572,7 @@ __metadata:
     token-types: "npm:^6.1.2"
     tsx: "npm:^4.23.15"
     typescript: "npm:^7.0.2"
-    uint8array-extras: "npm:^1.4.0"
+    uint8array-extras: "npm:^1.6.0"
   languageName: unknown
   linkType: soft
 
@@ -3840,10 +3840,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uint8array-extras@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "uint8array-extras@npm:1.4.0"
-  checksum: 10c0/eaffd3388634b7e5e1496073b878dd19136043137d3e7e0d2a453e37f566a5a551e640819e1a6596c6df9b9d1f7b70884cc29db6a357bdd424811f3598d504dd
+"uint8array-extras@npm:^1.6.0":
+  version: 1.6.0
+  resolution: "uint8array-extras@npm:1.6.0"
+  checksum: 10c0/d53177c025ebea31af1e445abd474027b66341a56f207f352a5a486aa1d492e228bbc883dc4a51ea8358bb88d60a019351e20a92dd17c2ef8326e29fbad57127
   languageName: node
   linkType: hard
 
