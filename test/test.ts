@@ -1665,36 +1665,65 @@ describe('fromStream with mayBeLess flag', () => {
       assert.strictEqual(stream.locked, false);
     });
 
-    describe('abort() should release stream-lock', () => {
-      it('BYOB WebStreamReader', async () => {
-        const readableStream = stringToReadableStream('abc', false);
-        try {
-          assert.isFalse(readableStream.locked, 'stream is unlocked before initializing tokenizer');
+    describe('source lifecycle', () => {
+      const readerTypes = [
+        { name: 'BYOB', type: 'bytes' as const, cancelsSource: false },
+        { name: 'default', type: undefined, cancelsSource: true }
+      ];
 
-          const webStreamReader = makeWebStreamReader(readableStream);
-          assert.isTrue(readableStream.locked, 'stream is locked after initializing tokenizer');
+      for (const readerType of readerTypes) {
+        for (const operation of ['close', 'abort'] as const) {
+          it(`${operation}() ${readerType.cancelsSource ? 'cancels' : 'preserves'} the ${readerType.name} reader's source`, async () => {
+            let cancelCalls = 0;
+            const readableStream = new ReadableStream<Uint8Array>({
+              type: readerType.type,
+              start(controller) {
+                controller.enqueue(new Uint8Array([1]));
+                controller.enqueue(new Uint8Array([2, 3]));
+              },
+              cancel() {
+                ++cancelCalls;
+              }
+            });
+            assert.isFalse(readableStream.locked, 'stream is unlocked before initializing tokenizer');
+            const tokenizer = fromWebStream(readableStream);
+            try {
+              try {
+                assert.isTrue(readableStream.locked, 'tokenizer holds the stream lock');
+                const firstByte = new Uint8Array(1);
+                assert.strictEqual(await tokenizer.readBuffer(firstByte), 1);
+                assert.deepEqual(firstByte, new Uint8Array([1]));
+                assert.strictEqual(cancelCalls, 0, 'reading does not cancel the source');
 
-          await webStreamReader.close();
-          assert.isFalse(readableStream.locked, 'stream is unlocked after closing tokenizer');
-        } finally {
-          await readableStream.cancel();
+                if (operation === 'abort') {
+                  await tokenizer.abort();
+                  assert.strictEqual(cancelCalls, readerType.cancelsSource ? 1 : 0);
+                  assert.strictEqual(readableStream.locked, readerType.cancelsSource);
+                }
+              } finally {
+                await tokenizer.close();
+              }
+              assert.strictEqual(cancelCalls, readerType.cancelsSource ? 1 : 0);
+              assert.isFalse(readableStream.locked, 'close releases the stream lock');
+              const reader = readableStream.getReader();
+              try {
+                const result = await reader.read();
+                if (readerType.cancelsSource) {
+                  assert.isTrue(result.done, 'the cancelled source has no remaining data');
+                  assert.isUndefined(result.value);
+                } else {
+                  assert.isFalse(result.done, 'another reader can continue reading the source');
+                  assert.deepEqual(result.value, new Uint8Array([2, 3]));
+                }
+              } finally {
+                reader.releaseLock();
+              }
+            } finally {
+              await readableStream.cancel();
+            }
+          });
         }
-      });
-
-      it('Default WebStreamReader', async () => {
-        const readableStream = stringToReadableStream('abc', true);
-        try {
-          assert.isFalse(readableStream.locked, 'stream is unlocked before initializing tokenizer');
-
-          const webStreamReader = makeWebStreamReader(readableStream);
-          assert.isTrue(readableStream.locked, 'stream is locked after initializing tokenizer');
-
-          await webStreamReader.close();
-          assert.isFalse(readableStream.locked, 'stream is unlocked after closing tokenizer');
-        } finally {
-          await readableStream.cancel();
-        }
-      });
+      }
     });
   });
 });

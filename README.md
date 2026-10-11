@@ -218,6 +218,8 @@ parse();
 
 Create a tokenizer from a [WHATWG ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) containing `Uint8Array` chunks.
 
+Uses a BYOB reader when supported by the stream, otherwise a default reader. Source cleanup differs between these readers; see [`close()`](#close-function) and [`abort()`](#abort-function).
+
 ```ts
 function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerOptions): ReadStreamTokenizer
 ```
@@ -376,6 +378,8 @@ close(): Promise<void>
 
 Await this method when finished with a tokenizer. For Node.js streams, it does not destroy the underlying stream; the caller remains responsible for its lifecycle.
 
+For Web streams, `close()` releases the reader lock. A BYOB reader leaves the source uncancelled, allowing another reader to continue reading it. A default reader cancels the source before releasing the lock, discarding remaining data. Bytes already read into tokenizer buffers, including peeked bytes, are not returned to the source.
+
 #### `abort` function
 
 Abort pending asynchronous stream operations.
@@ -385,6 +389,8 @@ abort(): Promise<void>
 ```
 
 This is a no-op for buffer, blob, and file tokenizers.
+
+For Web streams, `abort()` releases a BYOB reader's lock without cancelling the source. A default reader cancels the source but keeps its lock until `close()` is called. An `AbortSignal` invokes the same abort behavior.
 
 #### `supportsRandomAccess` function
 
