@@ -1428,6 +1428,72 @@ describe('fromStream with mayBeLess flag', () => {
   });
 
   describe('Node.js StreamReader', () => {
+    describe('Peeked data after normal stream close', () => {
+      it('preserves peeked bytes for repeated peeks and partial reads after EOF', async () => {
+        const data = Uint8Array.of(1, 2, 3, 4);
+        const stream = Readable.from([data], { objectMode: false });
+        const closed = new Promise<void>(resolve => stream.once('close', resolve));
+        const reader = new StreamReader(stream);
+        try {
+          const peeked = new Uint8Array(8);
+          assert.strictEqual(await reader.peek(peeked, true), data.length);
+          await closed;
+          assert.deepEqual(peeked.subarray(0, data.length), data);
+
+          const repeatedPeek = new Uint8Array(data.length);
+          assert.strictEqual(await reader.peek(repeatedPeek), data.length);
+          assert.deepEqual(repeatedPeek, data);
+
+          const first = new Uint8Array(2);
+          assert.strictEqual(await reader.read(first), first.length);
+          assert.deepEqual(first, data.subarray(0, 2));
+          const remainder = new Uint8Array(8);
+          assert.strictEqual(await reader.read(remainder, true), 2);
+          assert.deepEqual(remainder.subarray(0, 2), data.subarray(2));
+          assert.strictEqual(await reader.read(remainder, true), 0);
+          await nodeAssert.rejects(reader.read(new Uint8Array(1)), EndOfStreamError);
+        } finally {
+          await reader.close();
+          stream.destroy();
+        }
+      });
+
+      it('reads tokens from peeked data after the source closes during processing', async () => {
+        const stream = Readable.from([Uint8Array.of(1, 2, 3, 4)], { objectMode: false });
+        const closed = new Promise<void>(resolve => stream.once('close', resolve));
+        const tokenizer = await fromStream(stream);
+        try {
+          assert.strictEqual(await tokenizer.peekBuffer(new Uint8Array(8), { mayBeLess: true }), 4);
+          assert.strictEqual(tokenizer.position, 0);
+          await closed;
+          assert.strictEqual(await tokenizer.readToken(Token.UINT16_LE), 0x0201);
+          assert.strictEqual(await tokenizer.readToken(Token.UINT16_LE), 0x0403);
+          assert.strictEqual(tokenizer.position, 4);
+          await nodeAssert.rejects(tokenizer.readToken(Token.UINT8), EndOfStreamError);
+        } finally {
+          await tokenizer.close();
+          stream.destroy();
+        }
+      });
+
+      for (const action of ['abort', 'close'] as const) {
+        it(`still discards peeked bytes on explicit ${action} after normal stream close`, async () => {
+          const stream = Readable.from([Uint8Array.of(1, 2)], { objectMode: false });
+          const closed = new Promise<void>(resolve => stream.once('close', resolve));
+          const reader = new StreamReader(stream);
+          try {
+            assert.strictEqual(await reader.peek(new Uint8Array(4), true), 2);
+            await closed;
+            await reader[action]();
+            assert.strictEqual(await reader.read(new Uint8Array(2), true), 0);
+          } finally {
+            await reader.close();
+            stream.destroy();
+          }
+        });
+      }
+    });
+
     it('should throw an exception if constructor argument is not a stream', () => {
       const not_a_stream = new EventEmitter();
 
