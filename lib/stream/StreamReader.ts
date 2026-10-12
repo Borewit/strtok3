@@ -33,7 +33,12 @@ export class StreamReader extends AbstractStreamReader {
       }
     });
     this.s.once('error', err => this.reject(err));
-    this.s.once('close', () => this.abort());
+    this.s.once('close', () => {
+      // Normal EOF may leave peeked bytes that the caller still needs to consume.
+      if (!this.endOfStream) {
+        void this.abort();
+      }
+    });
   }
 
   /**
