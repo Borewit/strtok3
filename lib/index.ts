@@ -6,7 +6,8 @@ import type { ReadStreamTokenizer } from './ReadStreamTokenizer.js';
 
 export type { IGetToken, IToken } from '@tokenizer/token';
 export * from './core.js';
-export { FileTokenizer } from './FileTokenizer.js';
+export { FileTokenizer, type IFromFileOptions } from './FileTokenizer.js';
+export { NotRegularFileError } from './NotRegularFileError.js';
 
 interface StreamWithFile extends Readable {
   /**

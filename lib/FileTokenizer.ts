@@ -1,9 +1,21 @@
-import { type FileHandle, open as fsOpen } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import fs, { type FileHandle } from 'node:fs/promises';
 import { throwIfAborted } from './AbortSignal.js';
 import { AbstractTokenizer } from './AbstractTokenizer.js';
 import { getMaxBufferSize } from './BufferSizeError.js';
+import { NotRegularFileError } from './NotRegularFileError.js';
 import { EndOfStreamError } from './stream/index.js';
 import type { IRandomAccessFileInfo, IRandomAccessTokenizer, IReadChunkOptions, ITokenizerOptions } from './types.js';
+
+/** Options for creating a tokenizer from a file path. */
+export interface IFromFileOptions extends ITokenizerOptions {
+  /**
+   * Open without blocking on FIFOs and require the opened handle to refer to a regular file.
+   * Rejects with NotRegularFileError for an opened non-regular file and closes its handle.
+   * Disabled by default, preserving the existing file-opening behavior.
+   */
+  regularFileOnly?: boolean;
+}
 
 interface IFileTokenizerOptions extends ITokenizerOptions {
   /**
@@ -20,12 +32,17 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @param sourceFilePath File path
    * @param options Tokenizer options
    */
-  static async fromFile(sourceFilePath: string, options?: ITokenizerOptions): Promise<FileTokenizer> {
+  static async fromFile(sourceFilePath: string, options?: IFromFileOptions): Promise<FileTokenizer> {
     getMaxBufferSize(options);
     throwIfAborted(options?.abortSignal);
-    const fileHandle = await fsOpen(sourceFilePath, 'r');
+    const flags = options?.regularFileOnly ? constants.O_RDONLY | constants.O_NONBLOCK : 'r';
+    const fileHandle = await fs.open(sourceFilePath, flags);
     try {
       const stat = await fileHandle.stat();
+      if (options?.regularFileOnly && !stat.isFile()) {
+        throw new NotRegularFileError(sourceFilePath);
+      }
+
       return new FileTokenizer(fileHandle, {
         ...options,
         fileInfo: { ...options?.fileInfo, path: sourceFilePath, size: stat.size }
