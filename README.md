@@ -141,13 +141,13 @@ parse();
 Creates a [*tokenizer*](#tokenizer-object) from a local file.
 
 ```ts
-function fromFile(sourceFilePath: string, options?: ITokenizerOptions): Promise<FileTokenizer>
+function fromFile(sourceFilePath: string, options?: IFromFileOptions): Promise<FileTokenizer>
 ```  
 
 | Parameter      | Type     | Description                |
 |----------------|----------|----------------------------|
 | sourceFilePath | `string` | Path to file to read from  |
-| options | [ITokenizerOptions](#itokenizeroptions-interface) | Optional tokenizer options |
+| options | [IFromFileOptions](#ifromfileoptions-interface) | Optional file tokenizer options |
 
 > [!NOTE]
 > - Only available for Node.js engines
@@ -468,6 +468,36 @@ try {
   }
 } finally {
   await tokenizer.close();
+}
+```
+
+### `IFromFileOptions` interface
+
+Extends [ITokenizerOptions](#itokenizeroptions-interface) for `fromFile()`.
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| regularFileOnly | `boolean` | When `true`, opens with `O_RDONLY \| O_NONBLOCK` and checks that the opened handle refers to a regular file. Defaults to `false`, preserving existing behavior. |
+
+Use this option when non-regular inputs, such as FIFOs, should be rejected without waiting for a writer. Validation uses the opened handle, so replacing the pathname before opening does not bypass the check. Symbolic links to regular files are accepted.
+
+If an opened handle is not a regular file, `fromFile()` closes it and rejects with the exported `NotRegularFileError`. Its `path` property identifies the requested path. Opening errors, stat errors, and abort errors continue to propagate; any handle acquired by the factory is closed if setup fails. After success, the caller must close the tokenizer.
+
+```js
+import { fromFile, NotRegularFileError } from 'strtok3';
+
+try {
+  const tokenizer = await fromFile('somefile.bin', { regularFileOnly: true });
+  try {
+    // Parse the regular file.
+  } finally {
+    await tokenizer.close();
+  }
+} catch (error) {
+  if (!(error instanceof NotRegularFileError)) {
+    throw error;
+  }
+  // Handle an input that is not a regular file.
 }
 ```
 
