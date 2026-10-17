@@ -12,13 +12,17 @@ export { AbstractTokenizer } from './AbstractTokenizer.js';
 export { BufferSizeError } from './BufferSizeError.js';
 export { isRandomAccessTokenizer } from './isRandomAccessTokenizer.js';
 export { AbortError, type AnyWebByteStream, EndOfStreamError } from './stream/index.js';
+export { TokenizerBoundaryError } from './TokenizerBoundaryError.js';
+export { createTokenizerView } from './TokenizerView.js';
 export type {
   IFileInfo,
   IRandomAccessFileInfo,
   IRandomAccessTokenizer,
+  IRandomAccessTokenizerView,
   IReadChunkOptions,
   ITokenizer,
   ITokenizerOptions,
+  ITokenizerView,
   OnClose
 } from './types.js';
 
