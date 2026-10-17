@@ -92,7 +92,6 @@ jobs:
     name: "Coverage with Node.js 24"
     runs-on: ubuntu-latest
     needs: build
-    environment: ci
 
     steps:
 
@@ -116,11 +115,13 @@ jobs:
       - name: Test with coverage
         run: node node_modules/c8/bin/c8.js node node_modules/mocha/bin/mocha.js --no-config 'test/*.js'
 
-      - name: Upload coverage to Codacy
-        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v7
         with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: ./coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          disable_search: true
+          fail_ci_if_error: true
 
   test-bun:
     name: "Test with Bun ${{ matrix.bun-version }}"
