@@ -45,6 +45,16 @@ describe('isRandomAccessTokenizer', () => {
     });
   }
 
+  it('rejects position control and a known size when random access is disabled', async () => {
+    const tokenizer = fromBuffer(new Uint8Array([1, 2, 3]));
+    tokenizer.supportsRandomAccess = () => false;
+    try {
+      assert.isFalse(isRandomAccessTokenizer(tokenizer));
+    } finally {
+      await tokenizer.close();
+    }
+  });
+
   it('rejects random reads without position control on a third-party tokenizer', async () => {
     const tokenizer: ITokenizer = fromStream(Readable.from([]), { fileInfo: { size: 0 } });
     tokenizer.supportsRandomAccess = () => true;
