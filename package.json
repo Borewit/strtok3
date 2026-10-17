@@ -13,9 +13,11 @@
   "scripts": {
     "clean": "del-cli 'lib/**/*.js' 'lib/**/*.js.map' 'lib/**/*.d.ts' 'test/**/*.js' 'test/**/*.js.map'",
     "compile-src": "tsc -p lib  --sourceMap false",
+    "compile-src:dev": "tsc -p lib --sourceMap --inlineSources",
     "compile-test": "tsc -p test",
     "compile": "yarn run compile-src && yarn run compile-test",
     "build": "yarn run clean && yarn run compile",
+    "build:dev": "yarn run clean && yarn run compile-test && yarn run compile-src:dev",
     "prepublishOnly": "yarn run build",
     "eslint": "eslint lib test",
     "lint:md": "remark -u preset-lint-recommended .",
