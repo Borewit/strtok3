@@ -5,6 +5,7 @@
 [![DeepScan grade](https://deepscan.io/api/teams/5165/projects/8526/branches/103329/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=5165&pid=8526&bid=103329)
 [![Known Vulnerabilities](https://snyk.io/test/github/Borewit/strtok3/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Borewit/strtok3?targetFile=package.json)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/59dd6795e61949fb97066ca52e6097ef)](https://www.codacy.com/app/Borewit/strtok3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Borewit/strtok3&amp;utm_campaign=Badge_Grade)
+[![Codacy Coverage](https://api.codacy.com/project/badge/Coverage/59dd6795e61949fb97066ca52e6097ef)](https://app.codacy.com/app/Borewit/strtok3)
 # strtok3
 
 A promise-based streaming [*tokenizer*](#tokenizer-object) for [Node.js](https://nodejs.org) and browsers.
@@ -45,7 +46,7 @@ For TypeScript CommonJS backward compatibility, you can use [load-esm](https://g
 Use Node.js 24 LTS to build the project and install development dependencies.
 This build requirement is separate from the Node.js ≥ 18 runtime requirement in `package.json`.
 CI builds once with Node.js 24, then runs the compiled JavaScript unit tests across the Node.js compatibility matrix and Bun 1.2.x, 1.3.x, and 1.4.x.
-Coverage is collected in a separate Node.js 24 job.
+Coverage is collected in a separate Node.js 24 job and uploaded to Codacy.
 
 For local development, running the TypeScript tests with `tsx` requires Node.js 18.19+ (18.x) or Node.js ≥ 20.6.0.
 
