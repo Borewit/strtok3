@@ -10,6 +10,7 @@ import type { ITokenizerOptions } from './types.js';
 export type { IGetToken, IToken } from '@tokenizer/token';
 export { AbstractTokenizer } from './AbstractTokenizer.js';
 export { BufferSizeError } from './BufferSizeError.js';
+export { isRandomAccessTokenizer } from './isRandomAccessTokenizer.js';
 export { AbortError, type AnyWebByteStream, EndOfStreamError } from './stream/index.js';
 export type {
   IFileInfo,

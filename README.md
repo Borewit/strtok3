@@ -401,6 +401,25 @@ supportsRandomAccess(): boolean
 Returns `true` for buffer, blob, and file tokenizers, and `false` for stream tokenizers.
 When random access is supported, read and peek methods can use positions before `tokenizer.position`.
 
+#### `isRandomAccessTokenizer` helper
+
+Exported from both `strtok3` and `strtok3/core`:
+
+```ts
+import { isRandomAccessTokenizer, type ITokenizer } from 'strtok3';
+
+function skipToEnd(tokenizer: ITokenizer): void {
+  if (isRandomAccessTokenizer(tokenizer)) {
+    tokenizer.setPosition(tokenizer.fileInfo.size);
+  }
+}
+```
+
+Narrows `ITokenizer` to `IRandomAccessTokenizer` by checking `supportsRandomAccess()`,
+a callable `setPosition`, and a numeric file size. A known size alone does not imply
+random access. Existing third-party implementations can keep returning a boolean
+from `supportsRandomAccess()` without changing their interface.
+
 #### `setPosition` function
 
 Available on buffer, blob, and file tokenizers (`IRandomAccessTokenizer`).
