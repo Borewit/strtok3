@@ -68,6 +68,7 @@ Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer-objec
 - [fromFile](#fromfile-function)*
 - [fromStream](#fromstream-function)*
 - [fromWebStream](#fromwebstream-function)
+- [createTokenizerView](#createtokenizerview-function)
 
 > [!NOTE]
 > `fromFile` requires Node.js file-system APIs, and `fromStream` requires a Node.js readable stream.
@@ -247,6 +248,83 @@ async function parse() {
 
 parse();
 ```
+
+#### `createTokenizerView()` function
+
+Borrow a finite range of an existing tokenizer without buffering it or taking
+ownership of its input. Available from both `strtok3` and `strtok3/core`.
+
+```ts
+function createTokenizerView(source: ITokenizer, length: number): ITokenizerView
+```
+
+The view starts at `source.position`, with local `position` zero and
+`fileInfo.size` equal to `length`. Creation does not read or skip bytes. The size
+is the declared range, so it can exceed the actual remaining input. The outer
+file's MIME type, path, and URL are not copied to the view.
+
+```js
+import { createTokenizerView, fromBuffer } from 'strtok3';
+import { UINT8 } from 'token-types';
+
+const source = fromBuffer(new Uint8Array([10, 20, 30, 40, 50]));
+await source.ignore(1);
+const chunk = createTokenizerView(source, 3); // source bytes [20, 30, 40]
+
+console.log(await chunk.readToken(UINT8)); // 20; chunk.position = 1
+const child = chunk.createView(1);         // same as createTokenizerView(chunk, 1)
+console.log(await child.readToken(UINT8)); // 30; chunk.position = 2
+await child.close();                      // source stays open, at position 3
+
+console.log(chunk.remaining);             // 1
+await chunk.consumeRemainder();           // exactly consume 40, or throw on truncation
+await chunk.close();
+console.log(await source.readToken(UINT8)); // 50
+await source.close();
+```
+
+All read and peek positions, including explicit offsets and `setPosition()`, are
+relative to the view's start. Nested views must fit inside their parent's
+remaining range. A view exposes `setPosition()` and reports random access only
+when its source supports it; a stream with a known size remains forward-only.
+The overload for an `IRandomAccessTokenizer` returns an
+`IRandomAccessTokenizerView`, including for nested `createView()` calls.
+
+A request crossing the declared boundary rejects with `TokenizerBoundaryError`,
+a `RangeError` with `position`, `length`, and `size` properties. This applies to
+reads, peeks, tokens, and skips, even with `mayBeLess: true`. Invalid lengths,
+offsets, and unsafe offset arithmetic reject before allocating token buffers or
+consuming input. The source's token allocation and stream lookahead limits still
+apply through nested views.
+
+A request inside the view that encounters truncated underlying input rejects
+with `EndOfStreamError`. Buffer reads and peeks with `mayBeLess: true` may return
+fewer bytes within the requested range; token reads and peeks always require a
+complete token. A failed exact read may have consumed part of the input; the
+shared cursor reflects the bytes consumed. Peeks do not advance that cursor.
+
+`ignore()` preserves the source's skip behavior, which may return a shorter
+count or reject at EOF. Use `consumeRemainder()` when the entire declared
+remainder must exist: it returns the number consumed, or rejects with
+`EndOfStreamError`. On random-access sources it verifies the final byte and
+advances the cursor without reading the whole remainder. On streams it drains
+the remainder using the source's bounded skip buffers.
+
+The source, parent, child, and sibling views share one cursor. Use them
+sequentially, and close a child before resuming its parent. `close()` is
+idempotent, does not drain the remainder, and never closes or aborts the source.
+After a partially consumed child closes, the parent resumes at that same byte,
+not at the child's declared end. Call `child.consumeRemainder()` before closing
+when the parent should resume after the entire child range. Closed views reject
+further operations and keep their last local position; closing a parent view
+also prevents its children from being used.
+
+Overlapping operations through a view or its parent/child chain are rejected;
+`close()` also rejects while that view has an active operation. Direct operations
+on the original source, or separate views created from it, cannot be coordinated
+by a view, so callers must keep those sequential too. Explicit `abort()`
+propagates to the shared source to cancel pending input and affects its other
+users; it also closes the view.
 
 ### `Tokenizer` object
 The *tokenizer* is an abstraction of a [stream](https://nodejs.org/api/stream.html), file or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array), allowing _reading_ or _peeking_ from the stream.

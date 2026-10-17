@@ -170,3 +170,21 @@ export interface ITokenizerOptions {
    */
   abortSignal?: AbortSignal;
 }
+
+/** A finite, borrowed range of a tokenizer with positions relative to its start. */
+export interface ITokenizerView extends ITokenizer {
+  /** Declared range size; this is not a guarantee that the source contains all bytes. */
+  readonly fileInfo: IRandomAccessFileInfo;
+  /** Declared bytes between the shared cursor and the end of the view. */
+  readonly remaining: number;
+  /** Create a nested view at the current position without consuming input. */
+  createView(length: number): ITokenizerView;
+  /** Consume exactly the remaining bytes, rejecting with EndOfStreamError on truncation. */
+  consumeRemainder(): Promise<number>;
+}
+
+/** A view exposes position control only when its source supports random access. */
+export interface IRandomAccessTokenizerView extends ITokenizerView, IRandomAccessTokenizer {
+  readonly fileInfo: IRandomAccessFileInfo;
+  createView(length: number): IRandomAccessTokenizerView;
+}
