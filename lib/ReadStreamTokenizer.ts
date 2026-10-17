@@ -87,8 +87,11 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
     if (normOptions.length > 0) {
       try {
-        // Preserve peeked bytes even if the exact request turns out to be truncated.
-        bytesRead = await this.streamReader.peek(uint8Array.subarray(0, normOptions.length), true);
+        // The reader retains this buffer. Keep it independent of caller-owned memory,
+        // including partial bytes retained when an exact peek encounters truncation.
+        const peekBuffer = new Uint8Array(normOptions.length);
+        bytesRead = await this.streamReader.peek(peekBuffer, true);
+        uint8Array.set(peekBuffer.subarray(0, bytesRead));
       } catch (err) {
         if (options?.mayBeLess && err instanceof EndOfStreamError) {
           return 0;

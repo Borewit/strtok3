@@ -21,6 +21,19 @@ const factories: { name: string; make: () => ITokenizer | Promise<ITokenizer> }[
           }
         })
       )
+  },
+  {
+    name: 'BYOB web',
+    make: () =>
+      fromWebStream(
+        new ReadableStream<Uint8Array>({
+          type: 'bytes',
+          start(controller) {
+            controller.enqueue(Uint8Array.from(payload));
+            controller.close();
+          }
+        })
+      )
   }
 ];
 
@@ -32,6 +45,40 @@ for (const { name, make } of factories) {
         await expect(tokenizer.readToken(new Uint8ArrayType(4))).to.be.rejectedWith(EndOfStreamError);
         assert.strictEqual(tokenizer.position, 3);
         assert.strictEqual(await tokenizer.readBuffer(new Uint8Array(1), { mayBeLess: true }), 0);
+      } finally {
+        await tokenizer.close();
+      }
+    });
+
+    for (const mayBeLess of [false, true]) {
+      it(`retains its own partial peek bytes when the caller reuses its buffer (mayBeLess=${mayBeLess})`, async () => {
+        const tokenizer = await make();
+        try {
+          const buffer = new Uint8Array(4).fill(0xff);
+          const peek = tokenizer.peekBuffer(buffer, { mayBeLess });
+          if (mayBeLess) {
+            assert.strictEqual(await peek, payload.length);
+          } else {
+            await expect(peek).to.be.rejectedWith(EndOfStreamError);
+          }
+          assert.deepEqual(buffer.subarray(0, payload.length), payload);
+          assert.strictEqual(buffer[3], 0xff, 'only bytes actually peeked may be copied');
+          assert.strictEqual(tokenizer.position, 0);
+          buffer.fill(0);
+          assert.deepEqual(await tokenizer.readToken(new Uint8ArrayType(payload.length)), payload);
+        } finally {
+          await tokenizer.close();
+        }
+      });
+    }
+
+    it('retains its own bytes after a successful exact peek', async () => {
+      const tokenizer = await make();
+      try {
+        const buffer = new Uint8Array(2);
+        assert.strictEqual(await tokenizer.peekBuffer(buffer), 2);
+        buffer.fill(0);
+        assert.deepEqual(await tokenizer.readToken(new Uint8ArrayType(payload.length)), payload);
       } finally {
         await tokenizer.close();
       }
