@@ -148,6 +148,22 @@ describe('Maximum dynamically sized buffers', () => {
     });
   }
 
+  for (const factory of factories.filter(({ name }) => ['buffer', 'Blob', 'file'].includes(name))) {
+    it(`${factory.name} clamps ignore to the remaining input and returns zero at EOF`, async () => {
+      const tokenizer = await factory.make();
+      try {
+        assert.strictEqual(await tokenizer.ignore(payload.length - 2), payload.length - 2);
+        assert.strictEqual(await tokenizer.ignore(10), 2);
+        assert.strictEqual(tokenizer.position, payload.length);
+        assert.strictEqual(await tokenizer.ignore(1), 0);
+        assert.strictEqual(tokenizer.position, payload.length);
+        assert.strictEqual(await tokenizer.readBuffer(new Uint8Array(1), { mayBeLess: true }), 0);
+      } finally {
+        await tokenizer.close();
+      }
+    });
+  }
+
   for (const length of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1]) {
     for (const method of ['readToken', 'peekToken'] as const) {
       it(`${method} rejects invalid token length ${length}`, async () => {

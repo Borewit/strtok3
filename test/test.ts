@@ -1533,6 +1533,32 @@ describe('fromStream with mayBeLess flag', () => {
         });
       }
 
+      for (const failure of ['throw', 'close'] as const) {
+        it(`settles a pending read without writing bytes when the source synchronously ${failure}s`, async () => {
+          const stream = new PassThrough();
+          const reader = new StreamReader(stream);
+          const output = Uint8Array.of(99);
+          const error = new Error('synchronous read failure');
+          const rejected = nodeAssert.rejects(reader.read(output), failure === 'throw' ? error : AbortError);
+          try {
+            stream.read = () => {
+              if (failure === 'throw') {
+                throw error;
+              }
+              stream.emit('close');
+              return Uint8Array.of(42);
+            };
+            stream.emit('readable');
+            await rejected;
+            assert.deepEqual(output, Uint8Array.of(99));
+            assert.strictEqual(stream.listenerCount('readable'), 0);
+          } finally {
+            await reader.close();
+            stream.destroy();
+          }
+        });
+      }
+
       it('settles every pending read when cancellation occurs', async () => {
         const stream = new PassThrough();
         const reader = new StreamReader(stream);
