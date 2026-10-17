@@ -66,8 +66,8 @@ If you find this project useful and would like to support its development, consi
 Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer-object):
 - [fromBlob](#fromblob-function)
 - [fromBuffer](#frombuffer-function)
-- [fromFile](#fromfile-function)*
-- [fromStream](#fromstream-function)*
+- [fromFile](#fromfile-function)
+- [fromStream](#fromstream-function)
 - [fromWebStream](#fromwebstream-function)
 - [createTokenizerView](#createtokenizerview-function)
 
@@ -76,6 +76,8 @@ Use one of the methods to instantiate an [*abstract tokenizer*](#tokenizer-objec
 > In browsers, use `fromBlob`, `fromBuffer`, or `fromWebStream`.
 
 All methods return a [`Tokenizer`](#tokenizer-object), either directly or via a promise.
+The `strtok3/core` entry point exports all factories except `fromFile` and can be used
+without Node.js file-system APIs. In browsers, `strtok3` resolves to this core entry point.
 
 #### `fromBlob()` function
 
@@ -343,8 +345,17 @@ It can also be translated in chunked reads, as done in [@tokenizer/http](https:/
 _Read_ methods advance the stream pointer, while _peek_ methods do not.
 
 There are two kinds of functions:
-1. *read* methods: used to read a *token* or bytes into a buffer from the [*tokenizer*](#tokenizer-object). The position of the *tokenizer-stream* will advance with the number of bytes read.
+1. *read* methods: used to read a *token* or bytes into a buffer from the [*tokenizer*](#tokenizer-object). After a successful read, `tokenizer.position` is the starting position of the read plus the number of bytes read. An explicit position can skip ahead or, for random-access tokenizers, move backwards.
 2. *peek* methods: same as the read, but it will *not* advance the pointer. It allows to read (peek) ahead.
+
+Reads and peeks require the full requested length unless `mayBeLess: true` is passed to
+`readBuffer` or `peekBuffer`. Otherwise, insufficient input rejects with the exported
+`EndOfStreamError`. Token methods always require the full token.
+
+A failed exact stream read can consume partial input and advance `tokenizer.position`
+by the number of bytes consumed. A failed exact stream peek leaves `tokenizer.position`
+unchanged and retains the partial bytes for subsequent reads. Caller-provided buffers
+may contain partial data even when the operation rejects.
 
 #### `readBuffer` function
 
@@ -421,6 +432,8 @@ readNumber(token: IToken<number>): Promise<number>
 | token      | [IToken<number>](#token-object) | Numeric token to read from the tokenizer-stream.   |
 
 A promise resolving to a numeric value read and decoded from the *tokenizer-stream*.
+Uses a reusable 8-byte buffer, so `token.len` must be at most 8 bytes.
+For larger tokens or values such as `bigint`, use `readToken` instead.
 
 #### `peekNumber` function
 
@@ -432,10 +445,11 @@ peekNumber(token: IToken<number>): Promise<number>
 
 Returns a promise resolving to the decoded numeric value.
 Like `readNumber`, rejects with `EndOfStreamError` if the token cannot be read in full.
+The same 8-byte token limit applies; use `peekToken` for larger tokens or values such as `bigint`.
 
 #### `ignore` function
 
-Advance the offset pointer with the token number of bytes provided.
+Advance the offset pointer by the given number of bytes.
 
 ```ts
 ignore(length: number): Promise<number>
@@ -443,7 +457,7 @@ ignore(length: number): Promise<number>
 
 | Parameter  | Type   | Description                                                      |
 |------------|--------|------------------------------------------------------------------|
-| length     | number | Non-negative number of bytes to ignore. Advances `tokenizer.position`. |
+| length     | number | Non-negative safe integer number of bytes to ignore. Advances `tokenizer.position`. |
 
 Returns a promise resolving to the number of bytes ignored.
 Buffer, blob, and file tokenizers stop at the known file size. Stream tokenizers reject with `EndOfStreamError` if the requested bytes are unavailable.
@@ -468,6 +482,10 @@ abort(): Promise<void>
 ```
 
 This is a no-op for buffer, blob, and file tokenizers.
+
+For Node.js streams, pending reads reject with the exported `AbortError`, and buffered
+peek data is discarded. The underlying stream is not destroyed. Calling `close()` or
+aborting the configured `AbortSignal` has the same effect on pending Node.js stream reads.
 
 For Web streams, `abort()` releases a BYOB reader's lock without cancelling the source. A default reader cancels the source but keeps its lock until `close()` is called. An `AbortSignal` invokes the same abort behavior.
 
@@ -605,9 +623,14 @@ Each attribute is optional:
 
 | Attribute | Type    | Description                                                                                                                                                                                                                   |
 |-----------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| length    | number  | Requested number of bytes to read or peek. Defaults to the target buffer length. |
-| position  | number  | Byte offset to read or peek from. Defaults to [tokenizer.position](#tokenizer-attributes) when omitted. Earlier positions require random access. |
+| length    | number  | Requested number of bytes to read or peek. Must be a non-negative safe integer no larger than the target buffer length. Defaults to the target buffer length. |
+| position  | number  | Byte offset to read or peek from. Must be a non-negative safe integer. Defaults to [tokenizer.position](#tokenizer-attributes) when omitted. Earlier positions require random access. |
 | mayBeLess | boolean | If `true`, allows fewer than the requested number of bytes to be read or peeked instead of throwing `EndOfStreamError`. Defaults to `false`. |
+
+Invalid lengths or positions, including a `position + length` that exceeds the safe
+integer range, reject with `RangeError`. Requesting an earlier position on a tokenizer
+without random access rejects with `Error`. Data is written starting at index 0 of the
+target buffer. To write at an offset, pass `buffer.subarray(offset)` as the target buffer.
 
 Example usage:
 ```js
