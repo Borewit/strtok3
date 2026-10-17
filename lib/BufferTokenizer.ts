@@ -40,7 +40,7 @@ export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessT
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(uint8Array, options);
 
-    const bytes2read = Math.min(this.uint8Array.length - normOptions.position, normOptions.length);
+    const bytes2read = Math.max(0, Math.min(this.uint8Array.length - normOptions.position, normOptions.length));
     if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
       throw new EndOfStreamError();
     }

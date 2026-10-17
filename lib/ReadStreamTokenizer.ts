@@ -40,12 +40,10 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
       return 0;
     }
     let bytesRead = 0;
+    // Account for partial input before reporting an exact-read failure.
     while (bytesRead < normOptions.length) {
       const chunkLength = Math.min(this.maxBufferSize, normOptions.length - bytesRead);
-      const count = await this.streamReader.read(
-        uint8Array.subarray(bytesRead, bytesRead + chunkLength),
-        normOptions.mayBeLess
-      );
+      const count = await this.streamReader.read(uint8Array.subarray(bytesRead, bytesRead + chunkLength), true);
       bytesRead += count;
       this.position += count;
       if (count < chunkLength) {
@@ -89,7 +87,8 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
 
     if (normOptions.length > 0) {
       try {
-        bytesRead = await this.streamReader.peek(uint8Array.subarray(0, normOptions.length), normOptions.mayBeLess);
+        // Preserve peeked bytes even if the exact request turns out to be truncated.
+        bytesRead = await this.streamReader.peek(uint8Array.subarray(0, normOptions.length), true);
       } catch (err) {
         if (options?.mayBeLess && err instanceof EndOfStreamError) {
           return 0;
