@@ -1,7 +1,16 @@
 import { AbstractStreamReader } from './AbstractStreamReader.js';
 
+interface WebStreamByteReader {
+  // Both Node.js and browser BYOB readers accept non-shared byte buffers.
+  read(
+    view: Uint8Array<ArrayBuffer>,
+    options?: ReadableStreamBYOBReaderReadOptions
+  ): Promise<ReadableStreamReadResult<Uint8Array<ArrayBuffer>>>;
+  releaseLock(): void;
+}
+
 export abstract class WebStreamReader extends AbstractStreamReader {
-  public constructor(protected reader: ReadableStreamDefaultReader | ReadableStreamBYOBReader) {
+  public constructor(protected reader: WebStreamByteReader) {
     super();
   }
 
