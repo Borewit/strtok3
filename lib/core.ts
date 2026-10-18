@@ -37,15 +37,7 @@ export function fromStream(stream: Readable, options?: ITokenizerOptions): ReadS
   getMaxBufferSize(options);
   throwIfAborted(options?.abortSignal);
   const streamReader = new StreamReader(stream);
-  const _options: ITokenizerOptions = options ?? {};
-  const chainedClose = _options.onClose;
-  _options.onClose = async () => {
-    await streamReader.close();
-    if (chainedClose) {
-      return chainedClose();
-    }
-  };
-  return new ReadStreamTokenizer(streamReader, _options);
+  return new ReadStreamTokenizer(streamReader, options);
 }
 
 /**
@@ -59,15 +51,7 @@ export function fromWebStream(webStream: AnyWebByteStream, options?: ITokenizerO
   getMaxBufferSize(options);
   throwIfAborted(options?.abortSignal);
   const webStreamReader = makeWebStreamReader(webStream);
-  const _options: ITokenizerOptions = options ?? {};
-  const chainedClose = _options.onClose;
-  _options.onClose = async () => {
-    await webStreamReader.close();
-    if (chainedClose) {
-      return chainedClose();
-    }
-  };
-  return new ReadStreamTokenizer(webStreamReader, _options);
+  return new ReadStreamTokenizer(webStreamReader, options);
 }
 
 /**
