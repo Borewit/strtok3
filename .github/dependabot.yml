@@ -9,6 +9,10 @@ updates:
       time: "06:00"
     open-pull-requests-limit: 30
     versioning-strategy: increase
+    ignore:
+      # Keep Mocha on 11 to preserve supported Node.js versions.
+      - dependency-name: mocha
+        update-types: ["version-update:semver-major"]
     target-branch: "master"
     labels:
       - dependencies

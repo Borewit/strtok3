@@ -70,7 +70,7 @@
     "chai": "^6.3.0",
     "chai-as-promised": "^8.0.2",
     "del-cli": "^8.0.1",
-    "mocha": "^11",
+    "mocha": "^11.8.0",
     "node-readable-to-web-readable-stream": "^0.4.2",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.1",

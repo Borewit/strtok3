@@ -2673,7 +2673,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mocha@npm:^11":
+"mocha@npm:^11.8.0":
   version: 11.8.0
   resolution: "mocha@npm:11.8.0"
   dependencies:
@@ -3555,7 +3555,7 @@ __metadata:
     chai: "npm:^6.3.0"
     chai-as-promised: "npm:^8.0.2"
     del-cli: "npm:^8.0.1"
-    mocha: "npm:^11"
+    mocha: "npm:^11.8.0"
     node-readable-to-web-readable-stream: "npm:^0.4.2"
     remark-cli: "npm:^12.0.1"
     remark-preset-lint-recommended: "npm:^7.0.1"
