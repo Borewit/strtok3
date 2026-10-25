@@ -115,6 +115,9 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     }
     this.validateLength(length, 'ignore length');
     this.validateLength(this.position + length, 'end position');
+    if (length > 0 && this.fileInfo.size !== undefined && length > this.fileInfo.size - this.position) {
+      throw new EndOfStreamError();
+    }
     const bufSize = Math.min(ignoreChunkSize, this.maxBufferSize, length);
     const buf = new Uint8Array(bufSize);
     let totBytesRead = 0;

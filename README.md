@@ -461,6 +461,10 @@ ignore(length: number): Promise<number>
 
 Returns a promise resolving to the number of bytes ignored.
 Buffer, blob, and file tokenizers stop at the known file size. Stream tokenizers reject with `EndOfStreamError` if the requested bytes are unavailable.
+When a stream has a known size, skips beyond that size reject before allocating
+a skip buffer or consuming input, including skips through tokenizer views.
+If the size is unknown, or the stream ends before its advertised size, a failed
+skip may consume available bytes before rejecting; `position` reflects those bytes.
 
 #### `close` function
 Clean up resources, such as closing a file pointer if applicable.
