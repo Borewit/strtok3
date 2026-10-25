@@ -1530,6 +1530,206 @@ describe('fromStream with mayBeLess flag', () => {
   });
 
   describe('Node.js StreamReader', () => {
+    describe('Lifecycle listener cleanup', () => {
+      for (const factory of [coreFromStream, fromStream]) {
+        for (const action of ['abort', 'close', 'signal', 'error', 'source-close'] as const) {
+          it(`detaches only its own listeners after ${action} (${factory.name}, async=${factory === fromStream})`, async () => {
+            const stream = new PassThrough();
+            const events = ['readable', 'end', 'error', 'close'] as const;
+            const ownerListener = () => undefined;
+            for (const event of events) {
+              stream.on(event, ownerListener);
+            }
+            const controller = new AbortController();
+            const tokenizer = await factory(stream, { abortSignal: controller.signal });
+            const output = Uint8Array.of(99);
+            const error = new Error('source failure');
+            const rejected = nodeAssert.rejects(tokenizer.readBuffer(output), action === 'error' ? error : AbortError);
+            try {
+              if (action === 'signal') {
+                controller.abort();
+              } else if (action === 'error') {
+                stream.emit('error', error);
+              } else if (action === 'source-close') {
+                stream.emit('close');
+              } else {
+                await tokenizer[action]();
+              }
+              await rejected;
+              for (const event of events) {
+                assert.deepEqual(stream.listeners(event), [ownerListener], event);
+              }
+              assert.deepEqual(output, Uint8Array.of(99));
+              assert.isFalse(stream.destroyed);
+              await tokenizer.close();
+              await tokenizer.abort();
+              for (const event of events) {
+                assert.deepEqual(stream.listeners(event), [ownerListener], event);
+              }
+              stream.write(Uint8Array.of(42));
+              assert.deepEqual(new Uint8Array(stream.read()), Uint8Array.of(42));
+            } finally {
+              await tokenizer.close();
+              stream.destroy();
+            }
+          });
+        }
+      }
+
+      it('does not accumulate listeners when repeatedly borrowing an open stream', async () => {
+        const stream = new PassThrough();
+        try {
+          for (let count = 0; count < 12; count++) {
+            const tokenizer = coreFromStream(stream);
+            await tokenizer.close();
+            for (const event of ['end', 'error', 'close']) {
+              assert.strictEqual(stream.listenerCount(event), 0, event);
+            }
+          }
+          assert.isFalse(stream.destroyed);
+        } finally {
+          stream.destroy();
+        }
+      });
+
+      it('detaches lifecycle listeners on source end without close while retaining peeked bytes', async () => {
+        const stream = Readable.from([Uint8Array.of(42)], { objectMode: false, emitClose: false });
+        const ended = new Promise<void>(resolve => stream.once('end', resolve));
+        const tokenizer = coreFromStream(stream);
+        try {
+          assert.strictEqual(await tokenizer.peekBuffer(new Uint8Array(2), { mayBeLess: true }), 1);
+          await ended;
+          assert.strictEqual(stream.listenerCount('end'), 0);
+          assert.deepEqual(
+            stream.listeners('error').map(listener => listener.name),
+            ['handlePostEndError']
+          );
+          assert.deepEqual(
+            stream.listeners('close').map(listener => listener.name),
+            ['removePostEndErrorHandler']
+          );
+          assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 42);
+        } finally {
+          await tokenizer.close();
+          stream.destroy();
+        }
+      });
+
+      it('handles a source destruction error emitted after end and tokenizer close', async () => {
+        const destroyError = new Error('destroy failed after end');
+        const stream = new Readable({
+          emitClose: false,
+          read() {
+            this.push(Uint8Array.of(42));
+            this.push(null);
+          },
+          destroy(_error, callback) {
+            setImmediate(() => callback(destroyError));
+          }
+        });
+        const error = new Promise<Error>(resolve => stream.once('error', resolve));
+        const tokenizer = coreFromStream(stream);
+        try {
+          assert.strictEqual(await tokenizer.peekBuffer(new Uint8Array(2), { mayBeLess: true }), 1);
+          await tokenizer.close();
+          assert.include(
+            stream.listeners('error').map(listener => listener.name),
+            'handlePostEndError'
+          );
+          assert.include(
+            stream.listeners('close').map(listener => listener.name),
+            'removePostEndErrorHandler'
+          );
+          assert.strictEqual(await error, destroyError);
+          for (const event of ['end', 'error', 'close']) {
+            assert.strictEqual(stream.listenerCount(event), 0, event);
+          }
+        } finally {
+          await tokenizer.close();
+          stream.destroy();
+        }
+      });
+
+      for (const failure of ['stat', 'metadata'] as const) {
+        it(`cleans up when fromStream fails during ${failure} discovery`, async () => {
+          const stream = new PassThrough();
+          Object.assign(stream, {
+            path: getResourcePath(failure === 'stat' ? 'file-does-not-exist' : 'test1.dat')
+          });
+          const controller = new AbortController();
+          try {
+            await nodeAssert.rejects(
+              fromStream(stream, { abortSignal: controller.signal, fileInfo: Object.freeze({}) }),
+              failure === 'stat' ? { code: 'ENOENT' } : TypeError
+            );
+            for (const event of ['readable', 'end', 'error', 'close']) {
+              assert.strictEqual(stream.listenerCount(event), 0, event);
+            }
+            assert.strictEqual(getEventListeners(controller.signal, 'abort').length, 0);
+            assert.isFalse(stream.destroyed);
+          } finally {
+            stream.destroy();
+          }
+        });
+      }
+
+      it('handles a pending file-open error when metadata discovery fails', () => {
+        const sourceTests = import.meta.url.endsWith('.ts');
+        const indexUrl = new URL(sourceTests ? '../lib/index.ts' : '../lib/index.js', import.meta.url).href;
+        const missingFile = new URL('resources/file-does-not-exist', import.meta.url).href;
+        const result = spawnSync(
+          process.execPath,
+          [
+            '--unhandled-rejections=strict',
+            '--input-type=module',
+            ...(sourceTests ? ['--import', 'tsx'] : []),
+            '--eval',
+            `
+              import nodeAssert from 'node:assert/strict';
+              import { createReadStream } from 'node:fs';
+              import { setImmediate as waitForImmediate } from 'node:timers/promises';
+              import { fromStream } from ${JSON.stringify(indexUrl)};
+              const stream = createReadStream(new URL(${JSON.stringify(missingFile)}), { autoClose: false });
+              await nodeAssert.rejects(fromStream(stream), { code: 'ENOENT' });
+              await waitForImmediate();
+              nodeAssert.strictEqual(stream.listenerCount('error'), 0);
+            `
+          ],
+          { encoding: 'utf8', timeout: 5000 }
+        );
+        assert.strictEqual(result.error, undefined, result.error?.message);
+        assert.strictEqual(result.status, 0, result.stderr);
+      });
+
+      it('does not wait for file-open events after the stream is destroyed', async () => {
+        const stream = Object.assign(new PassThrough(), {
+          path: getResourcePath('file-does-not-exist'),
+          pending: true
+        });
+        const closed = new Promise<void>(resolve => stream.once('close', resolve));
+        stream.destroy();
+        await closed;
+
+        await nodeAssert.rejects(fromStream(stream), { code: 'ENOENT' });
+        for (const event of ['readable', 'end', 'error', 'close']) {
+          assert.strictEqual(stream.listenerCount(event), 0, event);
+        }
+      });
+
+      it('does not wait for file-open events after the stream has errored', async () => {
+        const stream = Object.assign(new PassThrough(), {
+          path: getResourcePath('file-does-not-exist'),
+          pending: true
+        });
+        Object.defineProperty(stream, 'errored', { value: new Error('open failed') });
+
+        await nodeAssert.rejects(fromStream(stream), { code: 'ENOENT' });
+        for (const event of ['readable', 'end', 'error', 'close']) {
+          assert.strictEqual(stream.listenerCount(event), 0, event);
+        }
+      });
+    });
+
     describe('Peeked data after normal stream close', () => {
       it('preserves peeked bytes for repeated peeks and partial reads after EOF', async () => {
         const data = Uint8Array.of(1, 2, 3, 4);

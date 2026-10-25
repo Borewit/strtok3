@@ -10,6 +10,14 @@ interface IReadRequest {
   onReadable: () => void;
 }
 
+function handlePostEndError(this: Readable): void {
+  this.removeListener('close', removePostEndErrorHandler);
+}
+
+function removePostEndErrorHandler(this: Readable): void {
+  this.removeListener('error', handlePostEndError);
+}
+
 /**
  * Node.js Readable Stream Reader
  * Ref: https://nodejs.org/api/stream.html#readable-streams
@@ -20,25 +28,37 @@ export class StreamReader extends AbstractStreamReader {
    */
   private pendingRequests = new Set<IReadRequest>();
 
+  private onEnd = (): void => {
+    this.endOfStream = true;
+    this.removeLifecycleListeners();
+    // Auto-destruction may emit an error after `end`. These shared handlers do
+    // not retain this reader when `emitClose` is disabled.
+    this.s.once('error', handlePostEndError);
+    this.s.once('close', removePostEndErrorHandler);
+    for (const request of this.pendingRequests) {
+      this.removeRequest(request);
+      request.deferred.resolve(0);
+    }
+  };
+
+  private onError = (err: Error): void => this.reject(err);
+
+  private onClose = (): void => {
+    this.removeLifecycleListeners();
+    // Normal EOF may leave peeked bytes that the caller still needs to consume.
+    if (!this.endOfStream) {
+      void this.abort();
+    }
+  };
+
   public constructor(private s: Readable) {
     super();
     if (!s.read || !s.once) {
       throw new Error('Expected an instance of stream.Readable');
     }
-    this.s.once('end', () => {
-      this.endOfStream = true;
-      for (const request of this.pendingRequests) {
-        this.removeRequest(request);
-        request.deferred.resolve(0);
-      }
-    });
-    this.s.once('error', err => this.reject(err));
-    this.s.once('close', () => {
-      // Normal EOF may leave peeked bytes that the caller still needs to consume.
-      if (!this.endOfStream) {
-        void this.abort();
-      }
-    });
+    this.s.once('end', this.onEnd);
+    this.s.once('error', this.onError);
+    this.s.once('close', this.onClose);
   }
 
   /**
@@ -101,7 +121,14 @@ export class StreamReader extends AbstractStreamReader {
     this.pendingRequests.delete(request);
   }
 
+  private removeLifecycleListeners(): void {
+    this.s.removeListener('end', this.onEnd);
+    this.s.removeListener('error', this.onError);
+    this.s.removeListener('close', this.onClose);
+  }
+
   private reject(err: Error) {
+    this.removeLifecycleListeners();
     this.interrupted = true;
     this.peekQueue = [];
     for (const request of this.pendingRequests) {
