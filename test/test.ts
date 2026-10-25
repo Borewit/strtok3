@@ -1155,6 +1155,61 @@ describe('Matrix tests', () => {
       .filter(tokenizerType => tokenizerType.randomRead)
       .forEach(tokenizerType => {
         describe(tokenizerType.name, () => {
+          for (const position of [
+            -1,
+            0.5,
+            Number.NaN,
+            Number.POSITIVE_INFINITY,
+            Number.NEGATIVE_INFINITY,
+            Number.MAX_SAFE_INTEGER + 1
+          ]) {
+            it(`rejects invalid seek position ${position} without changing the cursor`, async () => {
+              const tokenizer = (await getTokenizerWithData('\x01\x02\x03', tokenizerType)) as IRandomAccessTokenizer;
+              try {
+                tokenizer.setPosition(1);
+                assert.throws(() => tokenizer.setPosition(position), RangeError, 'position');
+                assert.strictEqual(tokenizer.position, 1);
+                assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 2);
+              } finally {
+                await tokenizer.close();
+              }
+            });
+          }
+
+          for (const position of [3, 4]) {
+            it(`keeps ignores non-negative without moving backward at position ${position}`, async () => {
+              const tokenizer = (await getTokenizerWithData('\x01\x02\x03', tokenizerType)) as IRandomAccessTokenizer;
+              try {
+                tokenizer.setPosition(position);
+                for (const length of [0, 1, 10]) {
+                  assert.strictEqual(await tokenizer.ignore(length), 0);
+                  assert.strictEqual(tokenizer.position, position);
+                }
+                assert.strictEqual(await tokenizer.readBuffer(new Uint8Array(1), { mayBeLess: true }), 0);
+                assert.strictEqual(tokenizer.position, position);
+                tokenizer.setPosition(0);
+                assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 1);
+              } finally {
+                await tokenizer.close();
+              }
+            });
+          }
+
+          it('accepts the maximum safe seek position and rejects unsafe ignore arithmetic', async () => {
+            const tokenizer = (await getTokenizerWithData('', tokenizerType)) as IRandomAccessTokenizer;
+            try {
+              tokenizer.setPosition(Number.MAX_SAFE_INTEGER);
+              assert.strictEqual(await tokenizer.ignore(0), 0);
+              assert.strictEqual(tokenizer.position, Number.MAX_SAFE_INTEGER);
+              await expect(tokenizer.ignore(1)).to.be.rejectedWith(RangeError, 'end position');
+              assert.strictEqual(tokenizer.position, Number.MAX_SAFE_INTEGER);
+              tokenizer.setPosition(0);
+              assert.strictEqual(await tokenizer.ignore(1), 0);
+            } finally {
+              await tokenizer.close();
+            }
+          });
+
           it('Read ID3v1 header at the end of the file', async () => {
             const tokenizer = (await tokenizerType.loadTokenizer('id3v1.mp3')) as IRandomAccessTokenizer;
             try {

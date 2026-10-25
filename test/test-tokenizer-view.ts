@@ -372,7 +372,8 @@ describe('Finite tokenizer views', () => {
     source.setPosition(1);
     assert.throws(() => createTokenizerView(source, Number.MAX_SAFE_INTEGER), RangeError, 'end position');
     assert.strictEqual(source.position, 1);
-    source.setPosition(Number.NaN);
+    // A caller or custom tokenizer can still expose an invalid source cursor.
+    source.position = Number.NaN;
     assert.throws(() => createTokenizerView(source, 0), RangeError, 'source position');
   });
 

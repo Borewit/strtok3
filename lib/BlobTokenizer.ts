@@ -63,6 +63,7 @@ export class BlobTokenizer extends AbstractTokenizer implements IRandomAccessTok
   }
 
   setPosition(position: number): void {
+    this.validateLength(position, 'position');
     this.position = position;
   }
 }

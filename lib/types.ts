@@ -55,7 +55,7 @@ export interface IRandomAccessTokenizer extends ITokenizer {
 
   /**
    * Change the position (offset) of the tokenizer
-   * @param position New position
+   * @param position New position, a non-negative safe integer. May be past EOF.
    */
   setPosition(position: number): void;
 }
