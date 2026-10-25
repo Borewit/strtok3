@@ -535,7 +535,10 @@ Available on buffer, blob, and file tokenizers (`IRandomAccessTokenizer`).
 setPosition(position: number): void
 ```
 
-Sets the current byte offset without reading data.
+Sets the current byte offset without reading data. The position must be a
+non-negative safe integer; invalid positions throw `RangeError` without changing
+the cursor. Seeking past EOF is allowed. At or past EOF, `ignore()` returns zero
+without moving the cursor backward, subject to safe end-position arithmetic.
 
 #### `Tokenizer` attributes
 

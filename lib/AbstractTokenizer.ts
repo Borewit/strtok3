@@ -148,7 +148,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
     this.validateLength(length, 'ignore length');
     this.validateLength(this.position + length, 'end position');
     if (this.fileInfo.size !== undefined) {
-      const bytesLeft = this.fileInfo.size - this.position;
+      const bytesLeft = Math.max(0, this.fileInfo.size - this.position);
       if (length > bytesLeft) {
         this.position += bytesLeft;
         return bytesLeft;

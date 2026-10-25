@@ -57,6 +57,7 @@ export class BufferTokenizer extends AbstractTokenizer implements IRandomAccessT
   }
 
   setPosition(position: number): void {
+    this.validateLength(position, 'position');
     this.position = position;
   }
 }
