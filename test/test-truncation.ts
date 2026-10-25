@@ -3,6 +3,7 @@ import { assert, expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { UINT8, Uint8ArrayType } from 'token-types';
 import { createTokenizerView, EndOfStreamError, fromBuffer, fromStream, fromWebStream } from '../lib/index.js';
+import { ReadStreamTokenizer } from '../lib/ReadStreamTokenizer.js';
 import type { ITokenizer, ITokenizerOptions } from '../lib/types.js';
 
 use(chaiAsPromised);
@@ -41,6 +42,35 @@ const factories: { name: string; make: (options?: ITokenizerOptions) => ITokeniz
 
 for (const { name, make } of factories) {
   describe(`Truncated exact ${name} stream operations`, () => {
+    for (const depth of [0, 1, 2]) {
+      for (const mayBeLess of [false, true]) {
+        it(`preflights distant known-EOF peeks without allocating lookahead (view depth ${depth}, mayBeLess=${mayBeLess})`, async () => {
+          const source = await make({ fileInfo: { size: payload.length } });
+          try {
+            await source.ignore(1);
+            let input = source;
+            for (let level = 0; level < depth; level++) {
+              input = createTokenizerView(input, Number.MAX_SAFE_INTEGER - 1);
+            }
+            const buffer = Uint8Array.of(0xff);
+            // Any attempted allocation of this lookahead fails immediately with RangeError.
+            const result = input.peekBuffer(buffer, { position: Number.MAX_SAFE_INTEGER - 2, mayBeLess });
+            if (mayBeLess) {
+              assert.strictEqual(await result, 0);
+            } else {
+              await expect(result).to.be.rejectedWith(EndOfStreamError);
+            }
+            assert.deepEqual(buffer, Uint8Array.of(0xff));
+            assert.strictEqual(source.position, 1);
+            assert.strictEqual(input.position, depth === 0 ? 1 : 0);
+            assert.strictEqual(await input.readNumber(UINT8), 2);
+          } finally {
+            await source.close();
+          }
+        });
+      }
+    }
+
     for (const nested of [false, true]) {
       it(`keeps zero-length skips a no-op beyond the advertised source size (nested=${nested})`, async () => {
         const source = await make({ fileInfo: { size: 1 } });
@@ -183,6 +213,45 @@ for (const { name, make } of factories) {
     });
   });
 }
+
+describe('Known-size stream peek I/O', () => {
+  for (const size of [0, 3]) {
+    for (const position of [size, size + 8]) {
+      for (const mayBeLess of [false, true]) {
+        for (const maxBufferSize of [undefined, 1]) {
+          it(`does not call the reader at/past EOF (size=${size}, position=${position}, mayBeLess=${mayBeLess}, cap=${maxBufferSize})`, async () => {
+            const source = new ReadStreamTokenizer(
+              {
+                read: async () => assert.fail('must not read'),
+                peek: async () => assert.fail('must not peek'),
+                close: async () => undefined,
+                abort: async () => undefined
+              },
+              { fileInfo: { size }, maxBufferSize }
+            );
+            try {
+              for (const input of [source, createTokenizerView(source, 32).createView(32)]) {
+                const buffer = Uint8Array.of(0xff);
+                const result = input.peekBuffer(buffer, { position, mayBeLess });
+                if (mayBeLess) {
+                  assert.strictEqual(await result, 0);
+                } else {
+                  await expect(result).to.be.rejectedWith(EndOfStreamError);
+                }
+                assert.deepEqual(buffer, Uint8Array.of(0xff));
+                assert.strictEqual(source.position, 0);
+                assert.strictEqual(input.position, 0);
+                assert.strictEqual(await input.peekBuffer(new Uint8Array(0), { position }), 0);
+              }
+            } finally {
+              await source.close();
+            }
+          });
+        }
+      }
+    }
+  }
+});
 
 describe('Known-size stream skip I/O', () => {
   for (const byob of [false, true]) {

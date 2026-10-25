@@ -67,6 +67,13 @@ export class ReadStreamTokenizer extends AbstractTokenizer {
     if (normOptions.length === 0) {
       return 0;
     }
+    // A known-empty range needs neither lookahead allocation nor source I/O.
+    if (this.fileInfo.size !== undefined && normOptions.position >= this.fileInfo.size) {
+      if (normOptions.mayBeLess) {
+        return 0;
+      }
+      throw new EndOfStreamError();
+    }
     const lookaheadSize = normOptions.length + normOptions.position - this.position;
     this.validateBufferSize(lookaheadSize);
     let bytesRead = 0;

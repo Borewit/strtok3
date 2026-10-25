@@ -389,6 +389,12 @@ peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number>
 
 Return value `Promise<number>` Promise with number of bytes read. The number of bytes read may be less if the `mayBeLess` flag was set.
 
+For streams with a known size, a nonempty peek starting at or beyond that size
+rejects with `EndOfStreamError`, or returns zero with `mayBeLess: true`, before
+allocating lookahead or reading input. This also applies through tokenizer views.
+Peeks starting inside the advertised input retain their partial-read behavior
+when they cross EOF. Zero-length peeks remain no-ops.
+
 #### `readToken` function
 
 Read a *token* from the tokenizer-stream.
