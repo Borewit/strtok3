@@ -15,6 +15,7 @@ interface INormalizedReadChunkOptions extends IReadChunkOptions {
  */
 export abstract class AbstractTokenizer implements ITokenizer {
   private onClose?: OnClose;
+  private closePromise?: Promise<void>;
   private abortSignal?: AbortSignal;
   private abortListener?: () => void;
   private numBuffer = new Uint8Array(10); // Includes the 80-bit floating-point tokens.
@@ -158,8 +159,17 @@ export abstract class AbstractTokenizer implements ITokenizer {
     return length;
   }
 
-  public async close(): Promise<void> {
-    this.removeAbortListener();
+  public close(): Promise<void> {
+    if (!this.closePromise) {
+      this.removeAbortListener();
+      // Cache completion before invoking cleanup hooks or caller callbacks.
+      this.closePromise = Promise.resolve().then(() => this.closeOnce());
+    }
+    return this.closePromise;
+  }
+
+  /** Perform cleanup once, sharing completion and the first error across close calls. */
+  protected async closeOnce(): Promise<void> {
     await this.abort();
     await this.onClose?.();
   }

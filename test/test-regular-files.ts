@@ -77,6 +77,57 @@ describe('Regular-file-only factory', () => {
     });
   }
 
+  for (const failure of [false, true]) {
+    it(`closes the file handle only once and preserves the first result (failure=${failure})`, async () => {
+      let closeCalls = 0;
+      let callbackCalls = 0;
+      const error = new Error('file close failed');
+      let restore = () => undefined;
+      captureOpenedHandles(handle => {
+        const close = handle.close.bind(handle);
+        restore = () => {
+          handle.close = close;
+        };
+        handle.close = async () => {
+          closeCalls++;
+          await close();
+          if (failure) {
+            throw error;
+          }
+        };
+      });
+      const tokenizer = await fromFile(filePath, {
+        onClose: async () => {
+          callbackCalls++;
+          assert.equal(openedHandles[0].fd, -1, 'file must close before onClose');
+        }
+      });
+      try {
+        const results = await Promise.allSettled([tokenizer.close(), tokenizer.close()]);
+        for (const result of results) {
+          if (failure) {
+            assert.equal(result.status, 'rejected');
+            if (result.status === 'rejected') {
+              assert.equal(result.reason, error);
+            }
+          } else {
+            assert.equal(result.status, 'fulfilled');
+          }
+        }
+        if (failure) {
+          await assert.rejects(tokenizer.close(), caught => caught === error);
+        } else {
+          await tokenizer.close();
+        }
+        assert.equal(closeCalls, 1);
+        assert.equal(callbackCalls, failure ? 0 : 1);
+      } finally {
+        restore();
+        await tokenizer.close().catch(() => undefined);
+      }
+    });
+  }
+
   posixIt('rejects an opened directory with a recognizable error and closes its handle', async () => {
     captureOpenedHandles();
     await assert.rejects(fromFile(directory, { regularFileOnly: true }), error => {
