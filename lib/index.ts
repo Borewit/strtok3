@@ -14,6 +14,25 @@ interface StreamWithFile extends Readable {
    * Informal property set by `node:fs.createReadStream`
    */
   path?: string;
+  pending?: boolean;
+}
+
+async function waitForPendingOpen(stream: StreamWithFile): Promise<void> {
+  if (stream.pending !== true || stream.destroyed || stream.errored !== null) {
+    return;
+  }
+
+  await new Promise<void>(resolve => {
+    const settle = (): void => {
+      stream.removeListener('open', settle);
+      stream.removeListener('error', settle);
+      stream.removeListener('close', settle);
+      resolve();
+    };
+    stream.once('open', settle);
+    stream.once('error', settle);
+    stream.once('close', settle);
+  });
 }
 
 /**
@@ -25,12 +44,18 @@ interface StreamWithFile extends Readable {
  */
 export async function fromStream(stream: Readable, options?: ITokenizerOptions): Promise<ReadStreamTokenizer> {
   const rst = coreFromStream(stream, options);
-  if ((stream as StreamWithFile).path) {
-    const stat = await fsStat((stream as StreamWithFile).path as string);
-    rst.fileInfo.path = (stream as StreamWithFile).path;
-    rst.fileInfo.size = stat.size;
+  try {
+    if ((stream as StreamWithFile).path) {
+      const stat = await fsStat((stream as StreamWithFile).path as string);
+      rst.fileInfo.path = (stream as StreamWithFile).path;
+      rst.fileInfo.size = stat.size;
+    }
+    return rst;
+  } catch (error) {
+    await waitForPendingOpen(stream as StreamWithFile);
+    await rst.close();
+    throw error;
   }
-  return rst;
 }
 
 export const fromFile = FileTokenizer.fromFile;
