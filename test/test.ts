@@ -293,6 +293,53 @@ describe('Matrix tests', () => {
         });
 
         describe('Parsing binary numbers', () => {
+          for (const [name, token] of [
+            ['Float80_BE', Token.Float80_BE],
+            ['Float80_LE', Token.Float80_LE]
+          ] as const) {
+            it(`reads and repeatedly peeks ${name} through number helpers`, async () => {
+              const values = [1, -2.5, Math.PI];
+              const data = new Uint8Array(values.length * (token.len + 1));
+              for (const [index, value] of values.entries()) {
+                const offset = index * (token.len + 1);
+                token.put(data, offset, value);
+                data[offset + token.len] = 42;
+              }
+              const input = Array.from(data, byte => String.fromCharCode(byte)).join('');
+              const tokenizer = await getTokenizerWithData(input, tokenizerType);
+              try {
+                for (const [index, value] of values.entries()) {
+                  const position = index * (token.len + 1);
+                  assert.strictEqual(await tokenizer.peekNumber(token), value);
+                  assert.strictEqual(await tokenizer.peekNumber(token), value);
+                  assert.strictEqual(tokenizer.position, position);
+                  assert.strictEqual(await tokenizer.readNumber(token), value);
+                  assert.strictEqual(tokenizer.position, position + token.len);
+                  assert.strictEqual(await tokenizer.peekNumber(Token.UINT8), 42);
+                  assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 42);
+                }
+                assert.strictEqual(tokenizer.position, data.length);
+              } finally {
+                await tokenizer.close();
+              }
+            });
+
+            for (const method of ['readNumber', 'peekNumber'] as const) {
+              it(`reports EOF for truncated ${name} in ${method}`, async () => {
+                const tokenizer = await getTokenizerWithData('\x00'.repeat(token.len - 1), tokenizerType);
+                try {
+                  await expect(tokenizer[method](token)).to.be.rejectedWith(EndOfStreamError);
+                  if (method === 'peekNumber') {
+                    assert.strictEqual(tokenizer.position, 0);
+                    assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 0);
+                  }
+                } finally {
+                  await tokenizer.close();
+                }
+              });
+            }
+          }
+
           it('should encode signed 8-bit integer (INT8)', () => {
             const b = new Uint8Array(1);
 

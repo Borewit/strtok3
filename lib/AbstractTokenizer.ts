@@ -17,7 +17,7 @@ export abstract class AbstractTokenizer implements ITokenizer {
   private onClose?: OnClose;
   private abortSignal?: AbortSignal;
   private abortListener?: () => void;
-  private numBuffer = new Uint8Array(8);
+  private numBuffer = new Uint8Array(10); // Includes the 80-bit floating-point tokens.
   protected readonly maxBufferSize: number;
 
   public abstract fileInfo: IFileInfo;
