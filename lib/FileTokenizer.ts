@@ -97,10 +97,9 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
     return res.bytesRead;
   }
 
-  public async close(): Promise<void> {
-    this.removeAbortListener();
+  protected async closeOnce(): Promise<void> {
     await this.fileHandle.close();
-    return super.close();
+    await super.closeOnce();
   }
 
   setPosition(position: number): void {

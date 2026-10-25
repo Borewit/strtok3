@@ -481,6 +481,11 @@ close(): Promise<void>
 
 Await this method when finished with a tokenizer. For Node.js streams, it does not destroy the underlying stream; the caller remains responsible for its lifecycle.
 
+For buffer, blob, and file tokenizers, repeated or concurrent `close()` calls
+share one cleanup operation and invoke `onClose` at most once. If cleanup or the
+callback fails, subsequent calls reject with the same error. Calling `abort()`
+before `close()` does not suppress cleanup or the callback.
+
 For Web streams, `close()` releases the reader lock. A BYOB reader leaves the source uncancelled, allowing another reader to continue reading it. A default reader cancels the source before releasing the lock, discarding remaining data. Bytes already read into tokenizer buffers, including peeked bytes, are not returned to the source.
 
 #### `abort` function

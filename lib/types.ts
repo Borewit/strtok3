@@ -160,7 +160,7 @@ export interface ITokenizerOptions {
   fileInfo?: IFileInfo;
 
   /**
-   * Asynchronous callback invoked when a buffer, blob, or file tokenizer is closed.
+   * Asynchronous callback invoked at most once when a buffer, blob, or file tokenizer is closed.
    * Stream tokenizers manage their reader directly and do not invoke this callback.
    */
   onClose?: OnClose;
