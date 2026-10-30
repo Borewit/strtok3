@@ -328,6 +328,66 @@ by a view, so callers must keep those sequential too. Explicit `abort()`
 propagates to the shared source to cancel pending input and affects its other
 users; it also closes the view.
 
+### `TokenWriter` class
+
+Serialize binary data synchronously into a growable in-memory buffer with the
+same token definitions used for reading.
+Available from both `strtok3` and `strtok3/core`.
+
+```ts
+const writer = new TokenWriter(); // optional initial capacity in bytes
+const cappedWriter = new TokenWriter(undefined, { maxBufferSize: 1024 * 1024 });
+
+writer.length; // bytes written so far
+writer.reserve(length); // reserve zero-filled region, returns start offset
+writer.writeToken(token, value); // encode a token, returns bytes written
+writer.writeBuffer(value); // copy raw bytes, returns bytes written
+writer.writeBytes(value); // alias for writeBuffer
+writer.writeZeros(length); // append zeros, returns bytes written
+writer.patchToken(token, offset, value); // overwrite an earlier region
+writer.toUint8Array(); // copy of the written bytes
+```
+
+```js
+import { TokenWriter } from 'strtok3';
+import { UINT24_BE, UINT32_LE } from 'token-types';
+
+const writer = new TokenWriter();
+writer.writeToken(UINT32_LE, 0x01020304);
+const blockLengthOffset = writer.reserve(3);
+const bytesWritten = writer.writeBuffer(new Uint8Array([0xaa, 0xbb])); // 2
+writer.patchToken(UINT24_BE, blockLengthOffset, 2);
+
+console.log(writer.length); // 9
+const data = writer.toUint8Array(); // Uint8Array(9)
+```
+
+Append methods return the number of bytes written, like `readBuffer()` returns
+the number read; `writer.length` gives the resulting total. `writeToken()` writes
+exactly `token.len` bytes and ignores the encoder's returned offset.
+`reserve()` returns the starting offset of a zero-filled region for back-filling
+with `patchToken()`. Patching outside the written region throws a `RangeError`;
+successful patches leave `length` unchanged and return nothing.
+
+Errors from `put()` propagate without changing the written bytes or `length`:
+failed appends clear partial bytes before reuse, and failed patches restore the
+original region. Encoders must write synchronously only within `token.len` bytes
+starting at the supplied offset and must not retain the destination buffer.
+
+`writeBuffer()` and its `writeBytes()` alias copy their input. `toUint8Array()`
+returns a snapshot that can be modified without changing the writer. The writer
+buffers the complete output; snapshots allocate another copy of the written bytes.
+
+The optional `maxBufferSize` caps both total output length and backing-buffer
+capacity. Like the tokenizer option, it defaults to `Infinity` and must be a
+positive safe integer or `Infinity`. Requests exceeding the cap throw
+`BufferSizeError` before allocation, encoding or changes to the output.
+An explicit initial capacity above the cap is rejected. When omitted, the initial
+capacity defaults to 1024 bytes or the cap, whichever is smaller; internal minimum
+capacity and buffer growth also respect the cap. Empty appends and in-range patches
+remain allowed at the limit. The cap does not bound total process memory, caller
+inputs, snapshots, patch rollback copies or encoder allocations.
+
 ### `Tokenizer` object
 
 The _tokenizer_ is an abstraction of a [stream](https://nodejs.org/api/stream.html), file or [Uint8Array](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array), allowing _reading_ or _peeking_ from the stream.
