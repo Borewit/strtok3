@@ -1,8 +1,8 @@
 # Release Drafter v7.10.0 configuration
 # Ref: https://github.com/release-drafter/release-drafter/tree/v7.10.0#configuration-options
 
-name-template: 'v$RESOLVED_VERSION'
-tag-template: 'v$RESOLVED_VERSION'
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
 tag-prefix: v
 categories:
   # Infrastructure and development-only updates stay out of release notes.
@@ -50,7 +50,7 @@ categories:
   # Unlabeled changes still receive a patch version.
   - type: version-resolver
     semver-increment: patch
-change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 change-title-escapes: '\<*_&'
 template: |
   ## Changes

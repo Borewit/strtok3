@@ -1,6 +1,6 @@
 import type { ITokenizerOptions } from './types.js';
 
-/** Thrown before a dynamically sized tokenizer buffer exceeds its configured limit. */
+/** Thrown before a tokenizer or writer buffer exceeds its configured limit. */
 export class BufferSizeError extends RangeError {
   /**
    * Create an error describing an allocation that exceeds the configured limit.

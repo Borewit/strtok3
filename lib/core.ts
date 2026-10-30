@@ -14,6 +14,7 @@ export { isRandomAccessTokenizer } from './isRandomAccessTokenizer.js';
 export { AbortError, type AnyWebByteStream, EndOfStreamError } from './stream/index.js';
 export { TokenizerBoundaryError } from './TokenizerBoundaryError.js';
 export { createTokenizerView } from './TokenizerView.js';
+export { type ITokenWriterOptions, TokenWriter } from './TokenWriter.js';
 export type {
   IFileInfo,
   IRandomAccessFileInfo,
