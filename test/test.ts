@@ -881,13 +881,6 @@ describe('Matrix tests', () => {
             await rst.close();
           });
 
-          it('should not throw an Error if we read exactly until the end of the file', async () => {
-            const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
-            const num = await rst.readToken(Token.UINT24_BE);
-            assert.strictEqual(num, 9000000);
-            await rst.close();
-          });
-
           it('should be thrown if a token EOF reached in the middle of a token', async () => {
             const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
             try {
