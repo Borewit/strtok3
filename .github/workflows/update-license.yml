@@ -2,8 +2,8 @@ name: Update License Year
 
 on:
   schedule:
-    - cron: "0 0 1 1 *"  # Runs on January 1st every year
-  workflow_dispatch:  # Allows manual triggering
+    - cron: "0 0 1 1 *" # Runs on January 1st every year
+  workflow_dispatch: # Allows manual triggering
 
 jobs:
   update-license:

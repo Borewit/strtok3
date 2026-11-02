@@ -1,6 +1,5 @@
 version: 2
 updates:
-
   # npm/Yarn dependencies
   - package-ecosystem: npm
     directory: "/"
