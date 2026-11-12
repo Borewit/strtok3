@@ -74,7 +74,7 @@
     "node-readable-to-web-readable-stream": "^0.4.2",
     "remark-cli": "^12.0.1",
     "remark-preset-lint-recommended": "^7.0.1",
-    "token-types": "^6.1.2",
+    "token-types": "^6.2.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "uint8array-extras": "^1.6.0"
