@@ -423,14 +423,47 @@ Reads and peeks require the full requested length unless `mayBeLess: true` is pa
 `readBuffer` or `peekBuffer`. Otherwise, insufficient input rejects with the exported
 `EndOfStreamError`. Token methods always require the full token.
 
-Following a short physical file read, filling may require additional I/O and may
-encounter a later error rather than returning the first fragment. Reads retain
-successfully consumed progress on failure; peeks do not advance the cursor.
+##### Completion and failure contracts
 
-A failed exact stream read can consume partial input and advance `tokenizer.position`
-by the number of bytes consumed. A failed exact stream peek leaves `tokenizer.position`
-unchanged and retains the partial bytes for subsequent reads. Caller-provided buffers
-may contain partial data even when the operation rejects.
+A resolved exact buffer request returns its requested length. With `mayBeLess: true`,
+only `buffer.subarray(0, count)` is the result; the untouched suffix is not input.
+For built-in tokenizers, a nonempty short result means EOF prevented filling the
+requested range; do not decode it as a complete signature or token. Partial mode
+does not mean nonblocking or a single transport chunk. Source errors, invalid
+options and allocation/lookahead limits still reject.
+
+| Backend           | Buffer completion with `mayBeLess: true`                                                         | Exact buffer request at physical EOF                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Buffer / Blob     | Copies all available bytes in the requested range.                                               | Rejects before copying or changing the cursor.                                                                                                                |
+| File              | Combines physical reads until the requested range is filled or a zero-byte read establishes EOF. | Both modes retry positive short reads until full or a zero-byte read; on EOF, the target contains the copied prefix and a read cursor includes that progress. |
+| Node / Web stream | Can wait for input and combine source chunks, stopping at the requested length or EOF.           | May copy and consume partial input before rejecting; a read cursor includes completed reader calls.                                                           |
+
+Peeks never change the cursor. Stream peeks retain their data independently of the
+caller target, including partial bytes retained on exact EOF. A failed forward peek
+may leave the target untouched even though lookahead was retained. File peeks do
+not retain a snapshot, and buffer tokenizers borrow their source: later source
+changes can affect subsequent operations.
+
+Filling across short physical file reads may require additional I/O and encounter
+a later error instead of returning the first fragment.
+
+These EOF behaviors are not general I/O-error transactions. On other errors, a
+target may be partially modified without a returned count; cursor progress depends
+on the backend and which internal calls completed. Do not decode a rejected request.
+Token and numeric methods call the decoder only after obtaining the full token;
+known-size token checks may reject before any I/O.
+
+Zero-length buffer requests return zero, not evidence of EOF. A zero-length peek
+is a no-op; a read with an explicit position still positions there (a stream must
+consume the skipped bytes and can reject if they are unavailable). For nonempty
+partial requests, zero means no bytes were obtained at the requested position;
+for streams, the advertised-size peek shortcut below also applies.
+
+Tokenizer views retain their source's completion and failure behavior, but reject
+requests crossing their declared boundary even in partial mode. Declared sizes and
+file stat snapshots do not guarantee physical availability. `maxBufferSize` bounds
+internal allocations/lookahead, not the length of a caller-provided read buffer;
+partial mode does not bypass that limit.
 
 #### `readBuffer` function
 
@@ -498,7 +531,9 @@ peekToken<Value>(token: IGetToken<Value>, position: number | null = this.positio
 | token     | [IGetToken](#token-object) | Token to peek from the tokenizer-stream.                                                |
 | position? | number &#124; null         | Offset where to begin peeking. Defaults to `tokenizer.position` when omitted or `null`. |
 
-Return a promise with the token value peeked from the [_tokenizer_](#tokenizer-object).
+Returns a promise with the decoded, complete token. Rejects with `EndOfStreamError`
+if fewer than `token.len` bytes are available. The legacy third `maybeless` argument
+in the interface is ignored; it does not enable partial token decoding.
 
 #### `readNumber` function
 
@@ -513,7 +548,7 @@ readNumber(token: IToken<number>): Promise<number>
 | token     | [IToken<number>](#token-object) | Numeric token to read from the tokenizer-stream. |
 
 A promise resolving to a numeric value read and decoded from the _tokenizer-stream_.
-Uses a reusable 8-byte buffer, so `token.len` must be at most 8 bytes.
+Uses a reusable 10-byte buffer, so `token.len` must be at most 10 bytes (including Float80).
 For larger tokens or values such as `bigint`, use `readToken` instead.
 
 #### `peekNumber` function
@@ -526,7 +561,7 @@ peekNumber(token: IToken<number>): Promise<number>
 
 Returns a promise resolving to the decoded numeric value.
 Like `readNumber`, rejects with `EndOfStreamError` if the token cannot be read in full.
-The same 8-byte token limit applies; use `peekToken` for larger tokens or values such as `bigint`.
+The same 10-byte token limit applies; use `peekToken` for larger tokens or values such as `bigint`.
 
 #### `ignore` function
 
@@ -732,11 +767,21 @@ integer range, reject with `RangeError`. Requesting an earlier position on a tok
 without random access rejects with `Error`. Data is written starting at index 0 of the
 target buffer. To write at an offset, pass `buffer.subarray(offset)` as the target buffer.
 
-Example usage:
+Example usage (checking a complete bounded header):
 
 ```js
-const bytesPeeked = await tokenizer.peekBuffer(buffer, { mayBeLess: true });
+const header = new Uint8Array(4);
+const count = await tokenizer.peekBuffer(header, { mayBeLess: true });
+if (count === header.length) {
+  // It is safe to inspect all four header bytes.
+} else {
+  // Only header.subarray(0, count) is valid; the header is not complete.
+  // EOF prevented completion; do not decode this as a complete header.
+}
 ```
+
+See [completion and failure contracts](#completion-and-failure-contracts) for
+backend-specific guarantees.
 
 ### `IFileInfo` interface
 

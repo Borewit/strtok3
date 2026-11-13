@@ -3,20 +3,21 @@ import { AbortError, EndOfStreamError } from './Errors.js';
 
 export interface IStreamReader {
   /**
-   * Peek ahead (peek) from stream. Subsequent read or peeks will return the same data.
+   * Peek ahead from the stream. Subsequent reads or peeks can return the retained data.
+   * The reader borrows the returned prefix of the target: do not mutate it while retained.
    * @param uint8Array - Uint8Array (or Buffer) to store data read from stream in
-   * Combine transport fragments until the buffer is filled or EOF is reached.
-   * @param mayBeLess - If true, return the available byte count at EOF without throwing.
-   * @returns Number of bytes peeked; only that prefix of the target contains peeked data.
+   * @param mayBeLess - Allow short reads at EOF; may still wait and combine source chunks
+   * @returns Number of bytes peeked; only this prefix of the target contains result bytes.
+   * Unlike tokenizer methods, a reader may return retained partial data at known EOF even without mayBeLess.
    */
   peek(uint8Array: Uint8Array, mayBeLess?: boolean): Promise<number>;
 
   /**
-   * Read from the stream.
+   * Read bytes from the stream, consuming retained peek data first.
    * @param uint8Array - Uint8Array (or Buffer) to store data read from stream in
-   * Combine transport fragments until the buffer is filled or EOF is reached.
-   * @param mayBeLess - If true, return the available byte count at EOF without throwing.
-   * @returns Number of bytes read; only that prefix of the target contains read data.
+   * @param mayBeLess - Allow short reads at EOF; may still wait and combine source chunks
+   * @returns Number of bytes read; only this prefix of the target contains result bytes.
+   * Unlike tokenizer methods, a reader may return retained partial data at known EOF even without mayBeLess.
    */
   read(uint8Array: Uint8Array, mayBeLess?: boolean): Promise<number>;
 

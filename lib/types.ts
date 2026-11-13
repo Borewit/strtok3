@@ -30,7 +30,8 @@ export interface IRandomAccessFileInfo extends IFileInfo {
 
 export interface IReadChunkOptions {
   /**
-   * Number of bytes to read.
+   * Number of bytes to read or peek, starting at index 0 of the target.
+   * Defaults to the target length; must be a non-negative safe integer no larger than it.
    */
   length?: number;
 
@@ -42,10 +43,10 @@ export interface IReadChunkOptions {
   position?: number;
 
   /**
-   * Fill the requested range or reach EOF in either mode.
-   * If true, return the available byte count at EOF instead of throwing EndOfStreamError.
-   * This is not a single-read or nonblocking option; other I/O errors still propagate.
-   * Defaults to false.
+   * Allow a successful short buffer read or peek instead of EndOfStreamError. Defaults to false.
+   * Both modes fill the requested range or reach EOF, combining transport fragments.
+   * This is not a single-read or nonblocking option.
+   * Only the returned prefix of the target contains result bytes; other errors still reject.
    */
   mayBeLess?: boolean;
 }
@@ -79,47 +80,49 @@ export interface ITokenizer {
   readonly position: number;
 
   /**
-   * Fill the requested range or reach EOF without advancing the tokenizer position.
-   * With mayBeLess, return the available count at EOF; otherwise reject short input.
-   * @param buffer - Target buffer to fill with data peeked from the tokenizer-stream
+   * Peek bytes without changing position, including on failure.
+   * Exact requests require the full length; see IReadChunkOptions.mayBeLess for partial requests.
+   * A rejection may leave partial data in the target.
+   * @param buffer - Caller-owned target; only its returned prefix is the result
    * @param options - Read behaviour options
    * @returns Promise with number of bytes read
    */
   peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
-   * Fill the requested range or reach EOF, advancing by the bytes consumed.
-   * With mayBeLess, return the available count at EOF; otherwise reject short input.
-   * @param buffer - Target buffer to fill with data read from the tokenizer-stream
+   * Read bytes, advancing position to the starting offset plus the returned count on success.
+   * Exact requests require the full length; see IReadChunkOptions.mayBeLess for partial requests.
+   * A rejection may leave partial data in the target and advance position, depending on the backend.
+   * @param buffer - Caller-owned target; only its returned prefix is the result
    * @param options - Additional read options
    * @returns Promise with number of bytes read
    */
   readBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
-   * Peek a token from the tokenizer-stream.
+   * Peek a complete token without changing position. Never decodes partial bytes.
    * @param token - Token to peek from the tokenizer-stream.
    * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
-   * @param maybeless - If set, will not throw an EOF error if the less then the requested length could be read.
+   * @param maybeless - Legacy, ignored argument; tokens always require token.len bytes.
    */
   peekToken<T>(token: IGetToken<T>, position?: number | null, maybeless?: boolean): Promise<T>;
 
   /**
-   * Read a token from the tokenizer-stream.
-   * @param token - Token to peek from the tokenizer-stream.
-   * @param position - Offset where to begin reading within the file. If position is null, data will be read from the current file position.
+   * Read a complete token. Never decodes partial bytes.
+   * @param token - Token to read from the tokenizer-stream.
+   * @param position - Absolute offset; defaults to the current position when omitted.
    */
   readToken<T>(token: IGetToken<T>, position?: number): Promise<T>;
 
   /**
-   * Peek a numeric token from the stream
+   * Peek a complete numeric token. Never decodes partial bytes.
    * @param token - Numeric token
    * @returns Promise with number
    */
   peekNumber(token: IGetToken<number>): Promise<number>;
 
   /**
-   * Read a numeric token from the stream
+   * Read a complete numeric token. Never decodes partial bytes.
    * @param token - Numeric token
    * @returns Promise with number
    */

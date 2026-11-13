@@ -158,6 +158,71 @@ describe('Maximum dynamically sized buffers', () => {
         });
       }
 
+      for (const method of ['readBuffer', 'peekBuffer'] as const) {
+        for (const mayBeLess of [false, true]) {
+          it(`${method} completes at the exact lookahead limit (partial ${mayBeLess})`, async () => {
+            const tokenizer = await factory.make({ maxBufferSize: 8 });
+            const target = new Uint8Array(10).fill(0xee);
+            try {
+              assert.strictEqual(await tokenizer[method](target.subarray(1, 9), { mayBeLess }), 8);
+              assert.deepEqual(target.subarray(1, 9), payload.subarray(0, 8));
+              assert.strictEqual(target[0], 0xee);
+              assert.strictEqual(target[9], 0xee);
+              assert.strictEqual(tokenizer.position, method === 'readBuffer' ? 8 : 0);
+              target.fill(0xff);
+              assert.strictEqual(await tokenizer.readNumber(Token.UINT8), method === 'readBuffer' ? 8 : 0);
+            } finally {
+              await tokenizer.close();
+            }
+          });
+        }
+      }
+
+      for (const method of ['readToken', 'peekToken', 'readNumber', 'peekNumber'] as const) {
+        it(`${method} decodes only complete data across fragments and mixed operations`, async () => {
+          const tokenizer = await factory.make({ maxBufferSize: 8 });
+          let decoded = 0;
+          const token = {
+            len: 4,
+            get(buffer: Uint8Array, offset: number) {
+              ++decoded;
+              assert.isAtLeast(buffer.length - offset, 4);
+              return Token.UINT32_BE.get(buffer, offset);
+            },
+            put: Token.UINT32_BE.put
+          };
+          try {
+            const reading = method === 'readToken' || method === 'readNumber';
+            assert.strictEqual(await tokenizer[method](token), 0x00010203);
+            assert.strictEqual(decoded, 1);
+            assert.strictEqual(tokenizer.position, reading ? 4 : 0);
+            assert.strictEqual(await tokenizer.peekNumber(Token.UINT8), reading ? 4 : 0);
+            assert.strictEqual(await tokenizer[method](token), reading ? 0x04050607 : 0x00010203);
+            assert.strictEqual(decoded, 2);
+            assert.strictEqual(tokenizer.position, reading ? 8 : 0);
+          } finally {
+            await tokenizer.close();
+          }
+        });
+      }
+
+      for (const method of ['readToken', 'peekToken'] as const) {
+        it(`${method} never decodes physical truncation even with a larger advertised stream size`, async () => {
+          const tokenizer = await factory.make({ maxBufferSize: 512, fileInfo: { size: 512 } });
+          const token = { len: payload.length + 1, get: () => assert.fail('must not decode partial input') };
+          try {
+            await expect(tokenizer[method](token)).to.be.rejectedWith(EndOfStreamError);
+            const streamRead = method === 'readToken' && !tokenizer.supportsRandomAccess();
+            assert.strictEqual(tokenizer.position, streamRead ? payload.length : 0);
+            if (method === 'peekToken') {
+              assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 0);
+            }
+          } finally {
+            await tokenizer.close();
+          }
+        });
+      }
+
       it('reuses the constructor cap across successive reads and peeks', async () => {
         const tokenizer = await factory.make({ maxBufferSize: 16 });
         try {
@@ -282,6 +347,25 @@ describe('Maximum dynamically sized buffers', () => {
         assert.strictEqual(await tokenizer.readBuffer(buffer, { mayBeLess: true }), 10);
         assert.strictEqual(tokenizer.position, 10);
         assert.deepEqual(buffer.subarray(0, 10), payload.subarray(0, 10));
+      } finally {
+        await tokenizer.close();
+      }
+    });
+  }
+
+  for (const method of ['readToken', 'peekToken', 'readNumber', 'peekNumber'] as const) {
+    it(`${method} rejects a custom backend short count before decoding`, async () => {
+      const tokenizer = fromBuffer(payload);
+      const token = { len: 4, get: () => assert.fail('must not decode partial input'), put: Token.UINT32_BE.put };
+      // A custom backend can return a short count rather than enforce exact completion.
+      tokenizer.readBuffer = tokenizer.peekBuffer = async (target, options) => {
+        assert.strictEqual(options?.length ?? target.length, token.len);
+        assert.notStrictEqual(options?.mayBeLess, true);
+        target.set(payload.subarray(0, 2));
+        return 2;
+      };
+      try {
+        await expect(tokenizer[method](token)).to.be.rejectedWith(EndOfStreamError);
       } finally {
         await tokenizer.close();
       }
