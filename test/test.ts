@@ -140,92 +140,134 @@ describe('Matrix tests', () => {
     // .filter((x, n) => n === 1)
     .forEach(tokenizerType => {
       describe(tokenizerType.name, () => {
-        describe('tokenizer read options', () => {
-          it('option.offset', async () => {
-            const buf = new Uint8Array(7);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.readBuffer(buf.subarray(1), { length: 6 }), 6);
-            await rst.close();
-          });
+        for (const method of ['readBuffer', 'peekBuffer'] as const) {
+          describe(`${method} completion contract`, () => {
+            const reading = method === 'readBuffer';
+            for (const length of [undefined, 2]) {
+              it(`writes only the requested subarray region (length ${length})`, async () => {
+                const target = new Uint8Array(8).fill(0xee);
+                const tokenizer = await getTokenizerWithData('abcdef', tokenizerType);
+                try {
+                  const count = await tokenizer[method](target.subarray(1, 7), { length });
+                  assert.strictEqual(count, length ?? 6);
+                  assert.deepEqual(
+                    target.subarray(1, 1 + count),
+                    new TextEncoder().encode('abcdef').subarray(0, count)
+                  );
+                  assert.isTrue(target.subarray(1 + count).every(byte => byte === 0xee));
+                  assert.strictEqual(target[0], 0xee);
+                  assert.strictEqual(tokenizer.position, reading ? count : 0);
+                } finally {
+                  await tokenizer.close();
+                }
+              });
+            }
 
-          it('option.length', async () => {
-            const buf = new Uint8Array(7);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.readBuffer(buf, { length: 2 }), 2);
-            await rst.close();
-          });
+            it('honors an explicit position without writing outside the result', async () => {
+              const target = new Uint8Array(7).fill(0xee);
+              const tokenizer = await getTokenizerWithData('abcdef', tokenizerType);
+              try {
+                assert.strictEqual(await tokenizer[method](target.subarray(1, 6), { position: 1 }), 5);
+                assert.deepEqual(target, Uint8Array.of(0xee, 98, 99, 100, 101, 102, 0xee));
+                assert.strictEqual(tokenizer.position, reading ? 6 : 0);
+              } finally {
+                await tokenizer.close();
+              }
+            });
 
-          it('default length', async () => {
-            const buf = new Uint8Array(6);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(
-              await rst.readBuffer(buf.subarray(1)),
-              5,
-              'default length = buffer.length - option.offset'
-            );
-            await rst.close();
-          });
+            it('returns only the valid prefix in partial mode and preserves caller memory', async () => {
+              const target = new Uint8Array(6).fill(0xee);
+              const tokenizer = await getTokenizerWithData('abc', tokenizerType);
+              try {
+                assert.strictEqual(await tokenizer[method](target.subarray(1, 5), { mayBeLess: true }), 3);
+                assert.deepEqual(target, Uint8Array.of(0xee, 97, 98, 99, 0xee, 0xee));
+                assert.strictEqual(tokenizer.position, reading ? 3 : 0);
+                target.fill(0xff);
+                if (!reading) {
+                  assert.strictEqual(await tokenizer.peekBuffer(target, { length: 3 }), 3);
+                  assert.deepEqual(target.subarray(0, 3), new TextEncoder().encode('abc'));
+                  assert.strictEqual(tokenizer.position, 0);
+                  assert.strictEqual(await tokenizer.readBuffer(target, { length: 3 }), 3);
+                }
+                assert.strictEqual(await tokenizer[method](target, { mayBeLess: true }), 0);
+                assert.isTrue(target.subarray(3).every(byte => byte === 0xff));
+                assert.strictEqual(tokenizer.position, 3);
+              } finally {
+                await tokenizer.close();
+              }
+            });
 
-          it('option.maybeLess = true', async () => {
-            const buffer = new Uint8Array(4);
-            const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
-            const len = await rst.readBuffer(buffer, { mayBeLess: true });
-            assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
-            await rst.close();
-          });
+            it('preserves backend-specific exact EOF progress', async () => {
+              const target = new Uint8Array(6).fill(0xee);
+              const tokenizer = await getTokenizerWithData('abc', tokenizerType);
+              const prechecksEof = tokenizerType.name === 'fromBuffer()' || tokenizerType.name === 'fromBlob()';
+              try {
+                await expect(tokenizer[method](target.subarray(1, 5))).to.be.rejectedWith(EndOfStreamError);
+                assert.deepEqual(
+                  target,
+                  prechecksEof ? new Uint8Array(6).fill(0xee) : Uint8Array.of(0xee, 97, 98, 99, 0xee, 0xee)
+                );
+                assert.strictEqual(tokenizer.position, reading && !prechecksEof ? 3 : 0);
+                if (!reading || prechecksEof) {
+                  target.fill(0xff);
+                  assert.strictEqual(await tokenizer.readBuffer(target, { length: 3 }), 3);
+                  assert.deepEqual(target.subarray(0, 3), new TextEncoder().encode('abc'));
+                }
+              } finally {
+                await tokenizer.close();
+              }
+            });
 
-          it('option.position', async () => {
-            const buffer = new Uint8Array(5);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            const len = await rst.readBuffer(buffer, { position: 1 });
-            assert.strictEqual(len, 5, 'return value');
-            assert.deepEqual(buffer, Uint8Array.from([0x02, 0x03, 0x04, 0x05, 0x06]));
-            await rst.close();
-          });
-        });
+            if (!reading) {
+              it('preserves forward-peek EOF copy policy and retained input', async () => {
+                const target = new Uint8Array(5).fill(0xee);
+                const tokenizer = await getTokenizerWithData('abc', tokenizerType);
+                try {
+                  await expect(tokenizer.peekBuffer(target.subarray(1, 4), { position: 1 })).to.be.rejectedWith(
+                    EndOfStreamError
+                  );
+                  assert.strictEqual(tokenizer.position, 0);
+                  assert.deepEqual(
+                    target,
+                    tokenizerType.name === 'fromFile()'
+                      ? Uint8Array.of(0xee, 98, 99, 0xee, 0xee)
+                      : new Uint8Array(5).fill(0xee)
+                  );
+                  target.fill(0xff);
+                  assert.strictEqual(await tokenizer.readBuffer(target, { length: 3 }), 3);
+                  assert.deepEqual(target.subarray(0, 3), new TextEncoder().encode('abc'));
+                } finally {
+                  await tokenizer.close();
+                }
+              });
+            }
 
-        describe('tokenizer peek options', () => {
-          it('option.offset', async () => {
-            const buf = new Uint8Array(7);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.peekBuffer(buf.subarray(1), { length: 6 }), 6);
-            await rst.close();
+            it('returns zero for empty requests but still honors read positioning', async () => {
+              const target = Uint8Array.of(0xee);
+              const tokenizer = await getTokenizerWithData('abc', tokenizerType);
+              try {
+                assert.strictEqual(await tokenizer[method](target, { length: 0, position: 2 }), 0);
+                assert.deepEqual(target, Uint8Array.of(0xee));
+                assert.strictEqual(tokenizer.position, reading ? 2 : 0);
+                assert.strictEqual(await tokenizer.readNumber(Token.UINT8), reading ? 99 : 97);
+              } finally {
+                await tokenizer.close();
+              }
+            });
           });
+        }
 
-          it('option.length', async () => {
-            const buf = new Uint8Array(7);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(await rst.peekBuffer(buf, { length: 2 }), 2);
-            await rst.close();
-          });
-
-          it('default length', async () => {
-            const buf = new Uint8Array(6);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            assert.strictEqual(
-              await rst.peekBuffer(buf.subarray(1)),
-              5,
-              'default length = buffer.length - option.offset'
-            );
-            await rst.close();
-          });
-
-          it('option.maybeLess = true', async () => {
-            const buffer = new Uint8Array(4);
-            const rst = await getTokenizerWithData('\x89\x54\x40', tokenizerType);
-            const len = await rst.peekBuffer(buffer, { mayBeLess: true });
-            assert.strictEqual(len, 3, 'should return 3 because no more bytes are available');
-            await rst.close();
-          });
-
-          it('option.position', async () => {
-            const buffer = new Uint8Array(5);
-            const rst = await getTokenizerWithData('\x01\x02\x03\x04\x05\x06', tokenizerType);
-            const len = await rst.peekBuffer(buffer, { position: 1 });
-            assert.strictEqual(len, 5, 'return value');
-            assert.deepEqual(buffer, Uint8Array.from([0x02, 0x03, 0x04, 0x05, 0x06]));
-            await rst.close();
-          });
+        it('does not enable partial token decoding with the legacy peekToken argument', async () => {
+          const tokenizer = await getTokenizerWithData('ab', tokenizerType);
+          try {
+            await expect(
+              tokenizer.peekToken({ len: 3, get: () => assert.fail('must not decode partial input') }, undefined, true)
+            ).to.be.rejectedWith(EndOfStreamError);
+            assert.strictEqual(tokenizer.position, 0);
+            assert.strictEqual(await tokenizer.readNumber(Token.UINT8), 97);
+          } finally {
+            await tokenizer.close();
+          }
         });
 
         it('should decode buffer', async () => {
@@ -1349,6 +1391,20 @@ describe('fromStream with mayBeLess flag', () => {
           });
 
           describe('peek', () => {
+            it('borrows the returned target prefix until the peek is consumed', async () => {
+              const reader = factory.fromString('abc');
+              const target = new Uint8Array(3);
+              try {
+                assert.strictEqual(await reader.peek(target), 3);
+                target[0] = 120;
+                const result = new Uint8Array(3);
+                assert.strictEqual(await reader.read(result), 3);
+                assert.deepEqual(result, Uint8Array.of(120, 98, 99));
+              } finally {
+                await reader.close();
+              }
+            });
+
             it('should be able to read a peeked chunk', async () => {
               const streamReader = factory.fromString('\x05peter');
 
@@ -1436,6 +1492,19 @@ describe('fromStream with mayBeLess flag', () => {
 
               const len = await streamReader.peek(res, false);
               assert.equal(len, 3);
+            });
+
+            it('can return retained partial data at known EOF even without partial mode', async () => {
+              const reader = factory.fromString('abc');
+              const target = new Uint8Array(4).fill(0xee);
+              try {
+                assert.strictEqual(await reader.peek(target, true), 3);
+                assert.strictEqual(await reader.read(target, false), 3);
+                assert.deepEqual(target, Uint8Array.of(97, 98, 99, 0xee));
+                await expect(reader.read(target, false)).to.be.rejectedWith(EndOfStreamError);
+              } finally {
+                await reader.close();
+              }
             });
 
             it('should return a partial result from a stream if EOF is reached', async () => {
