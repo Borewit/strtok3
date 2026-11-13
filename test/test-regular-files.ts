@@ -384,8 +384,8 @@ describe('Regular-file-only factory', () => {
     }
 
     for (const method of ['readBuffer', 'peekBuffer'] as const) {
-      for (const mayBeLess of [undefined, false]) {
-        it(`${method} fills exact requests across short reads (mayBeLess ${mayBeLess})`, async () => {
+      for (const mayBeLess of [undefined, false, true]) {
+        it(`${method} fills requests across short reads (mayBeLess ${mayBeLess})`, async () => {
           const calls = capturePartialReads();
           const tokenizer = await fromFile(filePath);
           try {
@@ -424,40 +424,88 @@ describe('Regular-file-only factory', () => {
         }
       });
 
-      it(`${method} returns after one short read with mayBeLess`, async () => {
+      it(`${method} combines fragments on repeated partial requests`, async () => {
         const calls = capturePartialReads();
         const tokenizer = await fromFile(filePath);
         try {
-          const destination = new Uint8Array(5).fill(255);
-          assert.equal(await tokenizer[method](destination, { position: 3, mayBeLess: true }), 2);
-          assert.deepEqual(destination, Uint8Array.of(3, 4, 255, 255, 255));
-          assert.deepEqual(calls, [[0, 5, 3]]);
-          assert.equal(tokenizer.position, method === 'readBuffer' ? 5 : 0);
-        } finally {
-          await tokenizer.close();
-        }
-      });
-
-      it(`${method} throws only after zero-byte EOF and preserves partial progress`, async () => {
-        const calls = capturePartialReads();
-        const tokenizer = await fromFile(filePath);
-        try {
-          tokenizer.setPosition(7);
-          const destination = new Uint8Array(6).fill(255);
-          await assert.rejects(tokenizer[method](destination, { position: 29 }), EndOfStreamError);
-          assert.deepEqual(destination, Uint8Array.of(29, 30, 31, 255, 255, 255));
-          assert.deepEqual(calls, [
-            [0, 6, 29],
-            [2, 4, 31],
-            [3, 3, 32]
-          ]);
-          assert.equal(tokenizer.position, method === 'readBuffer' ? 32 : 7);
+          tokenizer.setPosition(3);
+          const backing = new Uint8Array(9).fill(255);
+          const destination = backing.subarray(2, 7);
+          for (let operation = 0; operation < 2; operation++) {
+            const position = tokenizer.position;
+            destination.fill(255);
+            assert.equal(await tokenizer[method](destination, { mayBeLess: true }), 5);
+            assert.deepEqual(destination, payload.subarray(position, position + 5));
+            assert.deepEqual(backing.subarray(0, 2), Uint8Array.of(255, 255));
+            assert.deepEqual(backing.subarray(7), Uint8Array.of(255, 255));
+            assert.deepEqual(calls.slice(operation * 3), [
+              [0, 5, position],
+              [2, 3, position + 2],
+              [4, 1, position + 4]
+            ]);
+            assert.equal(tokenizer.position, method === 'readBuffer' ? position + 5 : position);
+          }
         } finally {
           await tokenizer.close();
         }
       });
 
       for (const mayBeLess of [false, true]) {
+        it(`${method} stops only at zero-byte EOF and preserves partial progress (mayBeLess ${mayBeLess})`, async () => {
+          const calls = capturePartialReads();
+          const tokenizer = await fromFile(filePath);
+          try {
+            tokenizer.setPosition(7);
+            const destination = new Uint8Array(6).fill(255);
+            const operation = tokenizer[method](destination, { position: 29, mayBeLess });
+            if (mayBeLess) {
+              assert.equal(await operation, 3);
+            } else {
+              await assert.rejects(operation, EndOfStreamError);
+            }
+            assert.deepEqual(destination, Uint8Array.of(29, 30, 31, 255, 255, 255));
+            assert.deepEqual(calls, [
+              [0, 6, 29],
+              [2, 4, 31],
+              [3, 3, 32]
+            ]);
+            assert.equal(tokenizer.position, method === 'readBuffer' ? 32 : 7);
+          } finally {
+            await tokenizer.close();
+          }
+        });
+
+        it(`${method} uses physical EOF after truncation between reads (mayBeLess ${mayBeLess})`, async () => {
+          const truncatedPath = path.join(directory, `truncated-${method}-${mayBeLess}.bin`);
+          await fs.writeFile(truncatedPath, payload);
+          const calls = capturePartialReads(async call => {
+            if (call === 2) {
+              await fs.truncate(truncatedPath, 6);
+            }
+          });
+          const tokenizer = await fromFile(truncatedPath);
+          try {
+            assert.equal(tokenizer.fileInfo.size, payload.length);
+            tokenizer.setPosition(9);
+            const backing = new Uint8Array(9).fill(255);
+            const operation = tokenizer[method](backing.subarray(2, 7), { position: 3, mayBeLess });
+            if (mayBeLess) {
+              assert.equal(await operation, 3);
+            } else {
+              await assert.rejects(operation, EndOfStreamError);
+            }
+            assert.deepEqual(backing, Uint8Array.of(255, 255, 3, 4, 5, 255, 255, 255, 255));
+            assert.deepEqual(calls, [
+              [0, 5, 3],
+              [2, 3, 5],
+              [3, 2, 6]
+            ]);
+            assert.equal(tokenizer.position, method === 'readBuffer' ? 6 : 9);
+          } finally {
+            await tokenizer.close();
+          }
+        });
+
         it(`${method} stops immediately at EOF (mayBeLess ${mayBeLess})`, async () => {
           const calls = capturePartialReads();
           const tokenizer = await fromFile(filePath);
@@ -490,49 +538,52 @@ describe('Regular-file-only factory', () => {
             await tokenizer.close();
           }
         });
-      }
 
-      for (const error of [new Error('file read failed'), new AbortError()]) {
-        it(`${method} propagates ${error.name} after partial progress`, async () => {
-          const calls = capturePartialReads(call => {
+        for (const error of [new Error('file read failed'), new AbortError()]) {
+          it(`${method} propagates ${error.name} after partial progress (mayBeLess ${mayBeLess})`, async () => {
+            const calls = capturePartialReads(call => {
+              if (call === 2) {
+                throw error;
+              }
+            });
+            const tokenizer = await fromFile(filePath);
+            try {
+              tokenizer.setPosition(9);
+              const destination = new Uint8Array(5).fill(255);
+              await assert.rejects(
+                tokenizer[method](destination, { position: 3, mayBeLess }),
+                caught => caught === error
+              );
+              assert.deepEqual(destination, Uint8Array.of(3, 4, 255, 255, 255));
+              assert.deepEqual(calls, [
+                [0, 5, 3],
+                [2, 3, 5]
+              ]);
+              assert.equal(tokenizer.position, method === 'readBuffer' ? 5 : 9);
+            } finally {
+              await tokenizer.close();
+            }
+          });
+        }
+
+        it(`${method} propagates a handle closed between short reads (mayBeLess ${mayBeLess})`, async () => {
+          const calls = capturePartialReads(async (call, handle) => {
             if (call === 2) {
-              throw error;
+              await handle.close();
             }
           });
           const tokenizer = await fromFile(filePath);
           try {
-            tokenizer.setPosition(9);
             const destination = new Uint8Array(5).fill(255);
-            await assert.rejects(tokenizer[method](destination, { position: 3 }), caught => caught === error);
+            await assert.rejects(tokenizer[method](destination, { position: 3, mayBeLess }), { code: 'EBADF' });
             assert.deepEqual(destination, Uint8Array.of(3, 4, 255, 255, 255));
-            assert.deepEqual(calls, [
-              [0, 5, 3],
-              [2, 3, 5]
-            ]);
-            assert.equal(tokenizer.position, method === 'readBuffer' ? 5 : 9);
+            assert.equal(calls.length, 2);
+            assert.equal(tokenizer.position, method === 'readBuffer' ? 5 : 0);
           } finally {
             await tokenizer.close();
           }
         });
       }
-
-      it(`${method} propagates a handle closed between short reads`, async () => {
-        const calls = capturePartialReads(async (call, handle) => {
-          if (call === 2) {
-            await handle.close();
-          }
-        });
-        const tokenizer = await fromFile(filePath);
-        try {
-          const destination = new Uint8Array(5).fill(255);
-          await assert.rejects(tokenizer[method](destination, { position: 3 }), { code: 'EBADF' });
-          assert.deepEqual(destination, Uint8Array.of(3, 4, 255, 255, 255));
-          assert.equal(calls.length, 2);
-          assert.equal(tokenizer.position, method === 'readBuffer' ? 5 : 0);
-        } finally {
-          await tokenizer.close();
-        }
-      });
     }
   });
 });

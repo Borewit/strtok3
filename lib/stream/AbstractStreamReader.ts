@@ -2,18 +2,20 @@ import { AbortError, EndOfStreamError } from './Errors.js';
 
 export interface IStreamReader {
   /**
-   * Peak ahead (peek) from stream. Subsequent read or peeks will return the same data.
+   * Peek ahead (peek) from stream. Subsequent read or peeks will return the same data.
    * @param uint8Array - Uint8Array (or Buffer) to store data read from stream in
-   * @param mayBeLess - Allow the read to complete, without the buffer being fully filled (length may be smaller)
-   * @returns Number of bytes peeked. If `maybeLess` is set, this shall be the `uint8Array.length`.
+   * Combine transport fragments until the buffer is filled or EOF is reached.
+   * @param mayBeLess - If true, return the available byte count at EOF without throwing.
+   * @returns Number of bytes peeked; only that prefix of the target contains peeked data.
    */
   peek(uint8Array: Uint8Array, mayBeLess?: boolean): Promise<number>;
 
   /**
-   * Read from stream the stream.
+   * Read from the stream.
    * @param uint8Array - Uint8Array (or Buffer) to store data read from stream in
-   * @param mayBeLess - Allow the read to complete, without the buffer being fully filled (length may be smaller)
-   * @returns Number of actually bytes read. If `maybeLess` is set, this shall be the `uint8Array.length`.
+   * Combine transport fragments until the buffer is filled or EOF is reached.
+   * @param mayBeLess - If true, return the available byte count at EOF without throwing.
+   * @returns Number of bytes read; only that prefix of the target contains read data.
    */
   read(uint8Array: Uint8Array, mayBeLess?: boolean): Promise<number>;
 

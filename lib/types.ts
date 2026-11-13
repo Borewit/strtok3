@@ -42,7 +42,10 @@ export interface IReadChunkOptions {
   position?: number;
 
   /**
-   * If set, will not throw an EOF error if not all off the requested data could be read
+   * Fill the requested range or reach EOF in either mode.
+   * If true, return the available byte count at EOF instead of throwing EndOfStreamError.
+   * This is not a single-read or nonblocking option; other I/O errors still propagate.
+   * Defaults to false.
    */
   mayBeLess?: boolean;
 }
@@ -76,16 +79,18 @@ export interface ITokenizer {
   readonly position: number;
 
   /**
-   * Peek (read ahead) buffer from tokenizer
-   * @param buffer - Target buffer to fill with data peek from the tokenizer-stream
+   * Fill the requested range or reach EOF without advancing the tokenizer position.
+   * With mayBeLess, return the available count at EOF; otherwise reject short input.
+   * @param buffer - Target buffer to fill with data peeked from the tokenizer-stream
    * @param options - Read behaviour options
    * @returns Promise with number of bytes read
    */
   peekBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 
   /**
-   * Peek (read ahead) buffer from tokenizer
-   * @param buffer - Target buffer to fill with data peeked from the tokenizer-stream
+   * Fill the requested range or reach EOF, advancing by the bytes consumed.
+   * With mayBeLess, return the available count at EOF; otherwise reject short input.
+   * @param buffer - Target buffer to fill with data read from the tokenizer-stream
    * @param options - Additional read options
    * @returns Promise with number of bytes read
    */

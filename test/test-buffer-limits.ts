@@ -26,20 +26,27 @@ const payload = Uint8Array.from({ length: 256 }, (_, index) => index);
 let directory: string;
 let filePath: string;
 
+function* fragments(bytes: Uint8Array) {
+  for (let offset = 0; offset < bytes.length; offset += 3) {
+    yield bytes.subarray(offset, offset + 3);
+  }
+}
+
 function webStream(bytes: Uint8Array, byob: boolean): ReadableStream<Uint8Array> {
-  if (byob) {
-    return new ReadableStream<Uint8Array>({
-      type: 'bytes',
-      start(controller) {
-        controller.enqueue(Uint8Array.from(bytes));
+  let offset = 0;
+  return new ReadableStream<Uint8Array>({
+    ...(byob ? { type: 'bytes' as const } : {}),
+    pull(controller) {
+      if (offset < bytes.length) {
+        const chunk = bytes.subarray(offset, offset + 3);
+        offset += chunk.length;
+        // BYOB transfers the chunk's backing buffer; retain the input fixture.
+        controller.enqueue(Uint8Array.from(chunk));
+      }
+      // Close with the final chunk, without leaving a pending BYOB read unsettled.
+      if (offset === bytes.length) {
         controller.close();
       }
-    });
-  }
-  return new ReadableStream<Uint8Array>({
-    start(controller) {
-      controller.enqueue(bytes);
-      controller.close();
     }
   });
 }
@@ -48,7 +55,10 @@ const factories: { name: string; make: (options?: ITokenizerOptions) => ITokeniz
   { name: 'buffer', make: options => fromBuffer(payload, options) },
   { name: 'Blob', make: options => fromBlob(new Blob([payload]), options) },
   { name: 'file', make: options => fromFile(filePath, options) },
-  { name: 'Node stream', make: options => fromStream(Readable.from([payload], { objectMode: false }), options) },
+  {
+    name: 'Node stream',
+    make: options => fromStream(Readable.from(fragments(payload), { objectMode: false }), options)
+  },
   { name: 'default web stream', make: options => fromWebStream(webStream(payload, false), options) },
   { name: 'BYOB web stream', make: options => fromWebStream(webStream(payload, true), options) }
 ];
@@ -75,6 +85,35 @@ describe('Maximum dynamically sized buffers', () => {
 
   for (const factory of factories) {
     describe(factory.name, () => {
+      for (const method of ['readBuffer', 'peekBuffer'] as const) {
+        for (const position of [3, 250]) {
+          it(`${method} fills partial requests until EOF at ${position} with bounded fragments`, async () => {
+            const tokenizer = await factory.make({ maxBufferSize: 16 });
+            try {
+              await tokenizer.ignore(position);
+              const backing = new Uint8Array(16).fill(255);
+              const destination = backing.subarray(2, 14);
+              const count = Math.min(destination.length, payload.length - position);
+              assert.equal(await tokenizer[method](destination, { mayBeLess: true }), count);
+              const expected = new Uint8Array(16).fill(255);
+              expected.set(payload.subarray(position, position + count), 2);
+              assert.deepEqual(backing, expected);
+              assert.equal(tokenizer.position, method === 'readBuffer' ? position + count : position);
+              if (method === 'peekBuffer') {
+                destination.fill(0);
+                const read = new Uint8Array(12).fill(255);
+                assert.equal(await tokenizer.readBuffer(read, { mayBeLess: true }), count);
+                assert.deepEqual(read.subarray(0, count), payload.subarray(position, position + count));
+                assert.deepEqual(read.subarray(count), new Uint8Array(12 - count).fill(255));
+                assert.equal(tokenizer.position, position + count);
+              }
+            } finally {
+              await tokenizer.close();
+            }
+          });
+        }
+      }
+
       for (const method of ['readToken', 'peekToken'] as const) {
         for (const maxBufferSize of [undefined, Number.POSITIVE_INFINITY]) {
           it(`${method} has no default cap and still checks known input bounds (limit ${maxBufferSize})`, async () => {
@@ -133,18 +172,20 @@ describe('Maximum dynamically sized buffers', () => {
         }
       });
 
-      it('allows large caller-provided reads and ignores with a smaller internal cap', async () => {
-        const tokenizer = await factory.make({ maxBufferSize: 8 });
-        try {
-          const buffer = new Uint8Array(128);
-          assert.strictEqual(await tokenizer.readBuffer(buffer), 128);
-          assert.deepEqual(buffer, payload.subarray(0, 128));
-          assert.strictEqual(await tokenizer.ignore(127), 127);
-          assert.strictEqual(await tokenizer.readToken(Token.UINT8), 255);
-        } finally {
-          await tokenizer.close();
-        }
-      });
+      for (const mayBeLess of [false, true]) {
+        it(`allows large caller-provided reads and ignores with a smaller internal cap (mayBeLess ${mayBeLess})`, async () => {
+          const tokenizer = await factory.make({ maxBufferSize: 8 });
+          try {
+            const buffer = new Uint8Array(128);
+            assert.strictEqual(await tokenizer.readBuffer(buffer, { mayBeLess }), 128);
+            assert.deepEqual(buffer, payload.subarray(0, 128));
+            assert.strictEqual(await tokenizer.ignore(127), 127);
+            assert.strictEqual(await tokenizer.readToken(Token.UINT8), 255);
+          } finally {
+            await tokenizer.close();
+          }
+        });
+      }
     });
   }
 
@@ -301,7 +342,7 @@ describe('Maximum dynamically sized buffers', () => {
   });
 
   it('checks the stream token lookahead before allocating its token buffer', async () => {
-    const tokenizer = await fromStream(Readable.from([payload], { objectMode: false }), { maxBufferSize: 16 });
+    const tokenizer = await fromStream(Readable.from(fragments(payload), { objectMode: false }), { maxBufferSize: 16 });
     tokenizer.peekBuffer = async () => assert.fail('lookahead must be rejected before allocating the token buffer');
     try {
       await expect(tokenizer.peekToken(new Token.Uint8ArrayType(16), 1)).to.be.rejectedWith(
@@ -314,7 +355,7 @@ describe('Maximum dynamically sized buffers', () => {
   });
 
   it('preserves stream contents after a boundary lookahead and a rejected larger peek', async () => {
-    const tokenizer = await fromStream(Readable.from([payload], { objectMode: false }), { maxBufferSize: 16 });
+    const tokenizer = await fromStream(Readable.from(fragments(payload), { objectMode: false }), { maxBufferSize: 16 });
     try {
       assert.strictEqual(await tokenizer.peekToken(Token.UINT8, 15), 15);
       await expect(tokenizer.peekToken(Token.UINT8, 16)).to.be.rejectedWith(BufferSizeError);
