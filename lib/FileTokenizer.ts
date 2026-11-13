@@ -84,9 +84,9 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
   }
 
   /**
-   * Fill exact requests across short file reads; only a zero-byte read establishes EOF.
+   * Fill requests across short file reads; only a zero-byte read establishes EOF.
    * Keep this policy below token decoding and independent of the size recorded at open.
-   * Partial requests perform at most one read; peeks never commit cursor progress.
+   * mayBeLess tolerates EOF, not fragmentation; peeks never commit cursor progress.
    */
   private async readBufferAt(
     uint8Array: Uint8Array,
@@ -105,7 +105,7 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
       if (advancePosition) {
         this.position += res.bytesRead;
       }
-      if (res.bytesRead === 0 || options.mayBeLess) {
+      if (res.bytesRead === 0) {
         break;
       }
     }

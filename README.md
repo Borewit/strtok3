@@ -408,9 +408,19 @@ There are two kinds of functions:
 1. _read_ methods: used to read a _token_ or bytes into a buffer from the [_tokenizer_](#tokenizer-object). After a successful read, `tokenizer.position` is the starting position of the read plus the number of bytes read. An explicit position can skip ahead or, for random-access tokenizers, move backwards.
 2. _peek_ methods: same as the read, but it will _not_ advance the pointer. It allows to read (peek) ahead.
 
+Buffer reads and peeks combine transport fragments until the requested range is filled
+or EOF is reached. `mayBeLess` changes EOF handling, not completion: it is neither a
+single-physical-read option nor a nonblocking read. Other I/O errors still propagate.
+A successful short result identifies only the returned prefix of the target as valid;
+consumers must check that count before decoding a complete token or signature.
+
 Reads and peeks require the full requested length unless `mayBeLess: true` is passed to
 `readBuffer` or `peekBuffer`. Otherwise, insufficient input rejects with the exported
 `EndOfStreamError`. Token methods always require the full token.
+
+Following a short physical file read, filling may require additional I/O and may
+encounter a later error rather than returning the first fragment. Reads retain
+successfully consumed progress on failure; peeks do not advance the cursor.
 
 A failed exact stream read can consume partial input and advance `tokenizer.position`
 by the number of bytes consumed. A failed exact stream peek leaves `tokenizer.position`
@@ -432,7 +442,7 @@ readBuffer(buffer: Uint8Array, options?: IReadChunkOptions): Promise<number>;
 | options   | [IReadChunkOptions](#ireadchunkoptions-interface)              | Optional settings for the length, position, and handling of partial reads |
 
 Return promise with number of bytes read.
-The number of bytes read may be less than requested if the `mayBeLess` flag is set.
+With `mayBeLess: true`, fewer bytes are returned only when EOF prevents filling the requested range.
 
 #### `peekBuffer` function
 
@@ -447,7 +457,7 @@ peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number>
 | buffer    | Buffer &#124; Uint8Array                          | Target buffer to write the data read (peeked) to.                         |
 | options   | [IReadChunkOptions](#ireadchunkoptions-interface) | Optional settings for the length, position, and handling of partial reads |
 
-Return value `Promise<number>` Promise with number of bytes read. The number of bytes read may be less if the `mayBeLess` flag was set.
+Return value `Promise<number>` with the number of bytes peeked. With `mayBeLess: true`, fewer bytes are returned only when EOF prevents filling the requested range.
 
 For streams with a known size, a nonempty peek starting at or beyond that size
 rejects with `EndOfStreamError`, or returns zero with `mayBeLess: true`, before
@@ -710,7 +720,7 @@ Each attribute is optional:
 | --------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | length    | number  | Requested number of bytes to read or peek. Must be a non-negative safe integer no larger than the target buffer length. Defaults to the target buffer length.                         |
 | position  | number  | Byte offset to read or peek from. Must be a non-negative safe integer. Defaults to [tokenizer.position](#tokenizer-attributes) when omitted. Earlier positions require random access. |
-| mayBeLess | boolean | If `true`, allows fewer than the requested number of bytes to be read or peeked instead of throwing `EndOfStreamError`. Defaults to `false`.                                          |
+| mayBeLess | boolean | If `true`, returns the available byte count at EOF instead of throwing `EndOfStreamError`. Requests still fill the requested range or reach EOF. Defaults to `false`.                 |
 
 Invalid lengths or positions, including a `position + length` that exceeds the safe
 integer range, reject with `RangeError`. Requesting an earlier position on a tokenizer
