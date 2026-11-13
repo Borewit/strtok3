@@ -70,15 +70,7 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
   public async readBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
     const normOptions = this.normalizeOptions(uint8Array, options);
     this.position = normOptions.position;
-    if (normOptions.length === 0) {
-      return 0;
-    }
-    const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
-    this.position += res.bytesRead;
-    if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
-      throw new EndOfStreamError();
-    }
-    return res.bytesRead;
+    return this.readBufferAt(uint8Array, normOptions, true);
   }
 
   /**
@@ -88,13 +80,39 @@ export class FileTokenizer extends AbstractTokenizer implements IRandomAccessTok
    * @returns Promise number of bytes read
    */
   public async peekBuffer(uint8Array: Uint8Array, options?: IReadChunkOptions): Promise<number> {
-    const normOptions = this.normalizeOptions(uint8Array, options);
+    return this.readBufferAt(uint8Array, this.normalizeOptions(uint8Array, options), false);
+  }
 
-    const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
-    if (!normOptions.mayBeLess && res.bytesRead < normOptions.length) {
+  /**
+   * Fill exact requests across short file reads; only a zero-byte read establishes EOF.
+   * Keep this policy below token decoding and independent of the size recorded at open.
+   * Partial requests perform at most one read; peeks never commit cursor progress.
+   */
+  private async readBufferAt(
+    uint8Array: Uint8Array,
+    options: IReadChunkOptions & { length: number; position: number },
+    advancePosition: boolean
+  ): Promise<number> {
+    let bytesRead = 0;
+    while (bytesRead < options.length) {
+      const res = await this.fileHandle.read(
+        uint8Array,
+        bytesRead,
+        options.length - bytesRead,
+        options.position + bytesRead
+      );
+      bytesRead += res.bytesRead;
+      if (advancePosition) {
+        this.position += res.bytesRead;
+      }
+      if (res.bytesRead === 0 || options.mayBeLess) {
+        break;
+      }
+    }
+    if (!options.mayBeLess && bytesRead < options.length) {
       throw new EndOfStreamError();
     }
-    return res.bytesRead;
+    return bytesRead;
   }
 
   protected async closeOnce(): Promise<void> {
