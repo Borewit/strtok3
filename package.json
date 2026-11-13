@@ -30,7 +30,8 @@
     "test-coverage": "c8 yarn run test",
     "start": "yarn run compile && yarn run lint && yarn run cover-test",
     "update-biome": "yarn add -D --exact @biomejs/biome && npx @biomejs/biome migrate --write",
-    "lint:ts:fix": "biome check --write"
+    "lint:ts:fix": "biome check --write",
+    "deps:refresh": "yarn up -R '**' && yarn dedupe"
   },
   "engines": {
     "node": ">=18"
