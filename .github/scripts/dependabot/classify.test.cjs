@@ -7,7 +7,7 @@ function fixture() {
   const manifest = {
     name: 'project',
     dependencies: { runtime: '^1' },
-    devDependencies: { 'remark-cli': '^1', typescript: '^1' }
+    devDependencies: { 'dev-tool': '^1', typescript: '^1' }
   };
   const lock = { __metadata: { version: 8 } };
   function entry(name, dependencies = {}) {
@@ -15,11 +15,11 @@ function fixture() {
   }
   lock['project@workspace:.'] = {
     resolution: 'project@workspace:.',
-    dependencies: { runtime: 'npm:^1', 'remark-cli': 'npm:^1', typescript: 'npm:^1' }
+    dependencies: { runtime: 'npm:^1', 'dev-tool': 'npm:^1', typescript: 'npm:^1' }
   };
   entry('runtime', { shared: 'npm:^1' });
   entry('shared');
-  entry('remark-cli', { socks: 'npm:^1', shared: 'npm:^1' });
+  entry('dev-tool', { socks: 'npm:^1', shared: 'npm:^1' });
   entry('socks', { 'ip-address': 'npm:^1' });
   entry('ip-address');
   entry('typescript');
