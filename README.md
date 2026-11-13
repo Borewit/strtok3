@@ -6,12 +6,14 @@
 [![Known Vulnerabilities](https://snyk.io/test/github/Borewit/strtok3/badge.svg?targetFile=package.json)](https://snyk.io/test/github/Borewit/strtok3?targetFile=package.json)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/59dd6795e61949fb97066ca52e6097ef)](https://www.codacy.com/app/Borewit/strtok3?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Borewit/strtok3&amp;utm_campaign=Badge_Grade)
 [![Codecov](https://codecov.io/gh/Borewit/strtok3/branch/master/graph/badge.svg)](https://codecov.io/gh/Borewit/strtok3)
+
 # strtok3
 
 A promise-based streaming [_tokenizer_](#tokenizer-object) for [Node.js](https://nodejs.org) and browsers.
 
 The `strtok3` module provides several methods for creating a [_tokenizer_](#tokenizer-object) from various input sources.
 Designed for:
+
 - Seamless support in streaming environments.
 - Efficiently decode binary data, strings, and numbers.
 - Reading [predefined](https://github.com/Borewit/token-types) or custom tokens.
@@ -20,6 +22,7 @@ Designed for:
 ### Features
 
 `strtok3` can read from:
+
 - Files, using a file path as input.
 - Node.js [streams](https://nodejs.org/api/stream.html).
 - WHATWG [ReadableStream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream) objects containing `Uint8Array` chunks.
@@ -66,6 +69,7 @@ If you find this project useful and would like to support its development, consi
 ### strtok3 methods
 
 Use one of the methods to instantiate an [_abstract tokenizer_](#tokenizer-object):
+
 - [fromBlob](#fromblob-function)
 - [fromBuffer](#frombuffer-function)
 - [fromFile](#fromfile-function)
@@ -405,6 +409,7 @@ It can also be translated in chunked reads, as done in [@tokenizer/http](https:/
 _Read_ methods advance the stream pointer, while _peek_ methods do not.
 
 There are two kinds of functions:
+
 1. _read_ methods: used to read a _token_ or bytes into a buffer from the [_tokenizer_](#tokenizer-object). After a successful read, `tokenizer.position` is the starting position of the read plus the number of bytes read. An explicit position can skip ahead or, for random-access tokenizers, move backwards.
 2. _peek_ methods: same as the read, but it will _not_ advance the pointer. It allows to read (peek) ahead.
 
@@ -728,6 +733,7 @@ without random access rejects with `Error`. Data is written starting at index 0 
 target buffer. To write at an offset, pass `buffer.subarray(offset)` as the target buffer.
 
 Example usage:
+
 ```js
 const bytesPeeked = await tokenizer.peekBuffer(buffer, { mayBeLess: true });
 ```
@@ -749,6 +755,7 @@ The _token_ is basically a description of what to read from the [_tokenizer-stre
 A basic set of _token types_ can be found here: [_token-types_](https://github.com/Borewit/token-types).
 
 A token is something which implements the following interface:
+
 ```ts
 export interface IGetToken<T> {
   /**
@@ -794,6 +801,7 @@ import * as Token from 'token-types';
 ## Dependencies
 
 Dependencies:
+
 - [@tokenizer/token](https://github.com/Borewit/tokenizer-token): Provides token definitions and utilities used by `strtok3` for interpreting binary data.
 
 ## Contributing
