@@ -25,11 +25,8 @@ jobs:
       - name: Test dependency label assignment
         run: node --test .github/scripts/dependabot/classify.test.cjs
 
-      - name: Check code style (formatting, imports, and lint)
-        run: yarn run lint:ts
-
-      - name: Lint Markdown
-        run: yarn run lint:md
+      - name: Check code and Markdown (formatting, imports, and lint)
+        run: yarn run lint
 
       - name: Build with source maps
         run: yarn run build:dev

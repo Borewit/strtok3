@@ -16,10 +16,6 @@ updates:
     labels:
       - dependencies
     groups:
-      remark:
-        dependency-type: "development"
-        patterns:
-          - "remark*"
       types:
         dependency-type: "development"
         patterns:
